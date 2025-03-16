@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Work Placement Map</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"> <!--Mapbox API-->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background-color: white;
+            padding: 1rem;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .filter-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-section h3 {
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .filter-option {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-option:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .filter-option.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .marker {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .popup {
+            max-width: 300px;
+        }
+        
+        .popup h3 {
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .popup p {
+            margin-bottom: 3px;
+            font-size: 0.9rem;
+        }
+        
+        .popup .capacity {
+            margin-top: 8px;
+            font-weight: bold;
+        }
+        
+        .search-box {
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+       /* .stats {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        
+        .stats h3 {
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .stats p {
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        } -->*/
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Social Work Placement Map</h1>
+    </header>
+    
+    <div class="container">
+        <div class="sidebar">
+            <input type="file">
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Search by name or suburb...">
+            </div>
+            
+            <div class="filter-section">
+                <h3>Stakeholder Type</h3>
+                <div class="filter-options" id="stakeholder-filters">
+                    <div class="filter-option active" data-type="all">All</div>
+                    <div class="filter-option" data-type="student">Students</div>
+                    <div class="filter-option" data-type="agency">Agencies</div>
+                    <div class="filter-option" data-type="staff">UWA Staff</div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Region</h3>
+                <div class="filter-options" id="region-filters">
+                    <div class="filter-option active" data-region="all">All</div>
+                    <div class="filter-option" data-region="NOR">North</div>
+                    <div class="filter-option" data-region="Central">Central</div>
+                    <div class="filter-option" data-region="SOR">South</div>
+                    <div class="filter-option" data-region="Rural">Rural</div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Area of Interest</h3>
+                <div class="filter-options" id="interest-filters">
+                    <div class="filter-option active" data-interest="all">All</div>
+                    <div class="filter-option" data-interest="mental-health">Mental Health</div>
+                    <div class="filter-option" data-interest="homelessness">Homelessness</div>
+                    <div class="filter-option" data-interest="justice">Justice</div>
+                    <div class="filter-option" data-interest="youth">Youth</div>
+                    <div class="filter-option" data-interest="aged-care">Aged Care</div>
+                    <div class="filter-option" data-interest="disability">Disability</div>
+                </div>
+            </div>
+            
+            <!-- <div class="stats" id="stats">
+                <h3>Current Selection</h3>
+                <p>Students: <span id="student-count">0</span></p>
+                <p>Agencies: <span id="agency-count">0</span> (Spots: <span id="agency-spots">0</span>)</p>
+                <p>UWA Staff: <span id="staff-count">0</span> (Capacity: <span id="staff-capacity">0</span>)</p>
+            </div> -->
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="legend">
+                <h4>Legend</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: blue"></div>
+                    <span>Students</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #e74c3c;"></div>
+                    <span>Agencies</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #2ecc71;"></div>
+                    <span>UWA Staff</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mapbox access token 
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYWxhbjAwNyIsImEiOiJjbTd5MGFtcTkwNHIyMndxYm85czZjcnc0In0.61fFzlPTeu4vErDSO8-MVA';
+        
+        // Initialize map centered on WA
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/navigation-night-v1',
+            center: [115.8613, -31.9523], // Perth coordinates
+            zoom: 10
+        });
+        
+        // Sample data for demonstration
+        const stakeholders = [
+            // Students
+            {
+                id: 1,
+                name: "Alice Smith",
+                type: "student",
+                location: [115.8613, -31.9523], 
+                suburb: "Perth",
+                region: "Central",
+                interests: ["mental-health", "youth"]
+            },
+            {
+                id: 2,
+                name: "Bob Johnson",
+                type: "student",
+                location: [115.7639, -31.8982], 
+                suburb: "Subiaco",
+                region: "Central",
+                interests: ["homelessness", "justice"]
+            },
+            {
+                id: 3,
+                name: "Charlie Brown",
+                type: "student",
+                location: [115.9006, -31.9609], 
+                suburb: "Victoria Park",
+                region: "SOR",
+                interests: ["aged-care", "disability"]
+            },
+            {
+                id: 4,
+                name: "Diana Prince",
+                type: "student",
+                location: [115.7471, -32.0383],
+                region: "SOR",
+                interests: ["mental-health", "homelessness"]
+            },
+            {
+                id: 5,
+                name: "Ethan Hunt",
+                type: "student",
+                location: [115.8075, -31.8927],
+                suburb: "Leederville",
+                region: "Central",
+                interests: ["youth", "justice"]
+            },
+            {
+                id: 6,
+                name: "Fiona Green",
+                type: "student",
+                location: [115.8005, -31.8148],
+                suburb: "Scarborough",
+                region: "NOR",
+                interests: ["mental-health", "disability"]
+            },
+            
+            // Agencies
+            {
+                id: 7,
+                name: "Mental Health Support Center",
+                type: "agency",
+                location: [115.8733, -31.9478], 
+                suburb: "East Perth",
+                region: "Central",
+                interests: ["mental-health"],
+                capacity: 3,
+                description: "Provides mental health support services to the community."
+            },
+            {
+                id: 8,
+                name: "Homeless Connect",
+                type: "agency",
+                location: [115.8583, -31.9535], 
+                suburb: "Perth",
+                region: "Central",
+                interests: ["homelessness"],
+                capacity: 2,
+                description: "Supports homeless individuals with housing and essential services."
+            },
+            {
+                id: 9,
+                name: "Youth Development Center",
+                type: "agency",
+                location: [115.8941, -31.8982], 
+                suburb: "Maylands",
+                region: "NOR",
+                interests: ["youth"],
+                capacity: 4,
+                description: "Provides programs and support for at-risk youth."
+            },
+            {
+                id: 10,
+                name: "Justice Advocacy Group",
+                type: "agency",
+                location: [115.8589, -31.9559],
+                suburb: "Perth",
+                region: "Central",
+                interests: ["justice"],
+                capacity: 2,
+                description: "Advocates for justice system reform and supports individuals in the system."
+            },
+            {
+                id: 11,
+                name: "Aged Care Facility",
+                type: "agency",
+                location: [115.7639, -32.0383],
+                suburb: "Fremantle",
+                region: "SOR",
+                interests: ["aged-care"],
+                capacity: 3,
+                description: "Provides care and support for elderly residents."
+            },
+            {
+                id: 12,
+                name: "Disability Support Services",
+                type: "agency",
+                location: [115.9006, -31.8982], 
+                suburb: "Morley",
+                region: "NOR",
+                interests: ["disability"],
+                capacity: 2,
+                description: "Offers support services for individuals with disabilities."
+            },
+            {
+                id: 13,
+                name: "Rural Health Initiative",
+                type: "agency",
+                location: [116.7152, -33.3283],
+                suburb: "Albany",
+                region: "Rural",
+                interests: ["mental-health", "aged-care"],
+                capacity: 2,
+                description: "Provides health services to rural communities."
+            },
+            
+            // UWA Staff
+            {
+                id: 14,
+                name: "Dr. Jane Wilson",
+                type: "staff",
+                location: [115.8175, -31.9809],
+                suburb: "Crawley",
+                region: "Central",
+                interests: ["mental-health", "youth"],
+                capacity: 3,
+                role: "Field Educator"
+            },
+            {
+                id: 15,
+                name: "Prof. Michael Lee",
+                type: "staff",
+                location: [115.8175, -31.9809],
+                suburb: "Crawley",
+                region: "Central",
+                interests: ["justice", "homelessness"],
+                capacity: 2,
+                role: "Liaison Officer"
+            },
+            {
+                id: 16,
+                name: "Dr. Sarah Johnson",
+                type: "staff",
+                location: [115.8175, -31.9809], 
+                suburb: "Crawley",
+                region: "Central",
+                interests: ["aged-care", "disability"],
+                capacity: 4,
+                role: "Field Educator & Liaison Officer"
+            },
+            {
+                id: 17,
+                name: "Dr. Robert Chen",
+                type: "staff",
+                location: [115.8941, -31.9609], 
+                suburb: "Victoria Park",
+                region: "SOR",
+                interests: ["mental-health", "youth"],
+                capacity: 3,
+                role: "Field Educator"
+            },
+            {
+                id: 18,
+                name: "Prof. Emily Davis",
+                type: "staff",
+                location: [115.7639, -31.8148], 
+                suburb: "Scarborough",
+                region: "NOR",
+                interests: ["homelessness", "justice"],
+                capacity: 2,
+                role: "Liaison Officer"
+            }
+        ];
+        
+        // Current filter state
+        let filters = {
+            stakeholderType: "all",
+            region: "all",
+            interest: "all",
+            search: ""
+        };
+        
+        // Add markers to the map
+        const markers = [];
+        
+        function addMarkers() {
+            // Clear existing markers
+            markers.forEach(marker => marker.remove());
+            markers.length = 0;
+            
+            // Filter stakeholders based on current filters
+            const filteredStakeholders = stakeholders.filter(stakeholder => {
+                const typeMatch = filters.stakeholderType === "all" || stakeholder.type === filters.stakeholderType;
+                const regionMatch = filters.region === "all" || stakeholder.region === filters.region;
+                const interestMatch = filters.interest === "all" || stakeholder.interests.includes(filters.interest);
+                const searchMatch = filters.search === "" || 
+                                   stakeholder.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+                                   stakeholder.suburb.toLowerCase().includes(filters.search.toLowerCase());
+                
+                return typeMatch && regionMatch && interestMatch && searchMatch;
+            });
+            
+            // Add markers for filtered stakeholders
+            filteredStakeholders.forEach(stakeholder => {
+                // Create marker element
+                const el = document.createElement('div');
+                el.className = 'marker';
+                
+                // Set marker color based on stakeholder type
+                if (stakeholder.type === "student") {
+                    el.style.backgroundColor = "#3498db"; // Blue
+                } else if (stakeholder.type === "agency") {
+                    el.style.backgroundColor = "#e74c3c"; // Red
+                    el.textContent = stakeholder.capacity;
+                } else if (stakeholder.type === "staff") {
+                    el.style.backgroundColor = "#2ecc71"; // Green
+                    el.textContent = stakeholder.capacity;
+                }
+                
+                // Create popup
+                const popup = new mapboxgl.Popup({ offset: 25 })
+                    .setHTML(`
+                        <div class="popup">
+                            <h3>${stakeholder.name}</h3>
+                            <p><strong>Type:</strong> ${stakeholder.type.charAt(0).toUpperCase() + stakeholder.type.slice(1)}</p>
+                            <p><strong>Location:</strong> ${stakeholder.suburb}, ${stakeholder.region}</p>
+                            ${stakeholder.interests ? `<p><strong>Interests:</strong> ${stakeholder.interests.map(i => i.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')).join(', ')}</p>` : ''}
+                            ${stakeholder.description ? `<p><strong>Description:</strong> ${stakeholder.description}</p>` : ''}
+                            ${stakeholder.role ? `<p><strong>Role:</strong> ${stakeholder.role}</p>` : ''}
+                            ${stakeholder.capacity ? `<p class="capacity">Available Spots: ${stakeholder.capacity}</p>` : ''}
+                        </div>
+                    `);
+                
+                // Create marker
+                const marker = new mapboxgl.Marker(el)
+                    .setLngLat(stakeholder.location)
+                    .setPopup(popup)
+                    .addTo(map);
+                
+                markers.push(marker);
+            });
+            
+            // Update stats
+            /*updateStats(filteredStakeholders);*/
+        }
+        
+       /* function updateStats(filteredStakeholders) {
+            const students = filteredStakeholders.filter(s => s.type === "student");
+            const agencies = filteredStakeholders.filter(s => s.type === "agency");
+            const staff = filteredStakeholders.filter(s => s.type === "staff");
+            
+            document.getElementById("student-count").textContent = students.length;
+            document.getElementById("agency-count").textContent = agencies.length;
+            document.getElementById("staff-count").textContent = staff.length;
+            
+            const agencySpots = agencies.reduce((total, agency) => total + agency.capacity, 0);
+            const staffCapacity = staff.reduce((total, staffMember) => total + staffMember.capacity, 0);
+            
+            document.getElementById("agency-spots").textContent = agencySpots;
+            document.getElementById("staff-capacity").textContent = staffCapacity;
+        }*/
+        
+        // Event listeners for filters
+        document.getElementById("stakeholder-filters").addEventListener("click", (e) => {
+            if (e.target.classList.contains("filter-option")) {
+                // Update active class
+                document.querySelectorAll("#stakeholder-filters .filter-option").forEach(el => {
+                    el.classList.remove("active");
+                });
+                e.target.classList.add("active");
+                
+                // Update filter
+                filters.stakeholderType = e.target.dataset.type;
+                addMarkers();
+            }
+        });
+        
+        document.getElementById("region-filters").addEventListener("click", (e) => {
+            if (e.target.classList.contains("filter-option")) {
+                // Update active class
+                document.querySelectorAll("#region-filters .filter-option").forEach(el => {
+                    el.classList.remove("active");
+                });
+                e.target.classList.add("active");
+                
+                // Update filter
+                filters.region = e.target.dataset.region;
+                addMarkers();
+            }
+        });
+        
+        document.getElementById("interest-filters").addEventListener("click", (e) => {
+            if (e.target.classList.contains("filter-option")) {
+                // Update active class
+                document.querySelectorAll("#interest-filters .filter-option").forEach(el => {
+                    el.classList.remove("active");
+                });
+                e.target.classList.add("active");
+                
+                // Update filter
+                filters.interest = e.target.dataset.interest;
+                addMarkers();
+            }
+        });
+        
+        document.getElementById("search").addEventListener("input", (e) => {
+            filters.search = e.target.value;
+            console.log(filters.search)
+            addMarkers();
+        });
+        
+        // Initialize map
+        map.on('load', () => {
+            addMarkers();
+        });
+    </script>
+</body>
+</html>
