@@ -1,0 +1,86 @@
+<!-- map-filter.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Work Placement Map</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link rel="stylesheet" href="../css/styles.css"> <!-- Link to a separate CSS file -->
+</head>
+<body>
+    <header>
+        <h1>Social Work Placement Map</h1>
+    </header>
+    
+    <div class="container">
+        <div class="sidebar">
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Search by name or suburb...">
+            </div>
+            
+            <div class="filter-section">
+                <h3>Stakeholder Type</h3>
+                <div class="filter-options" id="stakeholder-filters">
+                    <div class="filter-option active" data-type="all">All</div>
+                    <div class="filter-option" data-type="student">Students</div>
+                    <div class="filter-option" data-type="agency">Agencies</div>
+                    <div class="filter-option" data-type="staff">UWA Staff</div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Region</h3>
+                <div class="filter-options" id="region-filters">
+                    <div class="filter-option active" data-region="all">All</div>
+                    <div class="filter-option" data-region="NOR">North</div>
+                    <div class="filter-option" data-region="Central">Central</div>
+                    <div class="filter-option" data-region="SOR">South</div>
+                    <div class="filter-option" data-region="Rural">Rural</div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Area of Interest</h3>
+                <div class="filter-options" id="interest-filters">
+                    <div class="filter-option active" data-interest="all">All</div>
+                    <div class="filter-option" data-interest="mental-health">Mental Health</div>
+                    <div class="filter-option" data-interest="homelessness">Homelessness</div>
+                    <div class="filter-option" data-interest="justice">Justice</div>
+                    <div class="filter-option" data-interest="youth">Youth</div>
+                    <div class="filter-option" data-interest="aged-care">Aged Care</div>
+                    <div class="filter-option" data-interest="disability">Disability</div>
+                </div>
+            </div>
+            
+            <!-- <div class="stats" id="stats">
+                <h3>Current Selection</h3>
+                <p>Students: <span id="student-count">0</span></p>
+                <p>Agencies: <span id="agency-count">0</span> (Spots: <span id="agency-spots">0</span>)</p>
+                <p>UWA Staff: <span id="staff-count">0</span> (Capacity: <span id="staff-capacity">0</span>)</p>
+            </div> -->
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="legend">
+                <h4>Legend</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: blue"></div>
+                    <span>Students</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #e74c3c;"></div>
+                    <span>Agencies</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #2ecc71;"></div>
+                    <span>UWA Staff</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../js/app.js"></script> <!-- Link to a separate JS file -->
+</body>
+</html>
