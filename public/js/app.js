@@ -1,29 +1,28 @@
 //app.js
 // Mapbox access token from config file
-// Fetch the config.json file
-fetch('../config.json')
-    .then(response => response.json())
-    .then(config => {
-        // Check if the token is correctly fetched
-        console.log("Mapbox Token: ", config.mapboxToken);
-        
-        if (config.mapboxToken) {
-            mapboxgl.accessToken = config.mapboxToken;  // Assign the token
-            
-            // Initialize the map after assigning the token
-            const map = new mapboxgl.Map({
-                container: 'map',  // ID of your map container
-                style: 'mapbox://styles/mapbox/navigation-night-v1',  // Map style
-                center: [115.8613, -31.9523],  // Perth coordinates
-                zoom: 10  // Zoom level
-            });
-        } else {
-            console.error('Mapbox token is missing or incorrect.');
-        }
-    })
-    .catch(error => console.error('Error loading config:', error));
+// Directly assign the Mapbox token
+let map; // Declare map variable in the global scope
 
+const mapboxToken = "temporary"; // Replace with your actual Mapbox token
 
+if (mapboxToken) {
+    mapboxgl.accessToken = mapboxToken; // Assign the token
+
+    // Initialize the map after assigning the token
+    map = new mapboxgl.Map({
+        container: 'map', // ID of your map container
+        style: 'mapbox://styles/mapbox/navigation-night-v1', // Map style
+        center: [115.8613, -31.9523], // Perth coordinates
+        zoom: 10 // Zoom level
+    });
+
+    // Initialize map event listener
+    map.on('load', () => {
+        addMarkers();
+    });
+} else {
+    console.error('Mapbox token is missing or incorrect.');
+}
 
 // Sample data for demonstration
 const stakeholders = [
@@ -349,15 +348,3 @@ document.getElementById("interest-filters").addEventListener("click", (e) => {
         addMarkers();
     }
 });
-
-document.getElementById("search").addEventListener("input", (e) => {
-    filters.search = e.target.value;
-    console.log(filters.search)
-    addMarkers();
-});
-
-// Initialize map
-map.on('load', () => {
-    addMarkers();
-});
-
