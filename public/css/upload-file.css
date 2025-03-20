@@ -1,0 +1,233 @@
+:root {
+    --primary-color: #27358C;
+    --accent-color: #DDB106;
+    --white: #FFFFFF;
+    --light-gray: #f8f9fa;
+    --border-color: #dee2e6;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+}
+
+body {
+    background-color: var(--light-gray);
+}
+
+/* Card Styles */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    border-color: var(--border-color);
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    padding: 15px 20px;
+}
+
+/* Upload Area Styles */
+.upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    background-color: var(--light-gray);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.upload-area:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(39, 53, 140, 0.05);
+}
+
+.upload-icon {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+/* File Info Styles */
+.file-info {
+    margin-top: 20px;
+    display: none;
+}
+
+.progress {
+    margin-top: 15px;
+    display: none;
+    height: 10px;
+    border-radius: 5px;
+}
+
+.progress-bar {
+    background-color: var(--primary-color);
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #1e2a70;
+    border-color: #1e2a70;
+}
+
+.btn-primary:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-accent {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--white);
+}
+
+.btn-accent:hover, .btn-accent:focus {
+    background-color: #c09a05;
+    border-color: #c09a05;
+    color: var(--white);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-outline-danger {
+    color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--danger-color);
+    color: var(--white);
+}
+
+/* Tab Styles */
+.nav-tabs {
+    border-bottom-color: var(--border-color);
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+    font-weight: 500;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    padding: 0.5rem 1rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom-color: var(--primary-color);
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    border-bottom-color: rgba(39, 53, 140, 0.5);
+}
+
+/* Table Styles for Excel Preview */
+.table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: var(--primary-color);
+    color: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.table-primary {
+    background-color: var(--primary-color) !important;
+    color: var(--white);
+}
+
+/* Status Indicators */
+.upload-status {
+    font-size: 0.8rem;
+}
+
+.status-icon {
+    font-size: 1.5rem;
+}
+
+/* Upload Summary */
+.upload-summary .card {
+    transition: all 0.3s;
+    border: 1px solid var(--border-color);
+}
+
+.upload-summary .card:hover {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Alert Styles */
+.alert-success {
+    background-color: rgba(25, 135, 84, 0.1);
+    border-color: rgba(25, 135, 84, 0.2);
+    color: var(--success-color);
+}
+
+.alert-info {
+    background-color: rgba(39, 53, 140, 0.1);
+    border-color: rgba(39, 53, 140, 0.2);
+    color: var(--primary-color);
+}
+
+.alert-warning {
+    background-color: rgba(221, 177, 6, 0.1);
+    border-color: rgba(221, 177, 6, 0.2);
+    color: #856404;
+}
+
+/* Modal Styles */
+.modal-header {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.modal-content {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 15px;
+    }
+    
+    .upload-area {
+        padding: 20px;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.5rem;
+        font-size: 0.9rem;
+    }
+}
