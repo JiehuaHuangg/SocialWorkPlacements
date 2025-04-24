@@ -6,77 +6,173 @@
     <title>Excel Document Upload Portal</title>
     <!-- Bootstrap 5.3 CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../css/upload-file.css">
+    <style>
+        .card-header {
+            background-color: #27358C;
+            color: white;
+        }
+        .btn-accent {
+            background-color: #27358C;
+            color: white;
+        }
+        .btn-accent:hover {
+            background-color: #1e2a6e;
+            color: white;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #27358C;
+            background-color: rgba(39, 53, 140, 0.05);
+        }
+        .file-info {
+            display: none;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #e9ecef;
+            z-index: 1;
+        }
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 25%;
+        }
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+        .step.active .step-circle {
+            border-color: #27358C;
+            color: #27358C;
+        }
+        .step.completed .step-circle {
+            background-color: #27358C;
+            border-color: #27358C;
+            color: white;
+        }
+        .step-title {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+        .step.active .step-title {
+            color: #27358C;
+            font-weight: 600;
+        }
+        .step.completed .step-title {
+            color: #27358C;
+            font-weight: 600;
+        }
+        .upload-section {
+            display: none;
+        }
+        .upload-section.active {
+            display: block;
+        }
+        .nav-tabs .nav-link.active {
+            border-color: #27358C;
+            border-bottom-color: transparent;
+            color: #27358C;
+            font-weight: 600;
+        }
+        .nav-tabs .nav-link {
+            color: #6c757d;
+        }
+        .upload-status-summary {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+    </style>
 </head>
 <body>
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="card shadow">
-                    <div class="card-header text-white">
+                    <div class="card-header">
                         <h1 class="h4 mb-0">Excel Document Upload</h1>
                     </div>
                     <div class="card-body">
-                        <div class="alert alert-info mb-4">
-                            <div class="d-flex align-items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle-fill me-2" viewBox="0 0 16 16">
-                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                </svg>
-                                <strong>Note:</strong> You must upload Excel files for all four categories before final submission.
+                        <!-- Upload Status Summary -->
+                        <div class="upload-status-summary">
+                            <h2 class="h5 mb-3">Upload Progress</h2>
+                            <div class="step-indicator">
+                                <div class="step active" id="step1">
+                                    <div class="step-circle">1</div>
+                                    <div class="step-title">FE1 Students</div>
+                                </div>
+                                <div class="step" id="step2">
+                                    <div class="step-circle">2</div>
+                                    <div class="step-title">FE2 Students</div>
+                                </div>
+                                <div class="step" id="step3">
+                                    <div class="step-circle">3</div>
+                                    <div class="step-title">Agencies</div>
+                                </div>
+                                <div class="step" id="step4">
+                                    <div class="step-circle">4</div>
+                                    <div class="step-title">Sessional Staff</div>
+                                </div>
+                            </div>
+                            <div class="alert alert-info mb-0">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                    <strong>Note:</strong> You must upload Excel files for all four categories before final submission.
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- Nav tabs -->
-                        <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="fe1-tab" data-bs-toggle="tab" data-bs-target="#fe1" type="button" role="tab" aria-controls="fe1" aria-selected="true">
-                                    FE1 Students
-                                    <span class="upload-status ms-2" id="fe1Status">⚠️</span>
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="fe2-tab" data-bs-toggle="tab" data-bs-target="#fe2" type="button" role="tab" aria-controls="fe2" aria-selected="false">
-                                    FE2 Students
-                                    <span class="upload-status ms-2" id="fe2Status">⚠️</span>
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="agencies-tab" data-bs-toggle="tab" data-bs-target="#agencies" type="button" role="tab" aria-controls="agencies" aria-selected="false">
-                                    Agencies
-                                    <span class="upload-status ms-2" id="agencyStatus">⚠️</span>
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="sessional-tab" data-bs-toggle="tab" data-bs-target="#sessional" type="button" role="tab" aria-controls="sessional" aria-selected="false">
-                                    Sessional Staff
-                                    <span class="upload-status ms-2" id="sessionalStatus">⚠️</span>
-                                </button>
-                            </li>
-                        </ul>
-                        
-                        <!-- Tab content -->
-                        <div class="tab-content" id="userTabsContent">
-                            <!-- FE1 Students Tab -->
-                            <div class="tab-pane fade show active" id="fe1" role="tabpanel" aria-labelledby="fe1-tab">
+                        <!-- Upload Sections -->
+                        <div class="upload-sections">
+                            <!-- FE1 Students Section -->
+                            <div class="upload-section active" id="section1">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h2 class="h5 mb-0">FE1 Students Excel Upload <span class="text-danger">*</span></h2>
+                                    <h2 class="h5 mb-0">Step 1: FE1 Students Excel Upload <span class="text-danger">*</span></h2>
                                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#fe1ColumnsModal">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle me-1" viewBox="0 0 16 16">
-                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                                        </svg>
+                                        <i class="bi bi-info-circle me-1"></i>
                                         Required Columns
                                     </button>
                                 </div>
                                 <p>Upload FE1 student records in Excel format (.xlsx, .xls).</p>
                                 
                                 <div class="upload-area" id="fe1UploadArea">
-                                    <div class="upload-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
-                                            <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
-                                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-                                        </svg>
+                                    <div class="upload-icon mb-3">
+                                        <i class="bi bi-file-earmark-excel" style="font-size: 3rem; color: #27358C;"></i>
                                     </div>
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
@@ -95,35 +191,32 @@
                                             <button class="btn btn-sm btn-outline-danger" onclick="removeFile('fe1')">Remove</button>
                                         </div>
                                     </div>
-                                    <div class="progress" id="fe1Progress">
+                                    <div class="progress mb-3" id="fe1Progress">
                                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                                     </div>
-                                    <button class="btn btn-accent mt-3" id="fe1UploadBtn" onclick="uploadFile('fe1')">Upload File</button>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-accent" id="fe1UploadBtn" onclick="uploadFile('fe1')">Upload File</button>
+                                        <button class="btn btn-primary" id="fe1NextBtn" onclick="goToNextStep(1)" disabled>Next Step <i class="bi bi-arrow-right"></i></button>
+                                    </div>
                                 </div>
                                 
                                 <div class="mt-4" id="fe1Preview"></div>
                             </div>
                             
-                            <!-- FE2 Students Tab -->
-                            <div class="tab-pane fade" id="fe2" role="tabpanel" aria-labelledby="fe2-tab">
+                            <!-- FE2 Students Section -->
+                            <div class="upload-section" id="section2">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h2 class="h5 mb-0">FE2 Students Excel Upload <span class="text-danger">*</span></h2>
+                                    <h2 class="h5 mb-0">Step 2: FE2 Students Excel Upload <span class="text-danger">*</span></h2>
                                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#fe2ColumnsModal">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle me-1" viewBox="0 0 16 16">
-                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                                        </svg>
+                                        <i class="bi bi-info-circle me-1"></i>
                                         Required Columns
                                     </button>
                                 </div>
                                 <p>Upload FE2 student records in Excel format (.xlsx, .xls).</p>
                                 
                                 <div class="upload-area" id="fe2UploadArea">
-                                    <div class="upload-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
-                                            <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
-                                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-                                        </svg>
+                                    <div class="upload-icon mb-3">
+                                        <i class="bi bi-file-earmark-excel" style="font-size: 3rem; color: #27358C;"></i>
                                     </div>
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
@@ -142,35 +235,35 @@
                                             <button class="btn btn-sm btn-outline-danger" onclick="removeFile('fe2')">Remove</button>
                                         </div>
                                     </div>
-                                    <div class="progress" id="fe2Progress">
+                                    <div class="progress mb-3" id="fe2Progress">
                                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                                     </div>
-                                    <button class="btn btn-accent mt-3" id="fe2UploadBtn" onclick="uploadFile('fe2')">Upload File</button>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary" onclick="goToPreviousStep(2)"><i class="bi bi-arrow-left"></i> Previous</button>
+                                        <div>
+                                            <button class="btn btn-accent me-2" id="fe2UploadBtn" onclick="uploadFile('fe2')">Upload File</button>
+                                            <button class="btn btn-primary" id="fe2NextBtn" onclick="goToNextStep(2)" disabled>Next Step <i class="bi bi-arrow-right"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
                                 
                                 <div class="mt-4" id="fe2Preview"></div>
                             </div>
                             
-                            <!-- Agencies Tab -->
-                            <div class="tab-pane fade" id="agencies" role="tabpanel" aria-labelledby="agencies-tab">
+                            <!-- Agencies Section -->
+                            <div class="upload-section" id="section3">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h2 class="h5 mb-0">Agency Excel Upload <span class="text-danger">*</span></h2>
+                                    <h2 class="h5 mb-0">Step 3: Agency Excel Upload <span class="text-danger">*</span></h2>
                                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#agencyColumnsModal">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle me-1" viewBox="0 0 16 16">
-                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                                        </svg>
+                                        <i class="bi bi-info-circle me-1"></i>
                                         Required Columns
                                     </button>
                                 </div>
                                 <p>Upload agency information, contacts, or partnership data in Excel format (.xlsx, .xls).</p>
                                 
                                 <div class="upload-area" id="agencyUploadArea">
-                                    <div class="upload-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
-                                            <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
-                                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-                                        </svg>
+                                    <div class="upload-icon mb-3">
+                                        <i class="bi bi-file-earmark-excel" style="font-size: 3rem; color: #27358C;"></i>
                                     </div>
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
@@ -189,35 +282,35 @@
                                             <button class="btn btn-sm btn-outline-danger" onclick="removeFile('agency')">Remove</button>
                                         </div>
                                     </div>
-                                    <div class="progress" id="agencyProgress">
+                                    <div class="progress mb-3" id="agencyProgress">
                                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                                     </div>
-                                    <button class="btn btn-accent mt-3" id="agencyUploadBtn" onclick="uploadFile('agency')">Upload File</button>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary" onclick="goToPreviousStep(3)"><i class="bi bi-arrow-left"></i> Previous</button>
+                                        <div>
+                                            <button class="btn btn-accent me-2" id="agencyUploadBtn" onclick="uploadFile('agency')">Upload File</button>
+                                            <button class="btn btn-primary" id="agencyNextBtn" onclick="goToNextStep(3)" disabled>Next Step <i class="bi bi-arrow-right"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
                                 
                                 <div class="mt-4" id="agencyPreview"></div>
                             </div>
                             
-                            <!-- Sessional Staff Tab -->
-                            <div class="tab-pane fade" id="sessional" role="tabpanel" aria-labelledby="sessional-tab">
+                            <!-- Sessional Staff Section -->
+                            <div class="upload-section" id="section4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h2 class="h5 mb-0">Sessional Staff Excel Upload <span class="text-danger">*</span></h2>
+                                    <h2 class="h5 mb-0">Step 4: Sessional Staff Excel Upload <span class="text-danger">*</span></h2>
                                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#sessionalColumnsModal">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle me-1" viewBox="0 0 16 16">
-                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                                        </svg>
+                                        <i class="bi bi-info-circle me-1"></i>
                                         Required Columns
                                     </button>
                                 </div>
                                 <p>Upload sessional staff schedules, contracts, or payroll data in Excel format (.xlsx, .xls).</p>
                                 
                                 <div class="upload-area" id="sessionalUploadArea">
-                                    <div class="upload-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
-                                            <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
-                                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-                                        </svg>
+                                    <div class="upload-icon mb-3">
+                                        <i class="bi bi-file-earmark-excel" style="font-size: 3rem; color: #27358C;"></i>
                                     </div>
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
@@ -236,10 +329,13 @@
                                             <button class="btn btn-sm btn-outline-danger" onclick="removeFile('sessional')">Remove</button>
                                         </div>
                                     </div>
-                                    <div class="progress" id="sessionalProgress">
+                                    <div class="progress mb-3" id="sessionalProgress">
                                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                                     </div>
-                                    <button class="btn btn-accent mt-3" id="sessionalUploadBtn" onclick="uploadFile('sessional')">Upload File</button>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary" onclick="goToPreviousStep(4)"><i class="bi bi-arrow-left"></i> Previous</button>
+                                        <button class="btn btn-accent" id="sessionalUploadBtn" onclick="uploadFile('sessional')">Upload File</button>
+                                    </div>
                                 </div>
                                 
                                 <div class="mt-4" id="sessionalPreview"></div>
@@ -256,55 +352,6 @@
                                 <button id="submitAllBtn" class="btn btn-lg btn-primary" disabled onclick="submitAllFiles()">
                                     Submit All Files
                                 </button>
-                            </div>
-                            
-                            <div class="upload-summary mt-3">
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="card mb-2">
-                                            <div class="card-body p-3 d-flex align-items-center">
-                                                <span id="fe1StatusIcon" class="status-icon me-3">⚠️</span>
-                                                <div>
-                                                    <h4 class="h6 mb-0">FE1 Students</h4>
-                                                    <small id="fe1StatusText" class="text-muted">Not uploaded</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="card mb-2">
-                                            <div class="card-body p-3 d-flex align-items-center">
-                                                <span id="fe2StatusIcon" class="status-icon me-3">⚠️</span>
-                                                <div>
-                                                    <h4 class="h6 mb-0">FE2 Students</h4>
-                                                    <small id="fe2StatusText" class="text-muted">Not uploaded</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="card mb-2">
-                                            <div class="card-body p-3 d-flex align-items-center">
-                                                <span id="agencyStatusIcon" class="status-icon me-3">⚠️</span>
-                                                <div>
-                                                    <h4 class="h6 mb-0">Agencies</h4>
-                                                    <small id="agencyStatusText" class="text-muted">Not uploaded</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="card mb-2">
-                                            <div class="card-body p-3 d-flex align-items-center">
-                                                <span id="sessionalStatusIcon" class="status-icon me-3">⚠️</span>
-                                                <div>
-                                                    <h4 class="h6 mb-0">Sessional Staff</h4>
-                                                    <small id="sessionalStatusText" class="text-muted">Not uploaded</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -572,5 +619,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Custom JS -->
     <script src="../js/upload-file.js"></script>
+    <script type="module" src="../js/auth-check.js"></script>
+
 </body>
 </html>
