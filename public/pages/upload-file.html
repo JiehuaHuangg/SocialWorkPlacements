@@ -117,6 +117,25 @@
             padding: 1.5rem;
             margin-bottom: 2rem;
         }
+        /* Progress bar styles */
+        .progress {
+            height: 1.5rem;
+            font-size: 0.75rem;
+            background-color: #e9ecef;
+        }
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background-color: #27358C;
+            transition: width 0.3s ease;
+        }
+        /* Modal styles */
+        .modal-header {
+            background-color: #27358C;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -200,8 +219,8 @@
                                     </div>
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
-                                    <button class="btn btn-primary" onclick="document.getElementById('fe1FileInput').click()">Browse Files</button>
-                                    <input type="file" id="fe1FileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileSelect(this, 'fe1')">
+                                    <button class="btn btn-primary" >Browse Files</button>
+                                    <input type="file" id="fe1FileInput" accept=".xlsx, .xls" style="display: none;" >
                                 </div>
                                 
                                 <div class="file-info" id="fe1FileInfo">
@@ -212,15 +231,15 @@
                                                 <br>
                                                 <span class="text-muted" id="fe1FileSize"></span>
                                             </div>
-                                            <button class="btn btn-sm btn-outline-danger" onclick="removeFile('fe1')">Remove</button>
+                                            <button class="btn btn-sm btn-outline-danger" >Remove</button>
                                         </div>
                                     </div>
                                     <div class="progress mb-3" id="fe1Progress">
                                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                                     </div>
                                     <div class="d-flex justify-content-between">
-                                        <button class="btn btn-accent" id="fe1UploadBtn" onclick="uploadFile('fe1')">Upload File</button>
-                                        <button class="btn btn-primary" id="fe1NextBtn" onclick="goToNextStep(1)" disabled>Next Step <i class="bi bi-arrow-right"></i></button>
+                                        <button class="btn btn-accent" id="fe1UploadBtn">Upload File</button>
+                                        <button class="btn btn-primary" id="fe1NextBtn" disabled>Next Step <i class="bi bi-arrow-right"></i></button>
                                     </div>
                                 </div>
                                 
@@ -244,8 +263,8 @@
                                     </div>
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
-                                    <button class="btn btn-primary" onclick="document.getElementById('fe2FileInput').click()">Browse Files</button>
-                                    <input type="file" id="fe2FileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileSelect(this, 'fe2')">
+                                    <button class="btn btn-primary">Browse Files</button>
+                                    <input type="file" id="fe2FileInput" accept=".xlsx, .xls" style="display: none;">
                                 </div>
                                 
                                 <div class="file-info" id="fe2FileInfo">
@@ -256,17 +275,17 @@
                                                 <br>
                                                 <span class="text-muted" id="fe2FileSize"></span>
                                             </div>
-                                            <button class="btn btn-sm btn-outline-danger" onclick="removeFile('fe2')">Remove</button>
+                                            <button class="btn btn-sm btn-outline-danger" >Remove</button>
                                         </div>
                                     </div>
                                     <div class="progress mb-3" id="fe2Progress">
                                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                                     </div>
                                     <div class="d-flex justify-content-between">
-                                        <button class="btn btn-outline-secondary" onclick="goToPreviousStep(2)"><i class="bi bi-arrow-left"></i> Previous</button>
+                                        <button class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Previous</button>
                                         <div>
-                                            <button class="btn btn-accent me-2" id="fe2UploadBtn" onclick="uploadFile('fe2')">Upload File</button>
-                                            <button class="btn btn-primary" id="fe2NextBtn" onclick="goToNextStep(2)" disabled>Next Step <i class="bi bi-arrow-right"></i></button>
+                                            <button class="btn btn-accent me-2" id="fe2UploadBtn">Upload File</button>
+                                            <button class="btn btn-primary" id="fe2NextBtn" disabled>Next Step <i class="bi bi-arrow-right"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -291,8 +310,8 @@
                                     </div>
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
-                                    <button class="btn btn-primary" onclick="document.getElementById('agencyFileInput').click()">Browse Files</button>
-                                    <input type="file" id="agencyFileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileSelect(this, 'agency')">
+                                    <button class="btn btn-primary">Browse Files</button>
+                                    <input type="file" id="agencyFileInput" accept=".xlsx, .xls" style="display: none;" >
                                 </div>
                                 
                                 <div class="file-info" id="agencyFileInfo">
@@ -303,17 +322,17 @@
                                                 <br>
                                                 <span class="text-muted" id="agencyFileSize"></span>
                                             </div>
-                                            <button class="btn btn-sm btn-outline-danger" onclick="removeFile('agency')">Remove</button>
+                                            <button class="btn btn-sm btn-outline-danger" >Remove</button>
                                         </div>
                                     </div>
                                     <div class="progress mb-3" id="agencyProgress">
                                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                                     </div>
                                     <div class="d-flex justify-content-between">
-                                        <button class="btn btn-outline-secondary" onclick="goToPreviousStep(3)"><i class="bi bi-arrow-left"></i> Previous</button>
+                                        <button class="btn btn-outline-secondary" ><i class="bi bi-arrow-left"></i> Previous</button>
                                         <div>
-                                            <button class="btn btn-accent me-2" id="agencyUploadBtn" onclick="uploadFile('agency')">Upload File</button>
-                                            <button class="btn btn-primary" id="agencyNextBtn" onclick="goToNextStep(3)" disabled>Next Step <i class="bi bi-arrow-right"></i></button>
+                                            <button class="btn btn-accent me-2" id="agencyUploadBtn" >Upload File</button>
+                                            <button class="btn btn-primary" id="agencyNextBtn"  disabled>Next Step <i class="bi bi-arrow-right"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -338,8 +357,8 @@
                                     </div>
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
-                                    <button class="btn btn-primary" onclick="document.getElementById('sessionalFileInput').click()">Browse Files</button>
-                                    <input type="file" id="sessionalFileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileSelect(this, 'sessional')">
+                                    <button class="btn btn-primary" >Browse Files</button>
+                                    <input type="file" id="sessionalFileInput" accept=".xlsx, .xls" style="display: none;" >
                                 </div>
                                 
                                 <div class="file-info" id="sessionalFileInfo">
@@ -350,15 +369,15 @@
                                                 <br>
                                                 <span class="text-muted" id="sessionalFileSize"></span>
                                             </div>
-                                            <button class="btn btn-sm btn-outline-danger" onclick="removeFile('sessional')">Remove</button>
+                                            <button class="btn btn-sm btn-outline-danger" >Remove</button>
                                         </div>
                                     </div>
                                     <div class="progress mb-3" id="sessionalProgress">
                                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                                     </div>
                                     <div class="d-flex justify-content-between">
-                                        <button class="btn btn-outline-secondary" onclick="goToPreviousStep(4)"><i class="bi bi-arrow-left"></i> Previous</button>
-                                        <button class="btn btn-accent" id="sessionalUploadBtn" onclick="uploadFile('sessional')">Upload File</button>
+                                        <button class="btn btn-outline-secondary" ><i class="bi bi-arrow-left"></i> Previous</button>
+                                        <button class="btn btn-accent" id="sessionalUploadBtn" >Upload File</button>
                                     </div>
                                 </div>
                                 
@@ -373,7 +392,7 @@
                                     <h3 class="h5 mb-0">Submit All Files</h3>
                                     <p class="text-muted mb-0">All four categories must be uploaded before final submission</p>
                                 </div>
-                                <button id="submitAllBtn" class="btn btn-lg btn-primary" disabled onclick="submitAllFiles()">
+                                <button id="submitAllBtn" class="btn btn-lg btn-primary" disabled >
                                     Submit All Files
                                 </button>
                             </div>
@@ -642,10 +661,8 @@
     <!-- SheetJS (xlsx) for Excel parsing -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Custom JS -->
-    <script src="../js/upload-file.js"></script>
+    <script type="module" src="../js/upload-file.js"></script>
     <script type="module" src="../js/auth-check.js"></script>
     <script type="module" src="../js/logout.js"></script>
-
-
 </body>
 </html>
