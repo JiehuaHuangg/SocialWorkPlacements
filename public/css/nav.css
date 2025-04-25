@@ -1,0 +1,39 @@
+.navbar {
+background-color: #27358C !important; /* Primary blue */
+}
+.navbar-brand, .nav-link {
+color: #FFFFFF !important; /* White text */
+}
+.nav-link.active {
+color: #DDB106 !important; /* Accent gold for active link */
+}
+.btn-primary {
+background-color: #27358C; /* Primary blue */
+border-color: #27358C;
+}
+.btn-primary:hover {
+background-color: #1F2C6E; /* Darker shade of primary blue */
+border-color: #1F2C6E;
+}
+.btn-outline-primary {
+color: #27358C;
+border-color: #27358C;
+}
+.btn-outline-primary:hover {
+background-color: #27358C;
+color: #FFFFFF;
+}
+footer {
+background-color: #27358C !important; /* Primary blue */
+color: #FFFFFF; /* White text */
+}
+.modal-header {
+background-color: #27358C; /* Primary blue */
+color: #FFFFFF; /* White text */
+}
+.btn-close {
+filter: invert(1); /* White close button */
+}
+.feature-icon {
+color: #DDB106; /* Accent gold */
+}

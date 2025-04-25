@@ -8,3 +8,13 @@ onAuthStateChanged(auth, (user) => {
     window.location.href = "login.html";
   }
 });
+
+function logout() {
+    firebase.auth().signOut().then(() => {
+        // Redirect to login page after successful logout
+        window.location.href = '/public/pages/login.html';
+    }).catch((error) => {
+        console.error('Logout failed:', error);
+    });
+}
+

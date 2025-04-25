@@ -67,6 +67,11 @@ if (signupForm) {
       signupError.classList.remove("d-none");
       return;
     }
+    if (!email.endsWith("@uwa.edu.au")) {
+      signupError.textContent = "Only @uwa.edu.au email addresses are allowed.";
+      signupError.classList.remove("d-none");
+      return;
+    }
 
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
