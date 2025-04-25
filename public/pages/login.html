@@ -14,65 +14,18 @@
     main {
       flex: 1;
     }
-    .navbar {
-      background-color: #27358C !important; /* Primary blue */
-    }
-    .navbar-brand, .nav-link {
-      color: #FFFFFF !important; /* White text */
-    }
-    .nav-link.active {
-      color: #DDB106 !important; /* Accent gold for active link */
-    }
-    .btn-primary {
-      background-color: #27358C; /* Primary blue */
-      border-color: #27358C;
-    }
-    .btn-primary:hover {
-      background-color: #1F2C6E; /* Darker shade of primary blue */
-      border-color: #1F2C6E;
-    }
-    .btn-outline-primary {
-      color: #27358C;
-      border-color: #27358C;
-    }
-    .btn-outline-primary:hover {
-      background-color: #27358C;
-      color: #FFFFFF;
-    }
-    footer {
-      background-color: #27358C !important; /* Primary blue */
-      color: #FFFFFF; /* White text */
-    }
-    .modal-header {
-      background-color: #27358C; /* Primary blue */
-      color: #FFFFFF; /* White text */
-    }
-    .btn-close {
-      filter: invert(1); /* White close button */
-    }
-    .feature-icon {
-      color: #DDB106; /* Accent gold */
-    }
   </style>
+  <link rel="stylesheet" href="../css/nav.css">
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-      <a class="navbar-brand" href="/public/pages/login.html">WA Social Work Placement Mapper</a>
+      <a class="navbar-brand" href="/public/pages/login.html">UWA Social Work Placement Mapper</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="#">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/map-filter.html">Filter</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/matching.html">Matching</a>
-          </li>
         </ul>
       </div>
     </div>
@@ -215,15 +168,6 @@
       </div>
     </div>
   </div>
-
-  <!--  Firebase + App Auth + Firestore ES Module Support -->
-  <script type="module">
-    import "../js/auth.js";
-  </script>
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
- 
   <script>
     document.getElementById('signupForm').addEventListener('submit', function (event) {
       event.preventDefault();
@@ -241,5 +185,12 @@
       console.log('Sign-up form submitted');
     });
   </script>
+  <!--  Firebase + App Auth + Firestore ES Module Support -->
+  <script type="module">
+    import "../js/auth.js";
+  </script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
