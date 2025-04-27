@@ -635,7 +635,6 @@ import { db } from "./firebase-config.js";
   window.checkAllUploadsComplete = checkAllUploadsComplete;
   window.submitAllFiles = submitAllFiles;
 
-
 const mapboxToken = "pk.eyJ1IjoiYWxhbjAwNyIsImEiOiJjbTd5MGFtcTkwNHIyMndxYm85czZjcnc0In0.61fFzlPTeu4vErDSO8-MVA"
 // Track upload status for each category
 const uploadStatus = {
@@ -681,11 +680,12 @@ document.addEventListener("DOMContentLoaded", () => {
       browseBtn.addEventListener("click", () => input.click())
     }
 
-    // Remove button
-    const removeBtn = document.querySelector(`#${type}FileInfo .btn-outline-danger`)
-    if (removeBtn) {
-      removeBtn.addEventListener("click", () => removeFile(type))
-    }
+    // Remove button - using event delegation for dynamically added elements
+    document.addEventListener("click", (e) => {
+      if (e.target && e.target.closest(`#${type}FileInfo .btn-outline-danger`)) {
+        removeFile(type)
+      }
+    })
 
     // Next button
     const nextBtn = document.getElementById(`${type}NextBtn`)
@@ -793,12 +793,37 @@ function handleFileSelect(input, type) {
  * @param {string} type - The type of upload (fe1, fe2, agency, sessional)
  */
 function removeFile(type) {
-  document.getElementById(`${type}FileInput`).value = ""
+  // Reset file input
+  const fileInput = document.getElementById(`${type}FileInput`)
+  if (fileInput) {
+    fileInput.value = ""
+  }
+
+  // Reset display elements
   document.getElementById(`${type}FileInfo`).style.display = "none"
   document.getElementById(`${type}UploadArea`).style.display = "block"
   document.getElementById(`${type}Preview`).innerHTML = ""
-  document.getElementById(`${type}Progress`).style.display = "none"
-  document.getElementById(`${type}Progress`).querySelector(".progress-bar").style.width = "0%"
+
+  // Reset progress bar
+  const progressContainer = document.getElementById(`${type}Progress`)
+  if (progressContainer) {
+    progressContainer.style.display = "none"
+    const progressBar = progressContainer.querySelector(".progress-bar")
+    if (progressBar) {
+      progressBar.style.width = "0%"
+      progressBar.setAttribute("aria-valuenow", "0")
+      progressBar.textContent = ""
+    }
+  }
+
+  // Reset upload button
+  const uploadBtn = document.getElementById(`${type}UploadBtn`)
+  if (uploadBtn) {
+    uploadBtn.disabled = false
+    uploadBtn.innerHTML = "Upload File"
+    uploadBtn.classList.add("btn-accent")
+    uploadBtn.classList.remove("btn-success")
+  }
 
   // Update status
   uploadStatus[type] = false
@@ -806,10 +831,15 @@ function removeFile(type) {
   updateSubmitButton()
 
   // Disable next button
-  document.getElementById(`${type}NextBtn`).disabled = true
+  const nextBtn = document.getElementById(`${type}NextBtn`)
+  if (nextBtn) {
+    nextBtn.disabled = true
+  }
 
   // Remove the file from uploadedFiles
   uploadedFiles[type] = null
+
+  console.log(`File removed for ${type}`)
 }
 
 /**
@@ -1070,7 +1100,7 @@ function updateSubmitButton() {
 }
 
 async function geocodeLocation(location) {
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxToken}&limit=1`
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?country=au&limit=1&access_token=${mapboxToken}`
   try {
     const res = await fetch(url)
     const data = await res.json()
