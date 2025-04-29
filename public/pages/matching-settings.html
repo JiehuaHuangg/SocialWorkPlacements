@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Matching Algorithm Settings</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- SortableJS -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+  <style>
+    body {
+      padding: 20px;
+    }
+    .sortable-item {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      padding: 10px 20px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: grab;
+    }
+    .sortable-item:hover {
+      background-color: #e2e6ea;
+    }
+    .rule-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .priority-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: #0d6efd;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .enabled-toggle {
+      margin-left: auto;
+    }
+    .btn-save {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2 class="mb-4">Matching Algorithm Settings</h2>
+  <p class="text-muted">Drag to reorder. Toggle to enable/disable each rule.</p>
+
+  <ul id="rules-list" class="list-unstyled">
+    <!-- Rules -->
+    <li class="sortable-item" data-rule="Students' Sector Exception" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">1</div>
+        <span>Students' Sector Exception</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+    <li class="sortable-item" data-rule="At Least 1 Onsite Supervisor" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">2</div>
+        <span>At Least 1 Onsite Supervisor</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+    <li class="sortable-item" data-rule="Different Sector between FE1 and FE2" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">3</div>
+        <span>Different Sector between FE1 and FE2</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+    <li class="sortable-item" data-rule="Location Proximity" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">4</div>
+        <span>Location Proximity</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+    <li class="sortable-item" data-rule="Sector Interest Match" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">5</div>
+        <span>Sector Interest Match</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+    <li class="sortable-item" data-rule="Agency Available Spots" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">6</div>
+        <span>Agency Available Spots</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+    <li class="sortable-item" data-rule="Liaison Officer (LO) Available Spots" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">7</div>
+        <span>Liaison Officer (LO) Available Spots</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+    <li class="sortable-item" data-rule="External Field Educator (EFE) Spots" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">8</div>
+        <span>External Field Educator (EFE) Spots</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+    <li class="sortable-item" data-rule="Agency Restriction: No International Students" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">9</div>
+        <span>Agency Restriction: No International Students</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+    <li class="sortable-item" data-rule="First Nations Restriction (Aboriginal & Torrest Strait Islanders)" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">10</div>
+        <span>First Nations Restriction (Aboriginal & Torrest Strait Islanders)</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+    <li class="sortable-item" data-rule="Agency Restriction: Australian Driver's Licence Only" data-enabled="true">
+      <div class="rule-content">
+        <div class="priority-badge">11</div>
+        <span>Agency Restriction: Australian Driver's Licence Only</span>
+      </div>
+      <div class="form-check form-switch enabled-toggle">
+        <input class="form-check-input" type="checkbox" checked onchange="toggleRule(this)">
+      </div>
+    </li>
+
+  </ul>
+
+  <button class="btn btn-primary btn-save" onclick="saveSettings()">Save Settings</button>
+
+</div>
+
+<!-- JavaScript -->
+<script>
+  // Drag and Drop
+  const sortable = new Sortable(document.getElementById('rules-list'), {
+    animation: 150,
+    onEnd: updatePriorityNumbers
+  });
+
+  // On/Off
+  function toggleRule(checkbox) {
+    const li = checkbox.closest('li');
+    li.dataset.enabled = checkbox.checked ? 'true' : 'false';
+  }
+
+  // Save Settings
+  function saveSettings() {
+    const listItems = document.querySelectorAll('#rules-list li');
+    const settings = [];
+
+    listItems.forEach((item, index) => {
+      settings.push({
+        rule: item.dataset.rule,
+        enabled: item.dataset.enabled === 'true',
+        priority: index + 1
+      });
+    });
+
+    console.log('Saved Settings:', settings);
+    alert('Settings saved! Check console for details.');
+    // 可接到Firebase数据库保存
+  }
+
+  // 更新每条规则序号
+  function updatePriorityNumbers() {
+    const badges = document.querySelectorAll('.priority-badge');
+    badges.forEach((badge, index) => {
+      badge.innerText = index + 1;
+    });
+  }
+</script>
+
+</body>
+</html>
