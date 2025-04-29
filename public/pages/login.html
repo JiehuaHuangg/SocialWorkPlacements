@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UWA Social Work Field Education Placement</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    main {
+      flex: 1;
+    }
+  </style>
+  <link rel="stylesheet" href="../css/nav.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand" href="/public/pages/login.html">UWA Social Work Placement Mapper</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="hero-content">
+            <h1>Social Work Field Education Placement</h1>
+            <p class="lead">A geographic visualization and matching tool for UWA's Social Work Field Education team.</p>
+            <p>Efficiently match students with suitable agencies based on location, preferences, and requirements.</p>
+            <div class="d-flex gap-2 mt-4">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+              <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="container">
+            <h2 class="text-center mb-4">About the Platform</h2>
+            <div class="row">
+              <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+                        <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
+                        <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                      </svg>
+                    </div>
+                    <h3 class="card-title">Interactive Mapping</h3>
+                    <p class="card-text">Visualize stakeholder locations on an interactive map to make informed placement decisions.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
+                        <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                      </svg>
+                    </div>
+                    <h3 class="card-title">Advanced Filtering</h3>
+                    <p class="card-text">Filter stakeholders based on multiple criteria including location, interests, and availability.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
+                        <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8Zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022ZM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816ZM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>
+                      </svg>
+                    </div>
+                    <h3 class="card-title">Automated Matching</h3>
+                    <p class="card-text">Generate optimal placement recommendations based on defined priorities and requirements.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-white py-4 mt-5">
+    <div class="container text-center">
+      <p>© 2025 UWA Social Work Field Education Placement.</p>
+    </div>
+  </footer>
+
+  <!-- Login Modal -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="loginModalLabel">Login</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="loginForm">
+            <div class="mb-3">
+              <label for="loginEmail" class="form-label">Email address</label>
+              <input type="email" class="form-control" id="loginEmail" required>
+            </div>
+            <div class="mb-3">
+              <label for="loginPassword" class="form-label">Password</label>
+              <input type="password" class="form-control" id="loginPassword" required>
+            </div>
+            <div id="loginError" class="alert alert-danger d-none"></div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+          </form>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <p class="mb-0">Don't have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#signupModal" data-bs-dismiss="modal">Sign up</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signup Modal -->
+  <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="signupForm">
+            <div class="mb-3">
+              <label for="signupName" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="signupName" required>
+            </div>
+            <div class="mb-3">
+              <label for="signupEmail" class="form-label">Email address</label>
+              <input type="email" class="form-control" id="signupEmail" required>
+            </div>
+            <div class="mb-3">
+              <label for="signupPassword" class="form-label">Password</label>
+              <input type="password" class="form-control" id="signupPassword" required>
+              <div class="form-text">Password must be at least 6 characters long.</div>
+            </div>
+            <div class="mb-3">
+              <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
+              <input type="password" class="form-control" id="signupConfirmPassword" required>
+            </div>
+            <div id="signupError" class="alert alert-danger d-none"></div>
+            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+          </form>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <p class="mb-0">Already have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Login</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+      const email = document.getElementById('signupEmail').value;
+      const errorDiv = document.getElementById('signupError');
+      
+      if (!email.endsWith('@uwa.edu.au')) {
+        errorDiv.textContent = 'Only @uwa.edu.au email addresses are allowed.';
+        errorDiv.classList.remove('d-none');
+        return;
+      }
+      
+      errorDiv.classList.add('d-none');
+      // Proceed with sign-up logic
+      console.log('Sign-up form submitted');
+    });
+  </script>
+  <!--  Firebase + App Auth + Firestore ES Module Support -->
+  <script type="module">
+    import "../js/auth.js";
+  </script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

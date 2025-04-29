@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Document Upload Portal</title>
+    <!-- Bootstrap 5.3 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom Navbar CSS -->
+    <link rel="stylesheet" href="../css/nav.css">
+    <style>
+        .card-header {
+            background-color: #27358C;
+            color: white;
+        }
+        .btn-accent {
+            background-color: #27358C;
+            color: white;
+        }
+        .btn-accent:hover {
+            background-color: #1e2a6e;
+            color: white;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #27358C;
+            background-color: rgba(39, 53, 140, 0.05);
+        }
+        .file-info {
+            display: none;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #e9ecef;
+            z-index: 1;
+        }
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 25%;
+        }
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+        .step.active .step-circle {
+            border-color: #27358C;
+            color: #27358C;
+        }
+        .step.completed .step-circle {
+            background-color: #27358C;
+            border-color: #27358C;
+            color: white;
+        }
+        .step-title {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+        .step.active .step-title {
+            color: #27358C;
+            font-weight: 600;
+        }
+        .step.completed .step-title {
+            color: #27358C;
+            font-weight: 600;
+        }
+        .upload-section {
+            display: none;
+        }
+        .upload-section.active {
+            display: block;
+        }
+        .nav-tabs .nav-link.active {
+            border-color: #27358C;
+            border-bottom-color: transparent;
+            color: #27358C;
+            font-weight: 600;
+        }
+        .nav-tabs .nav-link {
+            color: #6c757d;
+        }
+        .upload-status-summary {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        /* Progress bar styles */
+        .progress {
+            height: 1.5rem;
+            font-size: 0.75rem;
+            background-color: #e9ecef;
+        }
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background-color: #27358C;
+            transition: width 0.3s ease;
+        }
+        /* Modal styles */
+        .modal-header {
+            background-color: #27358C;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary custom-navbar">
+        <div class="container">
+          <a class="navbar-brand" href="/public/pages/login.html">UWA Social Work Placement Mapper</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link active" href="#">Data Upload</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="../pages/map-filter.html">Visualisation</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="../pages/match.html">Matching</a>
+              </li>
+                <li class="nav-item">
+                    <button id="logoutBtn" class="btn btn-outline-danger">Logout</button>
+                </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h1 class="h4 mb-0">Excel Document Upload</h1>
+                    </div>
+                    <div class="card-body">
+                        <!-- Upload Status Summary -->
+                        <div class="upload-status-summary">
+                            <h2 class="h5 mb-3">Upload Progress</h2>
+                            <div class="step-indicator">
+                                <div class="step active" id="step1">
+                                    <div class="step-circle">1</div>
+                                    <div class="step-title">FE1 Students</div>
+                                </div>
+                                <div class="step" id="step2">
+                                    <div class="step-circle">2</div>
+                                    <div class="step-title">FE2 Students</div>
+                                </div>
+                                <div class="step" id="step3">
+                                    <div class="step-circle">3</div>
+                                    <div class="step-title">Agencies</div>
+                                </div>
+                                <div class="step" id="step4">
+                                    <div class="step-circle">4</div>
+                                    <div class="step-title">Sessional Staff</div>
+                                </div>
+                            </div>
+                            <div class="alert alert-info mb-0">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                    <strong>Note:</strong> You must upload Excel files for all four categories before final submission.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Upload Sections -->
+                        <div class="upload-sections">
+                            <!-- FE1 Students Section -->
+                            <div class="upload-section active" id="section1">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h2 class="h5 mb-0">Step 1: FE1 Students Excel Upload <span class="text-danger">*</span></h2>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#fe1ColumnsModal">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Required Columns
+                                    </button>
+                                </div>
+                                <p>Upload FE1 student records in Excel format (.xlsx, .xls).</p>
+                                
+                                <div class="upload-area" id="fe1UploadArea">
+                                    <div class="upload-icon mb-3">
+                                        <i class="bi bi-file-earmark-excel" style="font-size: 3rem; color: #27358C;"></i>
+                                    </div>
+                                    <h3 class="h6">Drag & Drop Excel File Here</h3>
+                                    <p class="text-muted">or</p>
+                                    <button class="btn btn-primary" >Browse Files</button>
+                                    <input type="file" id="fe1FileInput" accept=".xlsx, .xls" style="display: none;" >
+                                </div>
+                                
+                                <div class="file-info" id="fe1FileInfo">
+                                    <div class="alert alert-success">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>File Selected: </strong><span id="fe1FileName"></span>
+                                                <br>
+                                                <span class="text-muted" id="fe1FileSize"></span>
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-danger" >Remove</button>
+                                        </div>
+                                    </div>
+                                    <div class="progress mb-3" id="fe1Progress">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-accent" id="fe1UploadBtn">Upload File</button>
+                                        <button class="btn btn-primary" id="fe1NextBtn" disabled>Next Step <i class="bi bi-arrow-right"></i></button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4" id="fe1Preview"></div>
+                            </div>
+                            
+                            <!-- FE2 Students Section -->
+                            <div class="upload-section" id="section2">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h2 class="h5 mb-0">Step 2: FE2 Students Excel Upload <span class="text-danger">*</span></h2>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#fe2ColumnsModal">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Required Columns
+                                    </button>
+                                </div>
+                                <p>Upload FE2 student records in Excel format (.xlsx, .xls).</p>
+                                
+                                <div class="upload-area" id="fe2UploadArea">
+                                    <div class="upload-icon mb-3">
+                                        <i class="bi bi-file-earmark-excel" style="font-size: 3rem; color: #27358C;"></i>
+                                    </div>
+                                    <h3 class="h6">Drag & Drop Excel File Here</h3>
+                                    <p class="text-muted">or</p>
+                                    <button class="btn btn-primary">Browse Files</button>
+                                    <input type="file" id="fe2FileInput" accept=".xlsx, .xls" style="display: none;">
+                                </div>
+                                
+                                <div class="file-info" id="fe2FileInfo">
+                                    <div class="alert alert-success">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>File Selected: </strong><span id="fe2FileName"></span>
+                                                <br>
+                                                <span class="text-muted" id="fe2FileSize"></span>
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-danger" >Remove</button>
+                                        </div>
+                                    </div>
+                                    <div class="progress mb-3" id="fe2Progress">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Previous</button>
+                                        <div>
+                                            <button class="btn btn-accent me-2" id="fe2UploadBtn">Upload File</button>
+                                            <button class="btn btn-primary" id="fe2NextBtn" disabled>Next Step <i class="bi bi-arrow-right"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4" id="fe2Preview"></div>
+                            </div>
+                            
+                            <!-- Agencies Section -->
+                            <div class="upload-section" id="section3">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h2 class="h5 mb-0">Step 3: Agency Excel Upload <span class="text-danger">*</span></h2>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#agencyColumnsModal">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Required Columns
+                                    </button>
+                                </div>
+                                <p>Upload agency information, contacts, or partnership data in Excel format (.xlsx, .xls).</p>
+                                
+                                <div class="upload-area" id="agencyUploadArea">
+                                    <div class="upload-icon mb-3">
+                                        <i class="bi bi-file-earmark-excel" style="font-size: 3rem; color: #27358C;"></i>
+                                    </div>
+                                    <h3 class="h6">Drag & Drop Excel File Here</h3>
+                                    <p class="text-muted">or</p>
+                                    <button class="btn btn-primary">Browse Files</button>
+                                    <input type="file" id="agencyFileInput" accept=".xlsx, .xls" style="display: none;" >
+                                </div>
+                                
+                                <div class="file-info" id="agencyFileInfo">
+                                    <div class="alert alert-success">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>File Selected: </strong><span id="agencyFileName"></span>
+                                                <br>
+                                                <span class="text-muted" id="agencyFileSize"></span>
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-danger" >Remove</button>
+                                        </div>
+                                    </div>
+                                    <div class="progress mb-3" id="agencyProgress">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary" ><i class="bi bi-arrow-left"></i> Previous</button>
+                                        <div>
+                                            <button class="btn btn-accent me-2" id="agencyUploadBtn" >Upload File</button>
+                                            <button class="btn btn-primary" id="agencyNextBtn"  disabled>Next Step <i class="bi bi-arrow-right"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4" id="agencyPreview"></div>
+                            </div>
+                            
+                            <!-- Sessional Staff Section -->
+                            <div class="upload-section" id="section4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h2 class="h5 mb-0">Step 4: Sessional Staff Excel Upload <span class="text-danger">*</span></h2>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#sessionalColumnsModal">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Required Columns
+                                    </button>
+                                </div>
+                                <p>Upload sessional staff schedules, contracts, or payroll data in Excel format (.xlsx, .xls).</p>
+                                
+                                <div class="upload-area" id="sessionalUploadArea">
+                                    <div class="upload-icon mb-3">
+                                        <i class="bi bi-file-earmark-excel" style="font-size: 3rem; color: #27358C;"></i>
+                                    </div>
+                                    <h3 class="h6">Drag & Drop Excel File Here</h3>
+                                    <p class="text-muted">or</p>
+                                    <button class="btn btn-primary" >Browse Files</button>
+                                    <input type="file" id="sessionalFileInput" accept=".xlsx, .xls" style="display: none;" >
+                                </div>
+                                
+                                <div class="file-info" id="sessionalFileInfo">
+                                    <div class="alert alert-success">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>File Selected: </strong><span id="sessionalFileName"></span>
+                                                <br>
+                                                <span class="text-muted" id="sessionalFileSize"></span>
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-danger" >Remove</button>
+                                        </div>
+                                    </div>
+                                    <div class="progress mb-3" id="sessionalProgress">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary" ><i class="bi bi-arrow-left"></i> Previous</button>
+                                        <button class="btn btn-accent" id="sessionalUploadBtn" >Upload File</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4" id="sessionalPreview"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Final Submit Section -->
+                        <div class="mt-5 pt-3 border-top">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="h5 mb-0">Submit All Files</h3>
+                                    <p class="text-muted mb-0">All four categories must be uploaded before final submission</p>
+                                </div>
+                                <button id="submitAllBtn" class="btn btn-lg btn-primary" disabled >
+                                    Submit All Files
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Required Columns Modals -->
+    <!-- FE1 Columns Modal -->
+    <div class="modal fade" id="fe1ColumnsModal" tabindex="-1" aria-labelledby="fe1ColumnsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fe1ColumnsModalLabel">Required Columns for FE1 Students Excel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your Excel file must include the following columns in the exact order and spelling:</p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Column Name</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>Student's full name</td>
+                                </tr>
+                                <tr>
+                                    <td>Location</td>
+                                    <td>Student's location</td>
+                                </tr>
+                                <tr>
+                                    <td>Sector Exception</td>
+                                    <td>Any sector exceptions</td>
+                                </tr>
+                                <tr>
+                                    <td>Interested sectors</td>
+                                    <td>Sectors the student is interested in</td>
+                                </tr>
+                                <tr>
+                                    <td>Domestic / International</td>
+                                    <td>Student's status (Domestic or International)</td>
+                                </tr>
+                                <tr>
+                                    <td>Driver's Licence</td>
+                                    <td>Whether the student has a driver's license</td>
+                                </tr>
+                                <tr>
+                                    <td>First Nations (Aboriginal & Torres Strait Islanders)</td>
+                                    <td>First Nations status</td>
+                                </tr>
+                                <tr>
+                                    <td>UWA FE Coordinators</td>
+                                    <td>Assigned UWA FE coordinators</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <strong>Important:</strong> Column names must match exactly as shown above. The Excel file should have these columns in the first row.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Understood</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FE2 Columns Modal -->
+    <div class="modal fade" id="fe2ColumnsModal" tabindex="-1" aria-labelledby="fe2ColumnsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fe2ColumnsModalLabel">Required Columns for FE2 Students Excel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your Excel file must include the following columns in the exact order and spelling:</p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Column Name</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>Student's full name</td>
+                                </tr>
+                                <tr>
+                                    <td>Location</td>
+                                    <td>Student's location</td>
+                                </tr>
+                                <tr>
+                                    <td>Sector Exception</td>
+                                    <td>Any sector exceptions</td>
+                                </tr>
+                                <tr>
+                                    <td>Interested sectors</td>
+                                    <td>Sectors the student is interested in</td>
+                                </tr>
+                                <tr>
+                                    <td>FE1 Onsite Supervisor</td>
+                                    <td>Supervisor from FE1 placement</td>
+                                </tr>
+                                <tr>
+                                    <td>FE 1 Sector</td>
+                                    <td>Sector from FE1 placement</td>
+                                </tr>
+                                <tr>
+                                    <td>Domestic / International</td>
+                                    <td>Student's status (Domestic or International)</td>
+                                </tr>
+                                <tr>
+                                    <td>Driver's Licence</td>
+                                    <td>Whether the student has a driver's license</td>
+                                </tr>
+                                <tr>
+                                    <td>First Nations (Aboriginal & Torres Strait Islanders)</td>
+                                    <td>First Nations status</td>
+                                </tr>
+                                <tr>
+                                    <td>UWA FE Coordinators</td>
+                                    <td>Assigned UWA FE coordinators</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <strong>Important:</strong> Column names must match exactly as shown above. The Excel file should have these columns in the first row.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Understood</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agency Columns Modal -->
+    <div class="modal fade" id="agencyColumnsModal" tabindex="-1" aria-labelledby="agencyColumnsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="agencyColumnsModalLabel">Required Columns for Agencies Excel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your Excel file must include the following columns in the exact order and spelling:</p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Column Name</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>Agency name</td>
+                                </tr>
+                                <tr>
+                                    <td>Location</td>
+                                    <td>Agency location</td>
+                                </tr>
+                                <tr>
+                                    <td>Sector</td>
+                                    <td>Agency sector</td>
+                                </tr>
+                                <tr>
+                                    <td>Exception</td>
+                                    <td>Any exceptions</td>
+                                </tr>
+                                <tr>
+                                    <td>Available spots</td>
+                                    <td>Number of available placement spots</td>
+                                </tr>
+                                <tr>
+                                    <td>First Nations (Aboriginal & Torres Strait Islanders)</td>
+                                    <td>First Nations status or support</td>
+                                </tr>
+                                <tr>
+                                    <td>Onsite SW Supervisor</td>
+                                    <td>Name of onsite social work supervisor</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <strong>Important:</strong> Column names must match exactly as shown above. The Excel file should have these columns in the first row.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Understood</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sessional Staff Columns Modal -->
+    <div class="modal fade" id="sessionalColumnsModal" tabindex="-1" aria-labelledby="sessionalColumnsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sessionalColumnsModalLabel">Required Columns for Sessional Staff Excel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your Excel file must include the following columns in the exact order and spelling:</p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Column Name</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>Staff member's full name</td>
+                                </tr>
+                                <tr>
+                                    <td>Location</td>
+                                    <td>Staff member's location</td>
+                                </tr>
+                                <tr>
+                                    <td>LO</td>
+                                    <td>Learning outcomes</td>
+                                </tr>
+                                <tr>
+                                    <td>EFE</td>
+                                    <td>External field education</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <strong>Important:</strong> Column names must match exactly as shown above. The Excel file should have these columns in the first row.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Understood</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SheetJS (xlsx) for Excel parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Custom JS -->
+    <script type="module" src="../js/upload-file.js"></script>
+    <script type="module" src="../js/auth-check.js"></script>
+    <script type="module" src="../js/logout.js"></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+/* Custom CSS for the Excel Upload Portal */
+.card-header {
+    background-color: #27358c;
+    color: white;
+  }
+  
+  .btn-accent {
+    background-color: #27358c;
+    color: white;
+  }
+  
+  .btn-accent:hover {
+    background-color: #1e2a6e;
+    color: white;
+  }
+  
+  .upload-area {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s;
+  }
+  
+  .upload-area:hover {
+    border-color: #27358c;
+    background-color: rgba(39, 53, 140, 0.05);
+  }
+  
+  .file-info {
+    display: none;
+  }
+  
+  /* Step indicator styles */
+  .step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  
+  .step-indicator::before {
+    content: "";
+    position: absolute;
+    top: 24px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #e9ecef;
+    z-index: 1;
+  }
+  
+  .step {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    width: 25%;
+  }
+  
+  .step-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: white;
+    border: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-weight: bold;
+    color: #6c757d;
+    transition: all 0.3s;
+  }
+  
+  .step.active .step-circle {
+    border-color: #27358c;
+    color: #27358c;
+  }
+  
+  .step.completed .step-circle {
+    background-color: #27358c;
+    border-color: #27358c;
+    color: white;
+  }
+  
+  .step-title {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+  }
+  
+  .step.active .step-title {
+    color: #27358c;
+    font-weight: 600;
+  }
+  
+  .step.completed .step-title {
+    color: #27358c;
+    font-weight: 600;
+  }
+  
+  /* Upload section styles */
+  .upload-section {
+    display: none;
+  }
+  
+  .upload-section.active {
+    display: block;
+  }
+  
+  .scroll-preview::-webkit-scrollbar {
+    height: 6px;
+  }
+  .scroll-preview::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+  .scroll-preview::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  .scroll-preview::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  
