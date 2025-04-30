@@ -754,212 +754,282 @@ function calculateMatchScore(student, agency, geoCache) {
   }
 }
 
-// Assign a student to an agency
-function assignStudent(student, agencies, geoCache) {
-  if (student.assignment && student.assignment !== "Unassigned") return
 
-  // Step 1: Filter agencies based on hard constraints
-  const candidates = filterAgenciesByConstraints(student, agencies, geoCache)
-
-  if (candidates.length === 0) {
-    student.assignment = "Unassigned"
-    student.unassignedReason = "No agencies meet constraints"
-    return
-  }
-
-  // Step 2: Score and rank candidates
-  const rankedCandidates = rankAgencyCandidates(student, candidates, geoCache)
-
-  // Step 3: Assign to best candidate
-  if (rankedCandidates.length > 0) {
-    const bestMatch = rankedCandidates[0]
-    const bestAgency = bestMatch.agency
-
-    // Update agency availability
-    if (bestAgency["Available spots"]) {
-      bestAgency["Available spots"] -= 1
-    } else if (bestAgency.Available_spots) {
-      bestAgency.Available_spots -= 1
-    }
-
-    // Update student assignment
-    student.assignment = bestAgency.Name
-    student.assignedSector = bestAgency.Sector
-    student.matchScore = bestMatch.score.total
-    student.scoreDetails = bestMatch.score
-    student.distance = bestMatch.score.distance
-    student.matchReason = bestMatch.reason
-  } else {
-    student.assignment = "Unassigned"
-    student.unassignedReason = "No suitable agencies available"
-  }
-}
-
-// Add this new function to filter agencies by constraints
-function filterAgenciesByConstraints(student, agencies, geoCache) {
-  return agencies.filter((agency) => {
-    // Check availability
-    const hasAvailableSpots = agency["Available spots"] > 0 || agency.Available_spots > 0
-    if (!hasAvailableSpots) return false
-
-    // Check geocoding data exists
-    const hasGeoData = geoCache[student.Location] && geoCache[agency.Location]
-    if (!hasGeoData) return false
-
-    // Check agency constraints
-    const meetsConstraints = meetsAgencyConstraints(agency, student)
-    if (!meetsConstraints) return false
-
-    // Check student sector exceptions
-    const noViolations = !violatesStudentSectorException(student, agency)
-    if (!noViolations) return false
-
-    // HARD REQUIREMENT: FE2 students who didn't have an onsite supervisor in FE1 MUST have one now
-    const isFE2WithoutPreviousSupervisor =
-      (student.FE1_Sector || student["FE 1 Sector"]) &&
-      (!student["FE1 Onsite Supervisor"] ||
-        student["FE1 Onsite Supervisor"].toLowerCase() === "no" ||
-        student["FE1 Onsite Supervisor"] === "")
-
-    if (isFE2WithoutPreviousSupervisor) {
-      // This is a necessity, not a priority - must have onsite supervisor
-      if (!agency["Onsite SW Supervisor"] || agency["Onsite SW Supervisor"].toLowerCase() !== "yes") {
-        return false
-      }
-    }
-
-    return true
-  })
-}
-
-// Add this new function to rank agency candidates
-function rankAgencyCandidates(student, agencies, geoCache) {
-  const rankedCandidates = []
-
-  for (const agency of agencies) {
-    const scoreDetails = calculateMatchScore(student, agency, geoCache)
-
-    // Determine reason for match based on student type and needs
-    let reason = "Best overall match based on location and sector interests"
-
-    // Add specific reason for FE2 students needing supervisors
-    const isFE2WithoutPreviousSupervisor =
-      (student.FE1_Sector || student["FE 1 Sector"]) &&
-      (!student["FE1 Onsite Supervisor"] ||
-        student["FE1 Onsite Supervisor"].toLowerCase() === "no" ||
-        student["FE1 Onsite Supervisor"] === "")
-
-    if (
-      isFE2WithoutPreviousSupervisor &&
-      agency["Onsite SW Supervisor"] &&
-      agency["Onsite SW Supervisor"].toLowerCase() === "yes"
-    ) {
-      reason = "FE2 student matched with required onsite supervisor"
-    }
-
-    rankedCandidates.push({
-      agency: agency,
-      score: scoreDetails,
-      reason: reason,
-    })
-  }
-
-  // Sort by total score (highest first)
-  return rankedCandidates.sort((a, b) => b.score.total - a.score.total)
-}
 
 // Replace the matchStudents function with this more modular version
 function matchStudents(fe2Students, fe1Students, agencies, geoCache) {
-  const assignedStudents = new Set()
-  let totalScore = 0
-  const studentScores = []
+  const allStudents = [...fe2Students, ...fe1Students];
+  const allAvailableAgencies = [];
 
-  // Clear previous results
-  matchedStudents = []
-  unassignedStudents = []
-
-  // Create a priority queue of students
-  const priorityQueue = createStudentPriorityQueue(fe1Students, fe2Students)
-
-  // Process students in priority order
-  for (const student of priorityQueue) {
-    if (!assignedStudents.has(student.Name)) {
-      assignStudent(student, agencies, geoCache)
-
-      if (student.assignment !== "Unassigned") {
-        totalScore += student.matchScore
-        matchedStudents.push(student)
-      } else {
-        unassignedStudents.push(student)
-      }
-
-      studentScores.push({
-        name: student.Name,
-        assignment: student.assignment,
-        score: student.matchScore || 0,
-        scoreDetails: student.scoreDetails || null,
-        type: student.FE1_Sector || student["FE 1 Sector"] ? "FE2" : "FE1",
-        priority: student.priority || 0,
-      })
-
-      assignedStudents.add(student.Name)
+  // Flatten agencies to account for available spots
+  for (const agency of agencies) {
+    const spots = agency["Available spots"] || agency.Available_spots || 0;
+    for (let i = 0; i < spots; i++) {
+      allAvailableAgencies.push({ ...agency, originalName: agency.Name, instanceId: i });
     }
   }
 
-  // Calculate overall match score
-  const maxPossibleScore = (fe1Students.length + fe2Students.length) * 100
-  const matchScore = totalScore > 0 ? ((totalScore / maxPossibleScore) * 100).toFixed(2) : "0.00"
+  const costMatrix = [];
+  const validPairs = new Map(); // Map row index to list of valid agency indices
+
+  for (let i = 0; i < allStudents.length; i++) {
+    const row = [];
+    validPairs.set(i, []);
+    for (let j = 0; j < allAvailableAgencies.length; j++) {
+      const student = allStudents[i];
+      const agency = allAvailableAgencies[j];
+
+      // Skip if student doesn't meet constraints
+      if (
+        !geoCache[student.Location] ||
+        !geoCache[agency.Location] ||
+        !meetsAgencyConstraints(agency, student) ||
+        violatesStudentSectorException(student, agency)
+      ) {
+        row.push(1e6); // Big number to simulate "infinite" cost
+        continue;
+      }
+      // Enforce FE2 no-supervisor constraint
+      const isFE2 = student.FE1_Sector || student["FE 1 Sector"];
+      const hadNoSupervisor =
+        !student["FE1 Onsite Supervisor"] ||
+        student["FE1 Onsite Supervisor"].toLowerCase() === "no" ||
+        student["FE1 Onsite Supervisor"] === "";
+
+      const agencyHasSupervisor =
+        agency["Onsite SW Supervisor"] && agency["Onsite SW Supervisor"].toLowerCase() === "yes";
+
+      if (isFE2 && hadNoSupervisor && !agencyHasSupervisor) {
+        row.push(1e6); // Block this match
+        continue;
+      }
+
+      const scoreDetails = calculateMatchScore(student, agency, geoCache);
+      row.push(100 - scoreDetails.total); // Lower cost = better match
+      validPairs.get(i).push(j);
+    }
+    costMatrix.push(row);
+  }
+
+  // Run Hungarian algorithm
+  const munkres = new Munkres();
+  const assignments = munkres.compute(costMatrix);
+
+  // Track results
+  matchedStudents = [];
+  unassignedStudents = [];
+  let totalScore = 0;
+  const studentScores = [];
+
+  const assignedAgencyIndices = new Set();
+
+  for (const [studentIndex, agencyIndex] of assignments) {
+    const student = allStudents[studentIndex];
+    const agency = allAvailableAgencies[agencyIndex];
+
+    // Was this a real valid assignment?
+    const score = 100 - costMatrix[studentIndex][agencyIndex];
+
+    if (costMatrix[studentIndex][agencyIndex] >= 1e6) {
+      const isFE2 = student.FE1_Sector || student["FE 1 Sector"];
+      const hadNoSupervisor =
+        !student["FE1 Onsite Supervisor"] ||
+        student["FE1 Onsite Supervisor"].toLowerCase() === "no" ||
+        student["FE1 Onsite Supervisor"] === "";
+    
+      // More specific unassigned reason for critical FE2 students
+      if (isFE2 && hadNoSupervisor) {
+        student.unassignedReason = "No agency with required onsite supervisor";
+      } else {
+        student.unassignedReason = "No suitable agency match";
+      }
+    
+      student.assignment = "Unassigned";
+      unassignedStudents.push(student);
+      continue;
+    }
+    
+
+    // Mark as assigned
+    student.assignment = agency.originalName;
+    student.assignedSector = agency.Sector;
+    student.matchScore = score;
+    student.distance = getHaversineDistance(
+      geoCache[student.Location].lon,
+      geoCache[student.Location].lat,
+      geoCache[agency.Location].lon,
+      geoCache[agency.Location].lat
+    );
+    student.scoreDetails = calculateMatchScore(student, agency, geoCache);
+    const reasonParts = [];
+
+    if (student.scoreDetails?.sectorScore > 0) {
+      reasonParts.push("sector aligned");
+    }
+    if (student.scoreDetails?.locationScore > 0) {
+      reasonParts.push("close to location");
+    }
+
+    const isFE2 = student.FE1_Sector || student["FE 1 Sector"];
+    const hadNoSupervisor =
+      !student["FE1 Onsite Supervisor"] ||
+      student["FE1 Onsite Supervisor"].toLowerCase() === "no" ||
+      student["FE1 Onsite Supervisor"] === "";
+
+    const agencyHasSupervisor =
+      agency["Onsite SW Supervisor"] && agency["Onsite SW Supervisor"].toLowerCase() === "yes";
+
+    if (isFE2 && hadNoSupervisor && agencyHasSupervisor) {
+      reasonParts.push("required onsite supervisor present");
+    }
+
+    student.matchReason = `Matched due to ${reasonParts.join(", ")}`;
+
+
+    matchedStudents.push(student);
+    totalScore += student.matchScore;
+    assignedAgencyIndices.add(agencyIndex);
+
+    studentScores.push({
+      name: student.Name,
+      assignment: student.assignment,
+      score: student.matchScore,
+      scoreDetails: student.scoreDetails,
+      type: student.FE1_Sector || student["FE 1 Sector"] ? "FE2" : "FE1",
+    });
+  }
+
+  // Assign all students not in the assignments list as unassigned
+  const assignedStudentIndices = new Set(assignments.map(([i, _]) => i));
+  for (let i = 0; i < allStudents.length; i++) {
+    if (!assignedStudentIndices.has(i)) {
+      const student = allStudents[i];
+      student.assignment = "Unassigned";
+      student.unassignedReason = "No assignment made by optimizer";
+      unassignedStudents.push(student);
+    }
+  }
+
+  // Match score: average of all assigned students' scores
+  const maxPossibleScore = allStudents.length * 100;
+  const matchScore = totalScore > 0 ? ((totalScore / maxPossibleScore) * 100).toFixed(2) : "0.00";
 
   return {
     matchScore,
     studentScores,
     totalScore,
     maxPossibleScore,
-  }
+  };
 }
 
-// Add this new function to create a priority queue of students
-function createStudentPriorityQueue(fe1Students, fe2Students) {
-  // We're keeping the priority queue concept but removing the priority bonuses
-  // Instead, we'll use it just to determine the order of processing
 
-  const prioritizedStudents = []
-
-  // First process FE2 students who need onsite supervisors
-  const fe2NeedingSupervisors = fe2Students.filter((student) => {
-    const needsSupervisor =
-      !student["FE1 Onsite Supervisor"] ||
-      student["FE1 Onsite Supervisor"].toLowerCase() === "no" ||
-      student["FE1 Onsite Supervisor"] === ""
-    return needsSupervisor
-  })
-
-  fe2NeedingSupervisors.forEach((student) => {
-    prioritizedStudents.push(student)
-  })
-
-  // Then process remaining FE2 students
-  const remainingFE2 = fe2Students.filter((student) => !fe2NeedingSupervisors.some((s) => s.Name === student.Name))
-  remainingFE2.forEach((student) => {
-    prioritizedStudents.push(student)
-  })
-
-  // Then process all FE1 students
-  fe1Students.forEach((student) => {
-    prioritizedStudents.push(student)
-  })
-
-  return prioritizedStudents
-}
 
 // Update the displayResults function to remove priority bonus display
 function displayResults(matchResults, fe2Students, fe1Students) {
   // Update match score
   document.getElementById("matchScore").textContent = `Overall Match Score: ${matchResults.matchScore}%`
 
+ // Metrics
+const totalStudents = fe1Students.length + fe2Students.length;
+const matchedCount = matchedStudents.length;
+const unassignedCount = unassignedStudents.length;
+
+const averageDistance = (
+  matchedStudents.reduce((sum, s) => sum + (s.distance || 0), 0) / matchedCount
+).toFixed(1);
+
+const averageLocationScore = (
+  matchedStudents.reduce((sum, s) => sum + (s.scoreDetails?.locationScore || 0), 0) / matchedCount
+).toFixed(1);
+
+const averageSectorScore = (
+  matchedStudents.reduce((sum, s) => sum + (s.scoreDetails?.sectorScore || 0), 0) / matchedCount
+).toFixed(1);
+
+const unmatchedFE2WithSupervisorNeed = unassignedStudents.filter((s) => {
+  const isFE2 = s.FE1_Sector || s["FE 1 Sector"];
+  const hadNoSupervisor =
+    !s["FE1 Onsite Supervisor"] ||
+    s["FE1 Onsite Supervisor"].toLowerCase() === "no" ||
+    s["FE1 Onsite Supervisor"] === "";
+  return isFE2 && hadNoSupervisor;
+}).length;
+
+// Sort for top 5 lowest match scores
+const lowestMatchStudents = [...matchedStudents]
+  .sort((a, b) => (a.matchScore || 0) - (b.matchScore || 0))
+  .slice(0, 5);
+
+// Top 5 students with 0 sector score
+const studentsWithZeroSector = matchedStudents
+  .filter((s) => (s.scoreDetails?.sectorScore || 0) === 0)
+  .slice(0, 5);
+
+const assignedFarAway = matchedStudents.filter(
+  (s) => (s.distance || 0) > 30
+);
+
+const agencyUseCount = {};
+matchedStudents.forEach((s) => {
+  agencyUseCount[s.assignment] = (agencyUseCount[s.assignment] || 0) + 1;
+});
+
+const fullyUsedAgencies = Object.entries(agencyUseCount).filter(([name, count]) => {
+  const agency = allAgencies.find((a) => a.Name === name);
+  const spots = agency?.["Available spots"] || agency?.Available_spots || 0;
+  return count >= spots;
+}).map(([name]) => name);
+
+// Dropdown HTML helpers
+const renderStudentList = (students) => {
+  if (!students.length) return "<em>None</em>";
+  return "<ul class='mb-1'>" + students.map((s) =>
+    `<li>${s.Name} (${s.matchScore || 0}/100)</li>`
+  ).join("") + "</ul>";
+};
+
+const summaryHTML = `
+  <div class="alert alert-info mb-4">
+    <strong>Summary:</strong><br>
+    🔹 <strong>Matched:</strong> ${matchedCount} / ${totalStudents}<br>
+    🔹 <strong>Unassigned:</strong> ${unassignedCount}<br>
+    🔹 <strong>Overall Match Score:</strong> ${matchResults.matchScore}%<br>
+    🔹 <strong>Average Distance:</strong> ${averageDistance} km<br>
+    🔹 <strong>Average Location Score:</strong> ${averageLocationScore} / 50<br>
+    🔹 <strong>Average Sector Score:</strong> ${averageSectorScore} / 50<br>
+    🔹 <strong>Unmatched FE2s needing supervisor:</strong> ${unmatchedFE2WithSupervisorNeed}<br>
+    <hr>
+    <strong>Insights:</strong><br>
+
+    <details>
+      <summary>🔻 <strong>Lowest Assigned Match Scores</strong></summary>
+      ${renderStudentList(lowestMatchStudents)}
+    </details>
+
+    <details class="mt-2">
+      <summary>⚠️ <strong>Students with 0 Sector Score</strong></summary>
+      ${renderStudentList(studentsWithZeroSector)}
+    </details>
+
+    📍 <strong>Students >30km from placement:</strong> ${assignedFarAway.length}<br>
+    🧯 <strong>Fully Used Agencies:</strong> ${fullyUsedAgencies.length > 0 ? fullyUsedAgencies.join(", ") : "None"}
+  </div>
+`;
+
+// Insert at top of results
+document.getElementById("resultsSummary").innerHTML = summaryHTML;
+
+
+
+
   // Display FE2 results
   const fe2Results = document.getElementById("fe2Results")
-  fe2Results.innerHTML = ""
+  fe2Results.innerHTML = `
+  <div class="mt-2 small text-muted">
+  <span class="badge bg-primary me-1">&nbsp;</span> Location Score
+  <span class="badge bg-success ms-3 me-1">&nbsp;</span> Sector Score
+</div>`;
+
 
   for (const student of fe2Students) {
     const scoreDetails = student.scoreDetails || {
@@ -980,43 +1050,27 @@ function displayResults(matchResults, fe2Students, fe1Students) {
     let scoreHtml = ""
     if (isAssigned) {
       scoreHtml = `
-        <div class="score-breakdown">
-          <div class="score-component">
-            <span class="score-label">Total Score:</span>
-            <div class="score-bar">
-              <div class="progress progress-sm">
-                <div class="progress-bar bg-${getScoreColor(scoreDetails.total)}" 
-                     style="width: ${scoreDetails.total}%"></div>
-              </div>
-            </div>
-            <span class="score-value">${scoreDetails.total}/100</span>
-          </div>
-          <div class="score-component">
-            <span class="score-label">Location (${scoreDetails.adjustedLocationWeight || locationWeight}%):</span>
-            <div class="score-bar">
-              <div class="progress progress-sm">
-                <div class="progress-bar bg-primary" 
-                     style="width: ${(scoreDetails.locationScore / 50) * 100}%"></div>
-              </div>
-            </div>
-            <span class="score-value">${scoreDetails.weightedLocationScore}</span>
-          </div>
-          <div class="score-component">
-            <span class="score-label">Sector (${scoreDetails.adjustedSectorWeight || sectorWeight}%):</span>
-            <div class="score-bar">
-              <div class="progress progress-sm">
-                <div class="progress-bar bg-success" 
-                     style="width: ${(scoreDetails.sectorScore / 50) * 100}%"></div>
-              </div>
-            </div>
-            <span class="score-value">${scoreDetails.weightedSectorScore}</span>
-          </div>
-          <div class="small text-muted mt-1">
-            Distance: ${student.distance?.toFixed(1) || "?"} km
-            ${student.matchReason ? `<br>Reason: ${student.matchReason}` : ""}
+    <div class="score-breakdown">
+      <div class="score-component">
+        <span class="score-label">Total Score:</span>
+        <div class="score-bar">
+          <div class="progress progress-sm">
+            <div class="progress-bar bg-primary" 
+                 style="width: ${scoreDetails.weightedLocationScore}%"></div>
+            <div class="progress-bar bg-success" 
+                 style="width: ${scoreDetails.weightedSectorScore}%"></div>
           </div>
         </div>
-      `
+        <span class="score-value">${scoreDetails.total}/100</span>
+      </div>
+      <div class="small text-muted mt-1">
+        <span class="badge bg-primary me-1"></span> Location (${scoreDetails.adjustedLocationWeight || locationWeight}%): ${scoreDetails.weightedLocationScore}
+        <span class="badge bg-success ms-2 me-1"></span> Sector (${scoreDetails.adjustedSectorWeight || sectorWeight}%): ${scoreDetails.weightedSectorScore}
+        <br>Distance: ${student.distance?.toFixed(1) || "?"} km
+        ${student.matchReason ? `<br>Reason: ${student.matchReason}` : ""}
+      </div>
+    </div>
+  `
     } else {
       scoreHtml = `
         <div class="small text-danger mt-1">
@@ -1056,7 +1110,11 @@ function displayResults(matchResults, fe2Students, fe1Students) {
 
   // Display FE1 results
   const fe1Results = document.getElementById("fe1Results")
-  fe1Results.innerHTML = ""
+  fe1Results.innerHTML = `
+  <div class="mt-2 small text-muted">
+  <span class="badge bg-primary me-1">&nbsp;</span> Location Score
+  <span class="badge bg-success ms-3 me-1">&nbsp;</span> Sector Score
+</div>`;
 
   for (const student of fe1Students) {
     const scoreDetails = student.scoreDetails || {
@@ -1077,43 +1135,27 @@ function displayResults(matchResults, fe2Students, fe1Students) {
     let scoreHtml = ""
     if (isAssigned) {
       scoreHtml = `
-        <div class="score-breakdown">
-          <div class="score-component">
-            <span class="score-label">Total Score:</span>
-            <div class="score-bar">
-              <div class="progress progress-sm">
-                <div class="progress-bar bg-${getScoreColor(scoreDetails.total)}" 
-                     style="width: ${scoreDetails.total}%"></div>
-              </div>
-            </div>
-            <span class="score-value">${scoreDetails.total}/100</span>
-          </div>
-          <div class="score-component">
-            <span class="score-label">Location (${scoreDetails.adjustedLocationWeight || locationWeight}%):</span>
-            <div class="score-bar">
-              <div class="progress progress-sm">
-                <div class="progress-bar bg-primary" 
-                     style="width: ${(scoreDetails.locationScore / 50) * 100}%"></div>
-              </div>
-            </div>
-            <span class="score-value">${scoreDetails.weightedLocationScore}</span>
-          </div>
-          <div class="score-component">
-            <span class="score-label">Sector (${scoreDetails.adjustedSectorWeight || sectorWeight}%):</span>
-            <div class="score-bar">
-              <div class="progress progress-sm">
-                <div class="progress-bar bg-success" 
-                     style="width: ${(scoreDetails.sectorScore / 50) * 100}%"></div>
-              </div>
-            </div>
-            <span class="score-value">${scoreDetails.weightedSectorScore}</span>
-          </div>
-          <div class="small text-muted mt-1">
-            Distance: ${student.distance?.toFixed(1) || "?"} km
-            ${student.matchReason ? `<br>Reason: ${student.matchReason}` : ""}
+    <div class="score-breakdown">
+      <div class="score-component">
+        <span class="score-label">Total Score:</span>
+        <div class="score-bar">
+          <div class="progress progress-sm">
+            <div class="progress-bar bg-primary" 
+                 style="width: ${scoreDetails.weightedLocationScore}%"></div>
+            <div class="progress-bar bg-success" 
+                 style="width: ${scoreDetails.weightedSectorScore}%"></div>
           </div>
         </div>
-      `
+        <span class="score-value">${scoreDetails.total}/100</span>
+      </div>
+      <div class="small text-muted mt-1">
+        <span class="badge bg-primary me-1"></span> Location (${scoreDetails.adjustedLocationWeight || locationWeight}%): ${scoreDetails.weightedLocationScore}
+        <span class="badge bg-success ms-2 me-1"></span> Sector (${scoreDetails.adjustedSectorWeight || sectorWeight}%): ${scoreDetails.weightedSectorScore}
+        <br>Distance: ${student.distance?.toFixed(1) || "?"} km
+        ${student.matchReason ? `<br>Reason: ${student.matchReason}` : ""}
+      </div>
+    </div>
+  `
     } else {
       scoreHtml = `
         <div class="small text-danger mt-1">
@@ -1135,6 +1177,7 @@ function displayResults(matchResults, fe2Students, fe1Students) {
         <span class="badge bg-${getScoreColor(student.matchScore || 0)}">
           Score: ${student.matchScore || 0}/100
         </span>
+        
       </div>
       <div class="small text-muted">
         Location: ${student.Location} | 
@@ -1190,6 +1233,8 @@ function displayResults(matchResults, fe2Students, fe1Students) {
       addStudentMarker(student, false)
     }
   }
+ 
+
 }
 
 // Export results to Excel
