@@ -1,0 +1,50 @@
+body {
+  padding: 20px;
+}
+.rules-section {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.rules-box {
+  flex: 1;
+  min-width: 300px;
+}
+.sortable-item, .fixed-item {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 10px 20px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: grab;
+}
+.sortable-item:hover, .fixed-item:hover {
+  background-color: #e2e6ea;
+}
+.priority-badge {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #0d6efd;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  margin-right: 10px;
+}
+.rule-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.enabled-toggle {
+  margin-left: auto;
+}
+.btn-save {
+  margin-top: 20px;
+}
