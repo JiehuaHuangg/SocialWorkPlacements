@@ -109,4 +109,18 @@
     display: block;
   }
   
+  .scroll-preview::-webkit-scrollbar {
+    height: 6px;
+  }
+  .scroll-preview::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+  .scroll-preview::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  .scroll-preview::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
   
