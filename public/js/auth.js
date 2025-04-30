@@ -1,15 +1,15 @@
-import { auth, db } from "./firebase-config.js";
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   onAuthStateChanged,
-  sendEmailVerification
+  sendEmailVerification,
+  signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import {
   doc,
-  setDoc,
-  serverTimestamp
+  serverTimestamp,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import { auth, db } from "./firebase-config.js";
 
 
 
