@@ -1,86 +1,256 @@
-<!-- map-filter.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Work Placement Map</title>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-    <link rel="stylesheet" href="../css/styles.css"> <!-- Link to a separate CSS file -->
+    <title>Visualize</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"> <!--mapbox css link-->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script> <!--mapbox js link-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet"> <!--bootstrap link-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> <!--bootstrp icon link-->
+    <script src="https://kit.fontawesome.com/0e7cae0c06.js" crossorigin="anonymous"></script> <!--fontawesome icon link-->
+    <link rel="stylesheet" href="../css/styles.css"> <!--custom css-->
+    <link rel="stylesheet" href="../css/nav.css"> <!--custom css-->
 </head>
 <body>
-    <header>
-        <h1>Social Work Placement Map</h1>
-    </header>
-    
-    <div class="container">
-        <div class="sidebar">
-            <div class="search-box">
-                <input type="text" id="search" placeholder="Search by name or suburb...">
-            </div>
-            
-            <div class="filter-section">
+    <div id="map"></div> <!--display map-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary custom-navbar">
+        <div class="container">
+          <a class="navbar-brand" href="/public/pages/login.html">UWA Social Work Placement Mapper</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link " href="../pages/upload-file.html">Data Upload</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="../pages/map-filter.html">Visualisation</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="../pages/match.html">Matching</a>
+              </li>
+                <li class="nav-item">
+                    <button id="logoutBtn" class="btn btn-outline-danger">Logout</button>
+                </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    <!--search bar options-->
+    <div class="search-container-wrapper">
+        <div class="search-container position-relative">
+            <form class="d-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="search-icon feather feather-search">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input class="form-control search-input ps-5" type="search" placeholder="Search Name or Suburb..."
+                    aria-label="Search">
+                <button class="btn btn-search ms-2" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <!--left sidebar-->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><span><i class="bi bi-funnel-fill w-10 p-1" style="font-size: 0.95em" ;></i></span>Map Filters</h2>
+        </div>
+       <!--stakeholder type filter start:check box-->
+        <div class="sidebar-content">
+            <div class="filter-group">
                 <h3>Stakeholder Type</h3>
-                <div class="filter-options" id="stakeholder-filters">
-                    <div class="filter-option active" data-type="all">All</div>
-                    <div class="filter-option" data-type="student">Students</div>
-                    <div class="filter-option" data-type="agency">Agencies</div>
-                    <div class="filter-option" data-type="staff">UWA Staff</div>
+
+                <div class="filter-item">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input active" id="all" checked>
+                        <label for="all">All</label>
+                    </div>
+                </div>
+
+                <div class="filter-item">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="fe1_students">
+                        <label for="fe1_students">FE1 Students</label>
+                    </div>
+                </div>
+
+                <div class="filter-item">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="fe2_students">
+                        <label for="fe2_students">FE2 Students</label>
+                    </div>
+                </div>
+
+                <div class="filter-item">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="agencies">
+                        <label for="agencies">Agencies</label>
+                    </div>
+                </div>
+
+                <div class="filter-item">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="sessional_staff">
+                        <label for="sessional_staff">Sessional Staff</label>
+                    </div>
                 </div>
             </div>
-            
-            <div class="filter-section">
+            <!--stakeholder type filter end-->
+
+            <!--drivers licences filter start:radio-->
+            <div class="filter-group">
+                <h3>Driver's Licence</h3>
+                <div class="filter-options">
+
+                  <div class="filter-item">
+                    <input type="radio" name="licence" id="all_licence" checked>
+                    <label for="all_licence">All</label>
+                  </div>
+
+                  <div class="filter-item">
+                    <input type="radio" name="licence" id="international">
+                    <label for="international">International</label>
+                  </div>
+
+                  <div class="filter-item">
+                    <input type="radio" name="licence" id="australian">
+                    <label for="australian">Australian</label>
+                  </div>
+
+                  <div class="filter-item">
+                    <input type="radio" name="licence" id="no_licence">
+                    <label for="no_licence">No</label>
+                  </div>
+
+                </div>
+            </div>
+            <!--drivers licences filter end-->
+
+            <!--student type filter start-->
+            <div class="filter-group">
+                <h3>Student type</h3>
+                <div class="filter-options">
+
+                  <div class="filter-item">
+                    <input type="radio" name="studenttype" id="all_student" checked>
+                    <label for="all_student">All</label>
+                  </div>
+
+                  <div class="filter-item">
+                    <input type="radio" name="studenttype" id="international_student">
+                    <label for="international_student">International</label>
+                  </div>
+
+                  <div class="filter-item">
+                    <input type="radio" name="studenttype" id="domestic_student">
+                    <label for="domestic_student">Domestic</label>
+                  </div>
+
+                  <div class="filter-item">
+                    <input type="radio" name="studenttype" id="first_nation">
+                    <label for="first_nation">First Nation Students</label>
+                  </div>
+
+                </div>
+            </div>
+            <!--student type filter end-->
+
+            <!--region filter start-->
+            <div class="filter-group">
                 <h3>Region</h3>
                 <div class="filter-options" id="region-filters">
                     <div class="filter-option active" data-region="all">All</div>
-                    <div class="filter-option" data-region="NOR">North</div>
+                    <div class="filter-option" data-region="North">North</div>
                     <div class="filter-option" data-region="Central">Central</div>
-                    <div class="filter-option" data-region="SOR">South</div>
+                    <div class="filter-option" data-region="South">South</div>
+                    <div class="filter-option" data-region="East">East</div>
+                    <div class="filter-option" data-region="West">West</div>
                     <div class="filter-option" data-region="Rural">Rural</div>
                 </div>
             </div>
-            
-            <div class="filter-section">
-                <h3>Area of Interest</h3>
-                <div class="filter-options" id="interest-filters">
-                    <div class="filter-option active" data-interest="all">All</div>
-                    <div class="filter-option" data-interest="mental-health">Mental Health</div>
-                    <div class="filter-option" data-interest="homelessness">Homelessness</div>
-                    <div class="filter-option" data-interest="justice">Justice</div>
-                    <div class="filter-option" data-interest="youth">Youth</div>
-                    <div class="filter-option" data-interest="aged-care">Aged Care</div>
-                    <div class="filter-option" data-interest="disability">Disability</div>
+            <!--region filter ends-->
+
+            <!--gender filter start: radio-->
+            <div class="filter-group" >
+                <h3>Gender</h3>
+                <div class="filter-options">
+
+                    <div class="filter-item">
+                        <input type="radio" name="gender" id="all_gender" checked>
+                        <label for="all_gender">All</label>
+                    </div>
+
+                    <div class="filter-item">
+                        <input type="radio" name="gender" id="male">
+                        <label for="male">Male</label>
+                    </div>
+    
+                    <div class="filter-item">
+                        <input type="radio" name="gender" id="female">
+                        <label for="female">Female</label>
+                    </div>
+
                 </div>
             </div>
-            
-            <!-- <div class="stats" id="stats">
-                <h3>Current Selection</h3>
-                <p>Students: <span id="student-count">0</span></p>
-                <p>Agencies: <span id="agency-count">0</span> (Spots: <span id="agency-spots">0</span>)</p>
-                <p>UWA Staff: <span id="staff-count">0</span> (Capacity: <span id="staff-capacity">0</span>)</p>
-            </div> -->
+            <!--gender filter ends-->
+
+            <!--reset button turn all filter to "all" state-->
+            <button id="reset-btn">Reset All</button>
+
         </div>
-        
-        <div class="map-container">
-            <div id="map"></div>
-            <div class="legend">
-                <h4>Legend</h4>
-                <div class="legend-item">
-                    <div class="legend-color" style="background-color: blue"></div>
-                    <span>Students</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background-color: #e74c3c;"></div>
-                    <span>Agencies</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background-color: #2ecc71;"></div>
-                    <span>UWA Staff</span>
-                </div>
+    </div>
+    <!--left sidebar ends-->
+
+    <!--map legend start-->
+    <div class="map-container">
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-marker fe1-marker"></div>
+                <span>FE1</span>
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-marker fe2-marker"></div>
+                <span>FE2</span>
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-marker agency-marker"></div>
+                <span>Agencies</span>
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-marker staff-marker"></div>
+                <span>Staff</span>
             </div>
         </div>
     </div>
-    <script src="../js/app.js"></script> <!-- Link to a separate JS file -->
+    <!--map legend ends-->
+
+    <!--right sidebar start-->
+    <div class="sidebar-right">
+        <div class="sidebar-header">
+            <h2><span><i class="fa-solid fa-icons" style="font-size: 0.90em; margin-right: 5px;"></i></span>Sector</h2>
+        </div>
+        <!--area of interest read from the firestore, and display here -->
+        <div class="filter-section1">
+            <div class="filter-options" id="interest-filters">
+                <div class="filter-option active" data-interest="all">All</div>
+            </div>
+        </div>
+    </div>
+    <!--right sidebar ends-->
+
+    
+
+    <!--js script link-->
+    <script type="module" src="../js/app.js"></script>
+    <script type="module" src="../js/auth-check.js"></script>
+    <script type="module" src="../js/logout.js"></script>
 </body>
 </html>
