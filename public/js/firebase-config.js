@@ -1,5 +1,5 @@
 
-### Firebase configuration and data import script
+//Firebase configuration and data import script
 const admin = require("firebase-admin");
 const XLSX = require("xlsx");
 
