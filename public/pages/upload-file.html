@@ -81,7 +81,7 @@
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
                                     <button class="btn btn-primary" onclick="document.getElementById('fe1FileInput').click()">Browse Files</button>
-                                    <input type="file" id="fe1FileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileSelect(this, 'fe1')">
+                                    <input type="file" id="fe1FileInput" accept=".xlsx, .xls" style="display: none;">
                                 </div>
                                 
                                 <div class="file-info" id="fe1FileInfo">
@@ -128,7 +128,7 @@
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
                                     <button class="btn btn-primary" onclick="document.getElementById('fe2FileInput').click()">Browse Files</button>
-                                    <input type="file" id="fe2FileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileSelect(this, 'fe2')">
+                                    <input type="file" id="fe2FileInput" accept=".xlsx, .xls" style="display: none;">
                                 </div>
                                 
                                 <div class="file-info" id="fe2FileInfo">
@@ -175,7 +175,7 @@
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
                                     <button class="btn btn-primary" onclick="document.getElementById('agencyFileInput').click()">Browse Files</button>
-                                    <input type="file" id="agencyFileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileSelect(this, 'agency')">
+                                    <input type="file" id="agencyFileInput" accept=".xlsx, .xls" style="display: none;">
                                 </div>
                                 
                                 <div class="file-info" id="agencyFileInfo">
@@ -222,7 +222,7 @@
                                     <h3 class="h6">Drag & Drop Excel File Here</h3>
                                     <p class="text-muted">or</p>
                                     <button class="btn btn-primary" onclick="document.getElementById('sessionalFileInput').click()">Browse Files</button>
-                                    <input type="file" id="sessionalFileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleFileSelect(this, 'sessional')">
+                                    <input type="file" id="sessionalFileInput" accept=".xlsx, .xls" style="display: none;">
                                 </div>
                                 
                                 <div class="file-info" id="sessionalFileInfo">
@@ -571,6 +571,8 @@
     <!-- SheetJS (xlsx) for Excel parsing -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Custom JS -->
-    <script src="../js/upload-file.js"></script>
+    <script type="module" src="../js/upload-file.js"></script>
+    
+
 </body>
 </html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel文件上传到Firestore</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .upload-container {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .file-input {
+            margin-bottom: 15px;
+        }
+        .file-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .progress {
+            background-color: #e2f3f7;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>Excel文件上传到Firestore</h1>
+    
+    <div class="upload-container">
+        <div class="file-input">
+            <label class="file-label" for="file1">Excel文件 1:</label>
+            <input type="file" id="file1" accept=".xlsx, .xls">
+        </div>
+        
+        <div class="file-input">
+            <label class="file-label" for="file2">Excel文件 2:</label>
+            <input type="file" id="file2" accept=".xlsx, .xls">
+        </div>
+        
+        <div class="file-input">
+            <label class="file-label" for="file3">Excel文件 3:</label>
+            <input type="file" id="file3" accept=".xlsx, .xls">
+        </div>
+        
+        <div class="file-input">
+            <label class="file-label" for="file4">Excel文件 4:</label>
+            <input type="file" id="file4" accept=".xlsx, .xls">
+        </div>
+        
+        <button id="uploadBtn">上传到Firestore</button>
+    </div>
+    
+    <div id="status"></div>
+    
+    <script>
+        // 初始化状态显示区域
+        const statusDiv = document.getElementById('status');
+        
+        document.getElementById('uploadBtn').addEventListener('click', async function() {
+            // Firebase配置 - 请替换为您的实际配置
+            const firebaseConfig = {
+                apiKey: "AIzaSyAtaf5eAkVjCmy4JzBSzoerR-cLRkD4GRM",
+                authDomain: "social-work-placement.firebaseapp.com",
+                projectId: "social-work-placement",
+                storageBucket: "social-work-placement.firebasestorage.app",
+                messagingSenderId: "465758786519",
+                appId: "1:465758786519:web:04ae2f164411dbcf4bb192"
+  };
+            
+            try {
+                // 检查配置是否已替换
+                if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+                    throw new Error("请先替换Firebase配置中的占位符为您的实际项目配置");
+                }
+                
+                // 初始化Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                const db = firebase.firestore();
+                
+                const uploadBtn = document.getElementById('uploadBtn');
+                
+                // 检查是否所有文件都已选择
+                const file1 = document.getElementById('file1').files[0];
+                const file2 = document.getElementById('file2').files[0];
+                const file3 = document.getElementById('file3').files[0];
+                const file4 = document.getElementById('file4').files[0];
+                
+                if (!file1 || !file2 || !file3 || !file4) {
+                    statusDiv.textContent = '请选择所有四个Excel文件';
+                    statusDiv.className = 'error';
+                    return;
+                }
+                
+                uploadBtn.disabled = true;
+                statusDiv.textContent = '正在处理文件...';
+                statusDiv.className = 'progress';
+                
+                // 处理所有文件
+                const files = [
+                    { file: file1, name: '文件1' },
+                    { file: file2, name: '文件2' },
+                    { file: file3, name: '文件3' },
+                    { file: file4, name: '文件4' }
+                ];
+                
+                for (let i = 0; i < files.length; i++) {
+                    const fileInfo = files[i];
+                    statusDiv.textContent = `正在处理 ${fileInfo.name}...`;
+                    
+                    // 读取Excel文件
+                    const data = await readExcelFile(fileInfo.file);
+                    
+                    // 上传到Firestore
+                    await uploadToFirestore(db, data, fileInfo.name);
+                    
+                    statusDiv.textContent = `${fileInfo.name} 处理完成，正在继续...`;
+                }
+                
+                // 全部完成
+                statusDiv.textContent = '所有文件已成功上传到Firestore!';
+                statusDiv.className = 'success';
+            } catch (error) {
+                console.error('上传过程中出错:', error);
+                statusDiv.textContent = `错误: ${error.message}`;
+                statusDiv.className = 'error';
+            } finally {
+                if (document.getElementById('uploadBtn')) {
+                    document.getElementById('uploadBtn').disabled = false;
+                }
+            }
+        });
+        
+        function readExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const data = e.target.result;
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // 读取第一个工作表
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                        // 将工作表转换为JSON
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                        resolve(jsonData);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                
+                reader.onerror = function(error) {
+                    reject(error);
+                };
+                
+                reader.readAsArrayBuffer(file);
+            });
+        }
+        
+        async function uploadToFirestore(db, data, collectionName) {
+            // 创建一个批处理实例，用于批量写入
+            const batch = db.batch();
+            
+            // 为每个数据项创建一个文档
+            data.forEach((item, index) => {
+                const docRef = db.collection(collectionName).doc(`row${index + 1}`);
+                batch.set(docRef, item);
+            });
+            
+            // 提交批处理
+            return batch.commit();
+        }
+    </script>
+</body>
+</html>
