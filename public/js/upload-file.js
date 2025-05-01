@@ -10,26 +10,10 @@ const uploadStatuses = {
   const fileData = {
     fe1: null,
     fe2: null,
-    agency: null,
-    sessional: null
+    agency: null, 
+    sessional: null 
   };
   
-  // Initialize Firebase (you'll need to replace with your actual Firebase config)
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, doc, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-  
-  const firebaseConfig = {
-    apiKey: "AIzaSyAtaf5eAkVjCmy4JzBSzoerR-cLRkD4GRM",
-    authDomain: "social-work-placement.firebaseapp.com",
-    projectId: "social-work-placement",
-    storageBucket: "social-work-placement.firebasestorage.app",
-    messagingSenderId: "465758786519",
-    appId: "1:465758786519:web:04ae2f164411dbcf4bb192"
-  };
-  
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
   
   // Document ready function
   document.addEventListener('DOMContentLoaded', function() {
@@ -229,20 +213,20 @@ const uploadStatuses = {
   // Upload batch to Firestore
   async function uploadBatch(records, type, progressBar) {
     try {
-      // 实际上传到Firestore的代码，使用批处理以提高性能
-      const batchSize = 500; // Firestore批处理上限是500
+      // The actual code for uploading to Firestore using batch processing to improve performance.
+      const batchSize = 500; // The Firestore batch write limit is 500.
       let currentBatch = 0;
       const totalBatches = Math.ceil(records.length / batchSize);
       
-      // 实际的进度更新
+      // Actual progress update.
       for (let i = 0; i < records.length; i += batchSize) {
-        // 创建新的批处理
+        // Create a new batch.
         const batch = writeBatch(db);
         const currentBatchRecords = records.slice(i, i + batchSize);
         
-        // 为每条记录创建文档引用并添加到批处理中
+        // Create a document reference for each record and add it to the batch.
         currentBatchRecords.forEach(record => {
-          // 使用自动生成的ID或者从记录中提取唯一标识符作为文档ID
+          // Use an auto-generated ID or extract a unique identifier from the record as the document ID.
           const docRef = doc(collection(db, type));
           batch.set(docRef, {
             ...record,
@@ -251,20 +235,20 @@ const uploadStatuses = {
           });
         });
         
-        // 提交批处理
+        // Commit the batch.
         await batch.commit();
         
-        // 更新进度
+        // Update the progress.
         currentBatch++;
         const progress = Math.min(100, Math.round((currentBatch / totalBatches) * 100));
         progressBar.style.width = `${progress}%`;
         progressBar.textContent = `${progress}%`;
         
-        // 让UI有时间更新
+        // Allow time for the UI to update.
         await new Promise(resolve => setTimeout(resolve, 100));
       }
       
-      // 完成上传
+      // Upload complete.
       progressBar.style.width = '100%';
       progressBar.textContent = '100%';
       completeUpload(type);
@@ -273,7 +257,7 @@ const uploadStatuses = {
       console.error("Error uploading batch to Firestore: ", error);
       alert("Error uploading to Firestore: " + error.message);
       
-      // 重置UI
+      // Reset the UI.
       document.getElementById(`${type}UploadBtn`).disabled = false;
       document.getElementById(`${type}UploadBtn`).textContent = 'Upload File';
     }
@@ -339,43 +323,43 @@ const uploadStatuses = {
       return;
     }
     
-    // 禁用提交按钮并显示加载状态
+    // Disable the submit button and show the loading state.
     const submitBtn = document.getElementById('submitAllBtn');
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
     
-    // 创建进度模态框
+    // Create a progress modal.
     showFinalSubmissionProgress();
     
     try {
-      // 步骤1：验证数据
+      // Step 1: Validate the data.
       updateProgressWithStep(document.getElementById('finalSubmissionProgress'), 0, 25);
       await validateAllData();
       document.getElementById('step1').innerHTML = '✅ Data validation complete';
       document.getElementById('step1').classList.remove('text-muted');
       document.getElementById('step1').classList.add('text-success');
       
-      // 步骤2：准备数据库记录
+      // Step 2: Prepare database records.
       updateProgressWithStep(document.getElementById('finalSubmissionProgress'), 25, 50);
       const consolidatedData = await prepareConsolidatedData();
       document.getElementById('step2').innerHTML = '✅ Database records prepared';
       document.getElementById('step2').classList.remove('text-muted');
       document.getElementById('step2').classList.add('text-success');
       
-      // 步骤3：上传到Firestore
+      // Step 3: Upload to Firestore.
       await uploadConsolidatedData(consolidatedData);
       document.getElementById('step3').innerHTML = '✅ Upload to Firestore complete';
       document.getElementById('step3').classList.remove('text-muted');
       document.getElementById('step3').classList.add('text-success');
       
-      // 步骤4：完成
+      // Step 4: Complete.
       updateProgressWithStep(document.getElementById('finalSubmissionProgress'), 85, 100);
       await finalizeSubmission();
       document.getElementById('step4').innerHTML = '✅ Submission finalized';
       document.getElementById('step4').classList.remove('text-muted');
       document.getElementById('step4').classList.add('text-success');
       
-      // 完成提交
+      // Submit complete.
       setTimeout(() => {
         submissionComplete();
       }, 1000);
@@ -384,22 +368,21 @@ const uploadStatuses = {
       console.error("Error during final submission: ", error);
       alert("Error during submission: " + error.message);
       
-      // 重置UI
+      // Reset the UI.
       submitBtn.disabled = false;
       submitBtn.innerHTML = 'Submit All Files';
       
-      // 关闭进度模态框
+      // Close the progress modal.
       const progressModal = bootstrap.Modal.getInstance(document.getElementById('submissionProgressModal'));
       if (progressModal) progressModal.hide();
     }
   }
   
-  // 实际验证所有数据
+  // Validate all data.
   async function validateAllData() {
-    // 在这里添加实际的数据验证逻辑
-    // 例如检查必填字段、数据类型、数据一致性等
     
-    // 示例验证逻辑
+    // check required fields, data types, and data consistency.
+    
     for (const type in fileData) {
       if (!fileData[type]) continue;
       
@@ -407,23 +390,22 @@ const uploadStatuses = {
       const headers = jsonData[0];
       const records = jsonData.slice(1);
       
-      // 检查是否有空行
+      // Check for empty rows.
       const emptyRows = records.filter(row => row.every(cell => !cell || cell.toString().trim() === ''));
       if (emptyRows.length > 0) {
         throw new Error(`Found ${emptyRows.length} empty rows in ${type} file. Please remove them before uploading.`);
       }
       
-      // 在这里可以添加更多验证...
     }
     
-    // 模拟验证过程需要时间
+    // Simulate a time-consuming validation process
     await new Promise(resolve => setTimeout(resolve, 1500));
     return true;
   }
   
-  // 准备整合的数据
+  // Prepare the consolidated data
   async function prepareConsolidatedData() {
-    // 创建一个包含所有文件数据的对象
+    // Create an object that contains data from all files.
     const consolidatedData = {};
     
     for (const type in fileData) {
@@ -442,16 +424,16 @@ const uploadStatuses = {
       consolidatedData[type] = records;
     }
     
-    // 模拟准备数据需要时间
+    // Simulate data preparation time.
     await new Promise(resolve => setTimeout(resolve, 2000));
     return consolidatedData;
   }
   
-  // 上传整合后的数据到Firestore
+  // Upload the consolidated data to Firestore.
   async function uploadConsolidatedData(consolidatedData) {
     const progressBar = document.getElementById('finalSubmissionProgress');
     
-    // 创建整合数据的元数据记录
+    // Create a metadata record for the consolidated data.
     const metaDocRef = doc(collection(db, 'uploadSessions'));
     const metaData = {
       timestamp: new Date().toISOString(),
@@ -460,24 +442,24 @@ const uploadStatuses = {
       recordCounts: {}
     };
     
-    // 计算每种类型的记录数
+    // Calculate the number of records for each type.
     for (const type in consolidatedData) {
       metaData.recordCounts[type] = consolidatedData[type].length;
     }
     
-    // 首先保存元数据
+    // Save the metadata.
     await setDoc(metaDocRef, metaData);
     
-    // 然后上传各个文件的数据
+    // Then upload the data from each file.
     let currentProgress = 50;
     const typesCount = Object.keys(consolidatedData).length;
-    const progressPerType = 35 / typesCount; // 分配50-85%的进度
+    const progressPerType = 35 / typesCount; // Allocate 50–85% of the progress.
     
     for (const type in consolidatedData) {
       const records = consolidatedData[type];
-      const batchSize = 500; // Firestore批处理上限
+      const batchSize = 500; 
       
-      // 批量上传记录
+      // Batch upload records.
       for (let i = 0; i < records.length; i += batchSize) {
         const batch = writeBatch(db);
         const currentBatchRecords = records.slice(i, i + batchSize);
@@ -486,20 +468,20 @@ const uploadStatuses = {
           const docRef = doc(collection(db, type));
           batch.set(docRef, {
             ...record,
-            sessionId: metaDocRef.id, // 关联到元数据记录
+            sessionId: metaDocRef.id, // Associate with the metadata record.
             uploadTimestamp: new Date().toISOString()
           });
         });
         
         await batch.commit();
         
-        // 更新进度
+        // Update the progress.
         const batchProgress = (i + currentBatchRecords.length) / records.length * progressPerType;
         currentProgress = Math.min(85, currentProgress + batchProgress);
         progressBar.style.width = `${Math.round(currentProgress)}%`;
         progressBar.textContent = `${Math.round(currentProgress)}%`;
         
-        // 让UI有时间更新
+        // Allow the UI time to update.
         await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
@@ -507,11 +489,9 @@ const uploadStatuses = {
     return metaDocRef.id;
   }
   
-  // 完成提交
+  // Complete the submission.
   async function finalizeSubmission() {
-    // 在这里可以执行任何最终的清理或记录操作
-    
-    // 模拟最终处理需要时间
+   
     await new Promise(resolve => setTimeout(resolve, 2000));
     return true;
   }
@@ -553,7 +533,7 @@ const uploadStatuses = {
     modal.show();
   }
   
-  // 分步更新进度条的辅助函数
+  // Helper function to update the progress bar step by step.
   function updateProgressWithStep(progressBar, startPercent, endPercent) {
     let currentPercent = startPercent;
     const interval = setInterval(() => {
@@ -628,3 +608,4 @@ const uploadStatuses = {
   window.removeFile = removeFile;
   window.checkAllUploadsComplete = checkAllUploadsComplete;
   window.submitAllFiles = submitAllFiles;
+
