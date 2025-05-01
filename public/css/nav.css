@@ -2,6 +2,11 @@
     background-color: #27358C !important; /* Primary blue */
   }
   
+  .bg-deepblue {
+    background-color: #27358c !important;
+    color: white;
+  }
+  
   .custom-navbar .navbar-brand, 
   .custom-navbar .nav-link {
     color: #FFFFFF !important; /* White text */
