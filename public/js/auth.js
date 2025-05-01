@@ -1,147 +1,124 @@
-// Import necessary modules
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
-import { getFirestore, collection, doc, setDoc, addDoc, serverTimestamp } from "firebase/firestore"
-import { initializeApp } from "firebase/app"
-import { Modal } from "bootstrap"
+import { auth, db } from "./firebase-config.js";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import {
+  doc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
-// Firebase configuration (replace with your actual config)
-const firebaseConfig = {
-  apiKey: "AIzaSyAtaf5eAkVjCmy4JzBSzoerR-cLRkD4GRM",
-  authDomain: "social-work-placement.firebaseapp.com",
-  projectId: "social-work-placement",
-  storageBucket: "social-work-placement.firebasestorage.app",
-  messagingSenderId: "465758786519",
-  appId: "1:465758786519:web:04ae2f164411dbcf4bb192"
-}
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig)
-
-// Initialize Firebase Authentication and Firestore
-const auth = getAuth(app)
-const db = getFirestore(app)
-const firebase = {
-  firestore: {
-    FieldValue: {
-      serverTimestamp: serverTimestamp,
-    },
-  },
-}
-const bootstrap = {
-  Modal: Modal,
-}
 
 // DOM elements
-const loginForm = document.getElementById("loginForm")
-const signupForm = document.getElementById("signupForm")
-const loginError = document.getElementById("loginError")
-const signupError = document.getElementById("signupError")
-const contactForm = document.getElementById("contactForm")
+const loginForm = document.getElementById("loginForm");
+const signupForm = document.getElementById("signupForm");
+const loginError = document.getElementById("loginError");
+const signupError = document.getElementById("signupError");
 
 // Login functionality
 if (loginForm) {
   loginForm.addEventListener("submit", (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // Get user info
-    const email = loginForm["loginEmail"].value
-    const password = loginForm["loginPassword"].value
+    const email = loginForm["loginEmail"].value;
+    const password = loginForm["loginPassword"].value;
+    loginError.classList.add("d-none");
 
-    // Clear previous errors
-    loginError.classList.add("d-none")
-
-    // Sign in the user
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Close the login modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById("loginModal"))
-        modal.hide()
+        const user = userCredential.user;
 
-        // Reset form
-        loginForm.reset()
+        if (!user.emailVerified) {
+          loginError.textContent = "Please verify your email address before logging in.";
+          loginError.classList.remove("d-none");
+          return;
+        }
 
-        // Redirect to import data page
-        window.location.href = "upload-file.html"
+        const modalEl = document.getElementById("loginModal");
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.hide();
+        loginForm.reset();
+        window.location.href = "upload-file.html";
       })
       .catch((error) => {
-        // Display error message
-        loginError.textContent = error.message
-        loginError.classList.remove("d-none")
-      })
-  })
+        loginError.textContent = error.message;
+        loginError.classList.remove("d-none");
+      });
+  });
 }
 
 // Signup functionality
 if (signupForm) {
   signupForm.addEventListener("submit", (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // Get user info
-    const name = signupForm["signupName"].value
-    const email = signupForm["signupEmail"].value
-    const password = signupForm["signupPassword"].value
-    const confirmPassword = signupForm["signupConfirmPassword"].value
+    const name = signupForm["signupName"].value;
+    const email = signupForm["signupEmail"].value;
+    const password = signupForm["signupPassword"].value;
+    const confirmPassword = signupForm["signupConfirmPassword"].value;
+    signupError.classList.add("d-none");
 
-    // Clear previous errors
-    signupError.classList.add("d-none")
-
-    // Check if passwords match
     if (password !== confirmPassword) {
-      signupError.textContent = "Passwords do not match"
-      signupError.classList.remove("d-none")
-      return
+      signupError.textContent = "Passwords do not match";
+      signupError.classList.remove("d-none");
+      return;
+    }
+    if (!email.endsWith("@uwa.edu.au")) {
+      signupError.textContent = "Only @uwa.edu.au email addresses are allowed.";
+      signupError.classList.remove("d-none");
+      return;
     }
 
-    // Create user
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Add user to Firestore
-        return setDoc(doc(db, "users", userCredential.user.uid), {
-          name: name,
-          email: email,
-          role: "coordinator", // Default role
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        })
+        const user = userCredential.user;
+
+        // Send verification email
+        return sendEmailVerification(user).then(() => {
+          // Save user data in Firestore
+          return setDoc(doc(db, "users", user.uid), {
+            name,
+            email,
+            role: "coordinator",
+            createdAt: serverTimestamp(),
+          });
+        });
       })
       .then(() => {
-        // Close the signup modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById("signupModal"))
-        modal.hide()
-
-        // Reset form
-        signupForm.reset()
-
-        // Redirect to import data page
-        window.location.href = "/upload-file.html"
+        // Show verification instruction message in modal
+        const signupBody = document.querySelector("#signupModal .modal-body");
+        signupBody.innerHTML = `
+          <div class="text-center">
+            <h5 class="text-success">Signup Successful!</h5>
+            <p class="mt-3">Please check your <strong>@uwa.edu.au</strong> inbox and verify your email before logging in.</p>
+            <button class="btn btn-primary mt-3" data-bs-dismiss="modal">Close</button>
+          </div>
+        `;
       })
       .catch((error) => {
-        // Display error message
-        signupError.textContent = error.message
-        signupError.classList.remove("d-none")
-      })
-  })
+        signupError.textContent = error.message;
+        signupError.classList.remove("d-none");
+      });
+  });
 }
 
-// Check auth state
+// Auth state monitoring
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in
-    console.log("User logged in:", user.email)
+  const path = window.location.pathname;
 
-    // Check if we're on the home page and redirect if needed
-    if (window.location.pathname === "/" || window.location.pathname === "/login.html") {
-      // Redirect to import page if already logged in
-      window.location.href = "upload-file.html"
+  if (user && user.emailVerified) {
+    console.log("Logged in:", user.email);
+    if (path === "/" || path.endsWith("/login.html")) {
+      window.location.href = "upload-file.html";
     }
-  } else {
-    // User is signed out
-    console.log("User logged out")
-
-    // Check if we're on a protected page and redirect if needed
-    if (window.location.pathname !== "/" && window.location.pathname !== "/login.html") {
-      // Redirect to home page if not logged in
-      window.location.href = "login.html"
+  } else if (!user) {
+    console.log("Logged out");
+    if (!path.endsWith("/login.html") && !path.endsWith("/index.html")) {
+      window.location.href = "login.html";
     }
   }
-})
-
+});

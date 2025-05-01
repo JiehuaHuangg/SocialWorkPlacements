@@ -1,0 +1,51 @@
+.custom-navbar {
+    background-color: #27358C !important; /* Primary blue */
+  }
+  
+  .custom-navbar .navbar-brand, 
+  .custom-navbar .nav-link {
+    color: #FFFFFF !important; /* White text */
+  }
+  
+  .custom-navbar .nav-link.active {
+    color: #DDB106 !important; /* Accent gold for active link */
+  }
+  
+  .custom-navbar .btn-primary {
+    background-color: #27358C;
+    border-color: #27358C;
+  }
+  
+  .custom-navbar .btn-primary:hover {
+    background-color: #1F2C6E;
+    border-color: #1F2C6E;
+  }
+  
+  .custom-navbar .btn-outline-primary {
+    color: #27358C;
+    border-color: #27358C;
+  }
+  
+  .custom-navbar .btn-outline-primary:hover {
+    background-color: #27358C;
+    color: #FFFFFF;
+  }
+  
+  .custom-navbar footer {
+    background-color: #27358C !important;
+    color: #FFFFFF;
+  }
+  
+  .custom-navbar .modal-header {
+    background-color: #27358C;
+    color: #FFFFFF;
+  }
+  
+  .custom-navbar .btn-close {
+    filter: invert(1);
+  }
+  
+  .custom-navbar .feature-icon {
+    color: #DDB106;
+  }
+  

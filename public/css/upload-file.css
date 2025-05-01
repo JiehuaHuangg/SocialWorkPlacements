@@ -1,233 +1,126 @@
-:root {
-    --primary-color: #27358C;
-    --accent-color: #DDB106;
-    --white: #FFFFFF;
-    --light-gray: #f8f9fa;
-    --border-color: #dee2e6;
-    --success-color: #198754;
-    --danger-color: #dc3545;
-}
-
-body {
-    background-color: var(--light-gray);
-}
-
-/* Card Styles */
-.card {
-    border-radius: 10px;
-    overflow: hidden;
-    border-color: var(--border-color);
-}
-
+/* Custom CSS for the Excel Upload Portal */
 .card-header {
-    background-color: var(--primary-color);
-    padding: 15px 20px;
-}
-
-/* Upload Area Styles */
-.upload-area {
-    border: 2px dashed var(--border-color);
+    background-color: #27358c;
+    color: white;
+  }
+  
+  .btn-accent {
+    background-color: #27358c;
+    color: white;
+  }
+  
+  .btn-accent:hover {
+    background-color: #1e2a6e;
+    color: white;
+  }
+  
+  .upload-area {
+    border: 2px dashed #ccc;
     border-radius: 8px;
-    padding: 30px;
+    padding: 2rem;
     text-align: center;
-    background-color: var(--light-gray);
-    cursor: pointer;
+    margin-bottom: 1.5rem;
     transition: all 0.3s;
-}
-
-.upload-area:hover {
-    border-color: var(--primary-color);
+  }
+  
+  .upload-area:hover {
+    border-color: #27358c;
     background-color: rgba(39, 53, 140, 0.05);
-}
-
-.upload-icon {
-    color: var(--primary-color);
-    margin-bottom: 15px;
-}
-
-/* File Info Styles */
-.file-info {
-    margin-top: 20px;
+  }
+  
+  .file-info {
     display: none;
-}
-
-.progress {
-    margin-top: 15px;
-    display: none;
-    height: 10px;
-    border-radius: 5px;
-}
-
-.progress-bar {
-    background-color: var(--primary-color);
-}
-
-/* Button Styles */
-.btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: var(--white);
-}
-
-.btn-primary:hover, .btn-primary:focus {
-    background-color: #1e2a70;
-    border-color: #1e2a70;
-}
-
-.btn-primary:disabled {
-    background-color: #6c757d;
-    border-color: #6c757d;
-}
-
-.btn-accent {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
-    color: var(--white);
-}
-
-.btn-accent:hover, .btn-accent:focus {
-    background-color: #c09a05;
-    border-color: #c09a05;
-    color: var(--white);
-}
-
-.btn-outline-primary {
-    color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.btn-outline-primary:hover {
-    background-color: var(--primary-color);
-    color: var(--white);
-}
-
-.btn-outline-danger {
-    color: var(--danger-color);
-    border-color: var(--danger-color);
-}
-
-.btn-outline-danger:hover {
-    background-color: var(--danger-color);
-    color: var(--white);
-}
-
-/* Tab Styles */
-.nav-tabs {
-    border-bottom-color: var(--border-color);
-}
-
-.nav-tabs .nav-link {
-    color: #495057;
-    font-weight: 500;
-    border: none;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -1px;
-    padding: 0.5rem 1rem;
-}
-
-.nav-tabs .nav-link.active {
-    color: var(--primary-color);
-    font-weight: 600;
-    border-bottom-color: var(--primary-color);
-    background-color: transparent;
-}
-
-.nav-tabs .nav-link:hover {
-    border-color: transparent;
-    border-bottom-color: rgba(39, 53, 140, 0.5);
-}
-
-/* Table Styles for Excel Preview */
-.table-responsive {
-    max-height: 400px;
-    overflow-y: auto;
-    border-radius: 5px;
-    border: 1px solid var(--border-color);
-}
-
-.table {
-    margin-bottom: 0;
-}
-
-.table thead th {
-    background-color: var(--primary-color);
-    color: var(--white);
-    position: sticky;
-    top: 0;
+  }
+  
+  /* Step indicator styles */
+  .step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  
+  .step-indicator::before {
+    content: "";
+    position: absolute;
+    top: 24px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #e9ecef;
     z-index: 1;
-}
-
-.table-primary {
-    background-color: var(--primary-color) !important;
-    color: var(--white);
-}
-
-/* Status Indicators */
-.upload-status {
-    font-size: 0.8rem;
-}
-
-.status-icon {
-    font-size: 1.5rem;
-}
-
-/* Upload Summary */
-.upload-summary .card {
+  }
+  
+  .step {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    width: 25%;
+  }
+  
+  .step-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: white;
+    border: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-weight: bold;
+    color: #6c757d;
     transition: all 0.3s;
-    border: 1px solid var(--border-color);
-}
-
-.upload-summary .card:hover {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
-/* Alert Styles */
-.alert-success {
-    background-color: rgba(25, 135, 84, 0.1);
-    border-color: rgba(25, 135, 84, 0.2);
-    color: var(--success-color);
-}
-
-.alert-info {
-    background-color: rgba(39, 53, 140, 0.1);
-    border-color: rgba(39, 53, 140, 0.2);
-    color: var(--primary-color);
-}
-
-.alert-warning {
-    background-color: rgba(221, 177, 6, 0.1);
-    border-color: rgba(221, 177, 6, 0.2);
-    color: #856404;
-}
-
-/* Modal Styles */
-.modal-header {
-    background-color: var(--primary-color);
-    color: var(--white);
-}
-
-.modal-content {
+  }
+  
+  .step.active .step-circle {
+    border-color: #27358c;
+    color: #27358c;
+  }
+  
+  .step.completed .step-circle {
+    background-color: #27358c;
+    border-color: #27358c;
+    color: white;
+  }
+  
+  .step-title {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+  }
+  
+  .step.active .step-title {
+    color: #27358c;
+    font-weight: 600;
+  }
+  
+  .step.completed .step-title {
+    color: #27358c;
+    font-weight: 600;
+  }
+  
+  /* Upload section styles */
+  .upload-section {
+    display: none;
+  }
+  
+  .upload-section.active {
+    display: block;
+  }
+  
+  .scroll-preview::-webkit-scrollbar {
+    height: 6px;
+  }
+  .scroll-preview::-webkit-scrollbar-thumb {
+    background: #888;
     border-radius: 10px;
-    overflow: hidden;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .card-body {
-        padding: 15px;
-    }
-    
-    .upload-area {
-        padding: 20px;
-    }
-    
-    .btn-lg {
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-    }
-    
-    .nav-tabs .nav-link {
-        padding: 0.5rem 0.5rem;
-        font-size: 0.9rem;
-    }
-}
+  }
+  .scroll-preview::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  .scroll-preview::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  
