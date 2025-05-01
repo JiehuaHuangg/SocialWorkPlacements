@@ -908,11 +908,27 @@ async function init() {
     addMarkers()
 
     console.log("Initialization complete!")
-  } catch (error) {
+  } catch (error) { 
     console.error("Error during initialization:", error)
     showNotification("Error initializing application. Please check console for details.")
   }
 }
+// Get buttons and sidebars
+const toggleLeftBtn = document.getElementById("toggle-left-sidebar");
+const toggleRightBtn = document.getElementById("toggle-right-sidebar");
+
+const leftSidebar = document.getElementById("left-sidebar");
+const rightSidebar = document.getElementById("right-sidebar");
+
+// Add toggle logic
+toggleLeftBtn.addEventListener("click", () => {
+  leftSidebar.classList.toggle("hidden");
+});
+
+toggleRightBtn.addEventListener("click", () => {
+  rightSidebar.classList.toggle("hidden");
+});
+
 // Start the application
 document.addEventListener("DOMContentLoaded", () => {
   // Wait a bit for the DOM to be fully ready with all elements

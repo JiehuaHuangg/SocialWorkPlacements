@@ -56,7 +56,7 @@
     </div>
 
     <!--left sidebar-->
-    <div class="sidebar">
+    <div id="left-sidebar" class="sidebar">
         <div class="sidebar-header">
             <h2><span><i class="bi bi-funnel-fill w-10 p-1" style="font-size: 0.95em" ;></i></span>Map Filters</h2>
         </div>
@@ -233,7 +233,7 @@
     <!--map legend ends-->
 
     <!--right sidebar start-->
-    <div class="sidebar-right">
+    <div  id="right-sidebar" class="sidebar-right">
         <div class="sidebar-header">
             <h2><span><i class="fa-solid fa-icons" style="font-size: 0.90em; margin-right: 5px;"></i></span>Sector</h2>
         </div>
@@ -246,11 +246,20 @@
     </div>
     <!--right sidebar ends-->
 
-    
+    <!-- Toggle sidebar buttons for mobile/tablet -->
+    <div class="sidebar-toggles">
+        <button id="toggle-left-sidebar" class="toggle-btn">
+            <i class="bi bi-funnel-fill"></i>
+        </button>
+        <button id="toggle-right-sidebar" class="toggle-btn">
+            <i class="fa-solid fa-icons"></i>
+        </button>
+    </div>
 
     <!--js script link-->
     <script type="module" src="../js/app.js"></script>
     <script type="module" src="../js/auth-check.js"></script>
     <script type="module" src="../js/logout.js"></script>
+
 </body>
 </html>
