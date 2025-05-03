@@ -70,7 +70,13 @@ function determineRegion(lat, lng) {
   const perthLat = -31.9523
   const perthLng = 115.8613
 
-  // define region boundaries buffer value 30 km morethan or lessthan means any cardinal symbol
+ // We define a buffer of 0.3 degrees (~30 km), since 1 degree ≈ 111 km on Earth
+  // This buffer helps classify locations into broader regions:
+  // - North/South if latitude differs significantly
+  // - East/West if longitude differs significantly
+  // - Central if both latitude and longitude are within 0.3 degrees of Perth
+  // - Rural if it doesn’t fall into any of the above
+
   if (lat < perthLat - 0.3) {
     return "South"
   } else if (lat > perthLat + 0.3) {
