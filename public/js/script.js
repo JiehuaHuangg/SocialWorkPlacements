@@ -11,6 +11,7 @@ let geoCache = {}
 let matchedStudents = []
 let unassignedStudents = []
 let allAgencies = []
+let sessionalStaffList = []
 let locationWeight = 50 // Default weight for location (out of 100)
 let sectorWeight = 50 // Default weight for sector interests (out of 100)
 let notyf
@@ -174,37 +175,36 @@ function handleMapResize() {
 }
 
 // Fix the populateGeoCacheFromFirebase function to properly handle agency data
-function populateGeoCacheFromFirebase(fe1Students, fe2Students, agencies) {
-  console.log("Populating geoCache from Firebase data...")
-  console.log("Agencies:", agencies.length)
-  console.log("FE1 Students:", fe1Students.length)
-  console.log("FE2 Students:", fe2Students.length)
+function populateGeoCacheFromFirebase(fe1Students, fe2Students, agencies, sessionalStaff) {
+  console.log("Populating geoCache from Firebase data...");
 
-  // Add agency coordinates to geoCache
+  // Agencies
   agencies.forEach((agency) => {
     if (agency.latitude && agency.longitude) {
-      geoCache[agency.Location] = {
-        lat: agency.latitude,
-        lon: agency.longitude,
-      }
-      console.log(`Added agency to geoCache: ${agency.Name} at ${agency.latitude}, ${agency.longitude}`)
-    } else {
-      console.warn(`Missing coordinates for agency: ${agency.Name} at ${agency.Location}`)
+      geoCache[agency.Location] = { lat: agency.latitude, lon: agency.longitude };
     }
-  })
+  });
 
-  // Add student coordinates to geoCache
-  ;[...fe1Students, ...fe2Students].forEach((student) => {
+  // Students
+  [...fe1Students, ...fe2Students].forEach((student) => {
     if (student.latitude && student.longitude) {
-      geoCache[student.Location] = {
-        lat: student.latitude,
-        lon: student.longitude,
-      }
+      geoCache[student.Location] = { lat: student.latitude, lon: student.longitude };
     }
-  })
+  });
 
-  console.log(`Populated geoCache with ${Object.keys(geoCache).length} locations from Firebase`)
+  // 🔧 Add this: Sessional staff
+  sessionalStaff.forEach((staff) => {
+    if (staff.latitude && staff.longitude) {
+      geoCache[staff.Location] = { lat: staff.latitude, lon: staff.longitude };
+      console.log(`Added staff to geoCache: ${staff.Name} at ${staff.latitude}, ${staff.longitude}`);
+    } else {
+      console.warn(`Missing coordinates for staff: ${staff.Name}`);
+    }
+  });
+
+  console.log(`Populated geoCache with ${Object.keys(geoCache).length} locations`);
 }
+
 
 // Update the runMatching function to ensure agencies are displayed for Firebase data
 async function runMatching() {
@@ -240,6 +240,16 @@ async function runMatching() {
       fe1Students = data.fe1Students
       fe2Students = data.fe2Students
       agencies = data.agencies
+      sessionalStaffList = data.sessionalStaffList
+
+      // Normalize sessional staff by splitting multi-role entries
+      sessionalStaffList = sessionalStaffList.flatMap(staff => {
+        const roles = []
+        if (staff.LO > 0) roles.push({ ...staff, Role: "LO" })
+        if (staff.EFE > 0) roles.push({ ...staff, Role: "EFE" })
+        return roles
+      })
+
 
       console.log("Firebase data loaded:", {
         fe1Count: fe1Students.length,
@@ -249,13 +259,14 @@ async function runMatching() {
 
       // Populate geoCache with coordinates from Firebase
       updateLoadingStatus("Loading geocoded data from Firebase...")
-      populateGeoCacheFromFirebase(fe1Students, fe2Students, agencies)
+      populateGeoCacheFromFirebase(fe1Students, fe2Students, agencies, sessionalStaffList);
+
 
       // Add agency markers for Firebase data
       updateLoadingStatus("Adding agency markers...")
       agencies.forEach((agency) => {
         if (geoCache[agency.Location]) {
-          addAgencyMarker(agency, geoCache[agency.Location])
+        
         } else {
           console.warn(`No geocode data for agency: ${agency.Name}`)
         }
@@ -276,11 +287,21 @@ async function runMatching() {
 
       // Parse Excel files
       updateLoadingStatus("Parsing Excel files...")
-      ;[fe1Students, fe2Students, agencies] = await Promise.all([
+      ;[fe1Students, fe2Students, agencies, sessionalStaffList] = await Promise.all([
         parseExcelFile(fe1File),
         parseExcelFile(fe2File),
         parseExcelFile(agencyFile),
+        parseExcelFile(sessionalStaffFile),
       ])
+
+      // Normalize sessional staff by splitting multi-role entries
+      sessionalStaffList = sessionalStaffList.flatMap(staff => {
+        const roles = []
+        if (staff.LO > 0) roles.push({ ...staff, Role: "LO" })
+        if (staff.EFE > 0) roles.push({ ...staff, Role: "EFE" })
+        return roles
+      })
+
 
       // Geocode addresses if not already in cache
       updateLoadingStatus("Geocoding agency addresses...")
@@ -296,7 +317,6 @@ async function runMatching() {
           }
           await sleep(200) // Respect rate limits
         }
-        addAgencyMarker(agency, geoCache[agency.Location])
       }
 
       updateLoadingStatus("Geocoding student addresses...")
@@ -313,6 +333,22 @@ async function runMatching() {
           }
           await sleep(20) // Respect rate limits
         }
+
+        updateLoadingStatus("Geocoding sessional staff addresses...")
+        for (let i = 0; i < sessionalStaffList.length; i++) {
+          const staff = sessionalStaffList[i]
+          if (!geoCache[staff.Location]) {
+            updateLoadingStatus(`Geocoding staff ${i + 1}/${sessionalStaffList.length}: ${staff.Name}`)
+            const geo = await geocodeAddress(staff.Location)
+            if (geo) {
+              geoCache[staff.Location] = geo
+            } else {
+              console.warn(`Failed to geocode staff location: ${staff.Location}`)
+            }
+            await sleep(100) // prevent rate limits
+          }
+        }
+
       }
     }
 
@@ -362,10 +398,265 @@ async function runMatching() {
     // Run matching algorithm
     updateLoadingStatus("Running matching algorithm...")
     const matchResults = matchStudents(fe2Students, fe1Students, agencies, geoCache)
+    assignSessionalStaff([...fe2Students, ...fe1Students], sessionalStaffList, geoCache, agencies)
 
     // Display results
     updateLoadingStatus("Displaying results...")
     displayResults(matchResults, fe2Students, fe1Students)
+
+    const studentFeatures = [...fe1Students, ...fe2Students].map((student) => {
+      const geo = geoCache[student.Location]
+      if (!geo) return null
+      return {
+        type: "Feature",
+        properties: {
+          name: student.Name,
+          assignment: student.assignment,
+          sector: student["Interested sectors"] || "",
+          type: student.FE1_Sector || student["FE 1 Sector"] ? "FE2" : "FE1"
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [geo.lon, geo.lat]
+        }
+      }
+    }).filter(Boolean)
+
+    const agencyFeatures = allAgencies.map((agency) => {
+      const geo = geoCache[agency.Location]
+      if (!geo) return null
+      return {
+        type: "Feature",
+        properties: {
+          name: agency.Name,
+          sector: agency.Sector || "",
+          type: "agency"
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [geo.lon, geo.lat]
+        }
+      }
+    }).filter(Boolean)
+    
+    map.addSource("agencies", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: agencyFeatures
+      },
+      cluster: true,
+      clusterMaxZoom: 14,
+      clusterRadius: 40
+    })
+    
+
+    const assignmentLineFeatures = matchedStudents.map(student => {
+      const studentGeo = geoCache[student.Location]
+      const agency = allAgencies.find(a => a.Name === student.assignment)
+      const agencyGeo = geoCache[agency?.Location]
+    
+      if (!studentGeo || !agencyGeo) return null
+    
+      return {
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [studentGeo.lon, studentGeo.lat],
+            [agencyGeo.lon, agencyGeo.lat]
+          ]
+        }
+      }
+    }).filter(Boolean)
+    
+    map.addSource("assignment-lines", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: assignmentLineFeatures
+      }
+    })
+    
+
+    map.addSource("students", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: studentFeatures
+      },
+      cluster: true,
+      clusterMaxZoom: 14,
+      clusterRadius: 40
+    })
+
+    // Cluster layer
+    map.addLayer({
+      id: "clusters",
+      type: "circle",
+      source: "students",
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#3B82F6",
+        "circle-radius": ["step", ["get", "point_count"], 15, 10, 20, 50, 25]
+      }
+    })
+
+    map.addLayer({
+      id: "cluster-count",
+      type: "symbol",
+      source: "students",
+      filter: ["has", "point_count"],
+      layout: {
+        "text-field": "{point_count_abbreviated}",
+        "text-size": 12
+      }
+    })
+
+    // Separate styles for FE1 and FE2 students
+    map.addLayer({
+      id: "unclustered-fe1",
+      type: "circle",
+      source: "students",
+      filter: ["all", ["!", ["has", "point_count"]], ["==", ["get", "type"], "FE1"]],
+      paint: {
+        "circle-color": "#2196F3",
+        "circle-radius": 6,
+        "circle-stroke-width": 1,
+        "circle-stroke-color": "#fff"
+      }
+    })
+
+    map.addLayer({
+      id: "unclustered-fe2",
+      type: "circle",
+      source: "students",
+      filter: ["all", ["!", ["has", "point_count"]], ["==", ["get", "type"], "FE2"]],
+      paint: {
+        "circle-color": "#4CAF50",
+        "circle-radius": 6,
+        "circle-stroke-width": 1,
+        "circle-stroke-color": "#fff"
+      }
+    })
+
+    map.addLayer({
+      id: "agency-clusters",
+      type: "circle",
+      source: "agencies",
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#FF9800",
+        "circle-radius": ["step", ["get", "point_count"], 15, 10, 20, 50, 25],
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#fff"
+      }
+    })
+
+    map.addLayer({
+      id: "agency-cluster-count",
+      type: "symbol",
+      source: "agencies",
+      filter: ["has", "point_count"],
+      layout: {
+        "text-field": "{point_count_abbreviated}",
+        "text-size": 12
+      }
+    })    
+
+    // Add this handler to allow zooming into agency clusters on click
+    map.on("click", "agency-clusters", (e) => {
+      const features = map.queryRenderedFeatures(e.point, { layers: ["agency-clusters"] });
+      const clusterId = features[0].properties.cluster_id;
+      map.getSource("agencies").getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err) return;
+        map.easeTo({ center: features[0].geometry.coordinates, zoom });
+      });
+    });
+
+    // Optionally, change cursor to pointer on hover
+    map.on("mouseenter", "agency-clusters", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "agency-clusters", () => {
+      map.getCanvas().style.cursor = "";
+    });
+
+    map.addLayer({
+      id: "unclustered-agencies",
+      type: "circle",
+      source: "agencies",
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": "#FF9800", // orange
+        "circle-radius": 6,
+        "circle-stroke-width": 1,
+        "circle-stroke-color": "#fff"
+      }
+    })
+    
+
+    map.addLayer({
+      id: "assignment-lines-layer",
+      type: "line",
+      source: "assignment-lines",
+      paint: {
+        "line-color": "#ffffff",
+        "line-width": 1.5,
+        "line-opacity": 0.7,
+        "line-dasharray": [2, 2]
+      }
+    })
+
+    map.on("click", "unclustered-agencies", (e) => {
+      const props = e.features[0].properties
+      const coords = e.features[0].geometry.coordinates.slice()
+    
+      new mapboxgl.Popup()
+        .setLngLat(coords)
+        .setHTML(`<strong>Agency: ${props.name}</strong><br>Sector: ${props.sector}`)
+        .addTo(map)
+    })
+    
+
+    document.getElementById("toggleLines").addEventListener("change", (e) => {
+      const visibility = e.target.checked ? "visible" : "none"
+      map.setLayoutProperty("assignment-lines-layer", "visibility", visibility)
+    })
+    
+
+    map.on("click", "clusters", (e) => {
+      const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] })
+      const clusterId = features[0].properties.cluster_id
+      map.getSource("students").getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err) return
+        map.easeTo({ center: features[0].geometry.coordinates, zoom })
+      })
+    })
+
+    map.on("click", ["unclustered-fe1", "unclustered-fe2"], (e) => {
+      const props = e.features[0].properties
+      const coords = e.features[0].geometry.coordinates.slice()
+
+      new mapboxgl.Popup()
+        .setLngLat(coords)
+        .setHTML(`<strong>${props.name}</strong><br>Assigned to: ${props.assignment}<br>Type: ${props.type}`)
+        .addTo(map)
+    })
+    
+    // Line visibility toggle
+    const toggleBox = document.createElement("div")
+    toggleBox.innerHTML = `
+      <label style="background:#111; color:white; padding:5px; display:inline-block; margin-top:10px;">
+        <input type="checkbox" id="toggleLines" checked /> Show Assignment Lines
+      </label>
+    `
+    document.getElementById("controls")?.appendChild(toggleBox)
+    
+    document.getElementById("toggleLines").addEventListener("change", function () {
+      const visibility = this.checked ? "visible" : "none"
+      map.setLayoutProperty("assignment-lines", "visibility", visibility)
+    })
 
     // Show results container
     document.getElementById("loadingIndicator").style.display = "none"
@@ -413,7 +704,13 @@ async function fetchFirebaseData() {
     const agencySnapshot = await getDocs(agencyQuery)
     const agencies = agencySnapshot.docs.map((doc) => doc.data())
 
-    return { fe1Students, fe2Students, agencies }
+    // Fetch sessional staff from Firebase
+    const staffQuery = query(collection(db, "sessional_staff"))
+    const staffSnapshot = await getDocs(staffQuery)
+    const sessionalStaffList = staffSnapshot.docs.map((doc) => doc.data())
+
+
+    return { fe1Students, fe2Students, agencies, sessionalStaffList }
   } catch (error) {
     console.error("Error fetching data from Firebase:", error)
     throw new Error("Failed to fetch data from Firebase. Please check your connection and try again.")
@@ -472,112 +769,6 @@ async function geocodeAddress(address) {
     console.error("Geocoding error:", e)
   }
   return null
-}
-
-// Add an agency marker to the map
-function addAgencyMarker(agency, geo) {
-  if (!geo) return
-
-  // Create marker element
-  const el = document.createElement("div")
-  el.className = "marker-agency"
-
-  // Create popup content
-  const popupContent = `
-    <strong>Agency: ${agency.Name}</strong><br>
-    <strong>Location:</strong> ${agency.Location}<br>
-    <strong>Sector:</strong> ${agency.Sector || "N/A"}<br>
-    <strong>Available spots:</strong> ${agency.Available_spots || agency["Available spots"] || 0}<br>
-    <strong>Exceptions:</strong> ${agency.Exception || "None"}<br>
-    <strong>First Nations:</strong> ${agency["First Nations (Aboriginal & Torres Strait Islanders)"] || "No"}<br>
-    <strong>Onsite Supervisor:</strong> ${agency["Onsite SW Supervisor"] || "No"}
-  `
-
-  // Create popup
-  const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(popupContent)
-
-  // Create and add marker
-  const marker = new mapboxgl.Marker(el).setLngLat([geo.lon, geo.lat]).setPopup(popup).addTo(map)
-
-  markers.push(marker)
-}
-
-// Add a student marker to the map
-function addStudentMarker(student, isAssigned) {
-  const geo = geoCache[student.Location]
-  if (!geo) return
-
-  // Create marker element
-  const el = document.createElement("div")
-
-  // Determine marker class based on student type and assignment status
-  if (!isAssigned) {
-    el.className = "marker-student-unassigned"
-  } else if (student.FE1_Sector || student["FE 1 Sector"]) {
-    el.className = "marker-student-fe2"
-  } else {
-    el.className = "marker-student-fe1"
-  }
-
-  const agencySector =
-    student.assignment !== "Unassigned" && allAgencies.find((a) => a.Name === student.assignment)?.Sector
-
-  // Create popup content
-  const popupContent = `
-    <strong>Student: ${student.Name}</strong><br>
-    <strong>Location:</strong> ${student.Location}<br>
-    <strong>Assigned:</strong> ${student.assignment || "Unassigned"}<br>
-    <strong>Interest:</strong> ${student["Interested sectors"] || "None"}<br>
-    <strong>Agency Sector:</strong> ${agencySector || "N/A"}<br>
-    ${
-      student.FE1_Sector || student["FE 1 Sector"]
-        ? `<strong>FE1 Sector:</strong> ${student.FE1_Sector || student["FE 1 Sector"]}<br>`
-        : ""
-    }
-    <strong>Domestic/International:</strong> ${student["Domestic / International"] || "N/A"}<br>
-    <strong>Driver's License:</strong> ${student["Driver's Licence"] || "N/A"}<br>
-    <strong>First Nations:</strong> ${student["First Nations (Aboriginal & Torres Strait Islanders)"] || "No"}
-    ${student.matchScore ? `<br><strong>Match Score:</strong> ${student.matchScore}/100` : ""}
-  `
-
-  // Create popup
-  const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(popupContent)
-
-  // Create and add marker
-  const marker = new mapboxgl.Marker(el).setLngLat([geo.lon, geo.lat]).setPopup(popup).addTo(map)
-
-  markers.push(marker)
-
-  // Draw line to assigned agency if assigned
-  const assignedAgency = allAgencies.find((a) => a.Name === student.assignment)
-  if (assignedAgency && geoCache[assignedAgency.Location]) {
-    const agencyGeo = geoCache[assignedAgency.Location]
-
-    // Get current line features
-    const lineSource = map.getSource("lines")
-    const currentFeatures = lineSource._data.features || []
-
-    // Add new line feature
-    const newFeature = {
-      type: "Feature",
-      geometry: {
-        type: "LineString",
-        coordinates: [
-          [geo.lon, geo.lat],
-          [agencyGeo.lon, agencyGeo.lat],
-        ],
-      },
-    }
-
-    // Update source data
-    lineSource.setData({
-      type: "FeatureCollection",
-      features: [...currentFeatures, newFeature],
-    })
-
-    // Track the line for potential removal later
-    lines.push(newFeature)
-  }
 }
 
 // Parse sectors from a string
@@ -922,6 +1113,93 @@ function matchStudents(fe2Students, fe1Students, agencies, geoCache) {
   };
 }
 
+function assignSessionalStaff(students, sessionalStaff, geoCache, agencies) {
+  const assignedEFE = new Set()
+  const assignedLO = new Set()
+
+  const parseSectors = (str) => {
+    if (!str) return []
+    return str.split(";").map(s => s.trim().toLowerCase()).filter(Boolean) // <- ensure lowercase
+  }
+  
+
+  
+
+  const getDistance = (loc1, loc2) => {
+    const R = 6371
+    const toRad = (d) => (d * Math.PI) / 180
+    const dLat = toRad(loc2.lat - loc1.lat)
+    const dLon = toRad(loc2.lon - loc1.lon)
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(loc1.lat)) * Math.cos(toRad(loc2.lat)) * Math.sin(dLon / 2) ** 2
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  }
+
+  students.forEach((student) => {
+    const studentLoc = geoCache[student.Location]
+    const agency = agencies.find(a => a.Name === student.assignment)
+    const agencySectors = parseSectors(agency?.Sector || "")
+
+    if (!studentLoc || !agency) return
+
+    const agencyHasSupervisor =
+      agency["Onsite SW Supervisor"] &&
+      agency["Onsite SW Supervisor"].toLowerCase() === "yes"
+  
+
+    const efeCandidates = sessionalStaff.filter(s => {
+      console.log(`Staff location for ${s.Name}:`, geoCache[s.Location]);
+      console.log(`Checking ${s.Name} for sectors:`, parseSectors(s.Sector));
+      console.log(`Agency sectors:`, agencySectors);
+      return (
+        s.Role === "EFE" &&
+        !assignedEFE.has(s.Name) &&
+        s.Name !== student.assignedLO &&
+        geoCache[s.Location] &&
+        parseSectors(s.Sector).some(sec => agencySectors.includes(sec))
+      )
+    })
+
+    const loCandidates = sessionalStaff.filter(s => {
+      return (
+        s.Role === "LO" &&
+        !assignedLO.has(s.Name) &&
+        s.Name !== student.assignedEFE &&
+        geoCache[s.Location] &&
+        parseSectors(s.Sector).some(sec => agencySectors.includes(sec))
+      )
+    })
+
+    // Sort candidates by proximity to student
+    efeCandidates.sort((a, b) =>
+      getDistance(geoCache[a.Location], studentLoc) -
+      getDistance(geoCache[b.Location], studentLoc)
+    )
+    loCandidates.sort((a, b) =>
+      getDistance(geoCache[a.Location], studentLoc) -
+      getDistance(geoCache[b.Location], studentLoc)
+    )
+
+    // Assign LO to all students
+    const lo = loCandidates[0]
+    if (lo) {
+      student.assignedLO = lo.Name;
+      assignedLO.add(lo.Name);
+      console.log(`Assigned LO ${lo.Name} to ${student.Name}`);
+    }
+    
+    if (!agencyHasSupervisor) {
+      const efe = efeCandidates[0];
+      if (efe && (!lo || efe.Name !== lo.Name)) {
+        student.assignedEFE = efe.Name;
+        assignedEFE.add(efe.Name);
+        console.log(`Assigned EFE ${efe.Name} to ${student.Name}`);
+      }
+    }
+    
+  })
+}
 
 
 // Update the displayResults function to remove priority bonus display
@@ -1080,32 +1358,35 @@ document.getElementById("resultsSummary").innerHTML = summaryHTML;
     }
 
     studentDiv.innerHTML = `
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <strong>${student.Name}</strong> 
-          ${
-            isAssigned
-              ? `→ <span class="text-success">${student.assignment}</span>`
-              : `<span class="text-danger">(Unassigned)</span>`
-          }
-        </div>
-        <span class="badge bg-${getScoreColor(student.matchScore || 0)}">
-          Score: ${student.matchScore || 0}/100
-        </span>
-      </div>
-      <div class="small text-muted">
-        Location: ${student.Location} | 
-        Interests: ${student["Interested sectors"] || "None"}
-      </div>
-      ${scoreHtml}
-    `
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <strong>${student.Name}</strong> 
+      ${
+        isAssigned
+          ? `→ <span class="text-success">${student.assignment}</span>`
+          : `<span class="text-danger">(Unassigned)</span>`
+      }
+    </div>
+    <span class="badge bg-${getScoreColor(student.matchScore || 0)}">
+      Score: ${student.matchScore || 0}/100
+    </span>
+  </div>
+  <div class="small text-muted">
+    Location: ${student.Location} | 
+    Interests: ${student["Interested sectors"] || "None"}
+  </div>
+  <div class="small text-muted">
+    Assigned LO: <strong>${student.assignedLO || "None"}</strong> | 
+    Assigned EFE: <strong>${student.assignedEFE || "None"}</strong>
+  </div>
+  ${scoreHtml}
+`
+
+
 
     fe2Results.appendChild(studentDiv)
 
-    // Add student marker to map
-    if (isAssigned) {
-      addStudentMarker(student, true)
-    }
+  
   }
 
   // Display FE1 results
@@ -1177,21 +1458,21 @@ document.getElementById("resultsSummary").innerHTML = summaryHTML;
         <span class="badge bg-${getScoreColor(student.matchScore || 0)}">
           Score: ${student.matchScore || 0}/100
         </span>
-        
       </div>
       <div class="small text-muted">
         Location: ${student.Location} | 
         Interests: ${student["Interested sectors"] || "None"}
       </div>
+      <div class="small text-muted">
+        Assigned LO: <strong>${student.assignedLO || "None"}</strong> | 
+        Assigned EFE: <strong>${student.assignedEFE || "None"}</strong>
+      </div>
       ${scoreHtml}
     `
+  
 
     fe1Results.appendChild(studentDiv)
 
-    // Add student marker to map
-    if (isAssigned) {
-      addStudentMarker(student, true)
-    }
   }
 
   // Display unassigned students
@@ -1228,9 +1509,6 @@ document.getElementById("resultsSummary").innerHTML = summaryHTML;
       `
 
       unassignedResults.appendChild(studentDiv)
-
-      // Add unassigned student marker to map
-      addStudentMarker(student, false)
     }
   }
  
