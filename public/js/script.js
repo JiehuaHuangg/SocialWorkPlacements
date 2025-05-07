@@ -174,6 +174,42 @@ function handleMapResize() {
   }
 }
 
+// Add event listener for map search button
+document.getElementById("mapSearchBtn").addEventListener("click", () => {
+  const query = document.getElementById("mapSearchInput").value.trim().toLowerCase();
+  if (!query) return;
+
+  const sources = [
+    { data: matchedStudents, label: "Student" },
+    { data: unassignedStudents, label: "Student" },
+    { data: allAgencies, label: "Agency" },
+    { data: sessionalStaffList, label: "Sessional Staff" }
+  ];
+
+  for (const group of sources) {
+    const match = group.data.find(item => item.Name && item.Name.toLowerCase().includes(query));
+    if (match && geoCache[match.Location]) {
+      const { lon, lat } = geoCache[match.Location];
+      map.flyTo({ center: [lon, lat], zoom: 13 });
+
+      new mapboxgl.Popup()
+        .setLngLat([lon, lat])
+        .setHTML(`<strong>${match.Name}</strong><br>Type: ${group.label}`)
+        .addTo(map);
+      return;
+    }
+  }
+
+  notyf.error("No match found for: " + query);
+});
+
+// Add event listener for Enter key in search input
+document.getElementById("mapSearchInput").addEventListener("keyup", function (e) {
+  if (e.key === "Enter") document.getElementById("mapSearchBtn").click();
+});
+
+
+
 // Fix the populateGeoCacheFromFirebase function to properly handle agency data
 function populateGeoCacheFromFirebase(fe1Students, fe2Students, agencies, sessionalStaff) {
   console.log("Populating geoCache from Firebase data...");
@@ -438,6 +474,33 @@ async function runMatching() {
         }
       }
     }).filter(Boolean)
+
+    const uniqueStaffMap = new Map()
+    sessionalStaffList.forEach(staff => {
+      if (!uniqueStaffMap.has(staff.Name)) {
+        uniqueStaffMap.set(staff.Name, staff)
+      }
+    })
+
+    const sessionalStaffFeatures = Array.from(uniqueStaffMap.values()).map((staff) => {
+      const geo = geoCache[staff.Location]
+      if (!geo) return null
+      return {
+        type: "Feature",
+        properties: {
+          name: staff.Name,
+          role: `${staff.LO > 0 ? "LO" : ""}${staff.EFE > 0 ? (staff.LO > 0 ? " & EFE" : "EFE") : ""}`,
+          sector: staff.Sector || "",
+          type: "sessional"
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [geo.lon, geo.lat]
+        }
+      }
+    }).filter(Boolean)
+
+    
     
     map.addSource("agencies", {
       type: "geojson",
@@ -460,6 +523,10 @@ async function runMatching() {
     
       return {
         type: "Feature",
+        properties: {
+          student: student.Name,
+          agency: agency.originalName
+        },
         geometry: {
           type: "LineString",
           coordinates: [
@@ -469,6 +536,62 @@ async function runMatching() {
         }
       }
     }).filter(Boolean)
+
+    const staffLineFeatures = matchedStudents.flatMap((student) => {
+      const features = []
+      const studentGeo = geoCache[student.Location]
+    
+      if (!studentGeo) return features
+    
+      // LO Line
+      if (student.assignedLO) {
+        const lo = sessionalStaffList.find(s => s.Name === student.assignedLO);
+        const loGeo = geoCache[lo?.Location];
+        if (loGeo) {
+          features.push({
+            type: "Feature",
+            properties: {
+              student: student.Name,
+              staff: lo.Name,
+              type: "LO"
+            },
+            geometry: {
+              type: "LineString",
+              coordinates: [
+                [studentGeo.lon, studentGeo.lat],
+                [loGeo.lon, loGeo.lat]
+              ]
+            }
+          });
+        }
+      }
+    
+      // EFE Line
+      if (student.assignedEFE) {
+        const efe = sessionalStaffList.find(s => s.Name === student.assignedEFE);
+        const efeGeo = geoCache[efe?.Location];
+        if (efeGeo) {
+          features.push({
+            type: "Feature",
+            properties: {
+              student: student.Name,
+              staff: efe.Name,
+              type: "EFE"
+            },
+            geometry: {
+              type: "LineString",
+              coordinates: [
+                [studentGeo.lon, studentGeo.lat],
+                [efeGeo.lon, efeGeo.lat]
+              ]
+            }
+          });
+        }
+      }
+    
+      return features
+    })
+    
     
     map.addSource("assignment-lines", {
       type: "geojson",
@@ -489,6 +612,27 @@ async function runMatching() {
       clusterMaxZoom: 14,
       clusterRadius: 40
     })
+
+    map.addSource("sessionalStaff", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: sessionalStaffFeatures
+      },
+      cluster: true,
+      clusterMaxZoom: 14,
+      clusterRadius: 40
+    })
+    map.addSource("staff-lines", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: staffLineFeatures
+      }
+    })
+    
+  
+    
 
     // Cluster layer
     map.addLayer({
@@ -564,6 +708,63 @@ async function runMatching() {
       }
     })    
 
+    map.addLayer({
+      id: "staff-clusters",
+      type: "circle",
+      source: "sessionalStaff",
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#9C27B0", // purple
+        "circle-radius": ["step", ["get", "point_count"], 15, 10, 20, 50, 25],
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#fff"
+      }
+    })
+    
+    map.addLayer({
+      id: "staff-cluster-count",
+      type: "symbol",
+      source: "sessionalStaff",
+      filter: ["has", "point_count"],
+      layout: {
+        "text-field": "{point_count_abbreviated}",
+        "text-size": 12
+      }
+    })
+    
+    map.addLayer({
+      id: "unclustered-staff",
+      type: "circle",
+      source: "sessionalStaff",
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": "#9C27B0",
+        "circle-radius": 6,
+        "circle-stroke-width": 1,
+        "circle-stroke-color": "#fff"
+      }
+    })
+    
+    //line for staff
+    map.addLayer({
+      id: "staff-lines-layer",
+      type: "line",
+      source: "staff-lines",
+      paint: {
+        "line-color": [
+          "match",
+          ["get", "type"],
+          "LO", "#3B82F6", // Blue
+          "EFE", "#10B981", // Green
+          "#ccc"
+        ],
+        "line-width": 1.5,
+        "line-opacity": 0.7,
+        "line-dasharray": [1, 2]
+      }
+    })
+    
+
     // Add this handler to allow zooming into agency clusters on click
     map.on("click", "agency-clusters", (e) => {
       const features = map.queryRenderedFeatures(e.point, { layers: ["agency-clusters"] });
@@ -624,6 +825,12 @@ async function runMatching() {
       map.setLayoutProperty("assignment-lines-layer", "visibility", visibility)
     })
     
+    document.getElementById("toggleStaffLines").addEventListener("change", function () {
+      const visibility = this.checked ? "visible" : "none";
+      map.setLayoutProperty("staff-lines-layer", "visibility", visibility); // ✅ now matches
+    });
+    
+    
 
     map.on("click", "clusters", (e) => {
       const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] })
@@ -643,6 +850,27 @@ async function runMatching() {
         .setHTML(`<strong>${props.name}</strong><br>Assigned to: ${props.assignment}<br>Type: ${props.type}`)
         .addTo(map)
     })
+
+    map.on("click", "unclustered-staff", (e) => {
+      const props = e.features[0].properties
+      const coords = e.features[0].geometry.coordinates.slice()
+    
+      new mapboxgl.Popup()
+        .setLngLat(coords)
+        .setHTML(`<strong>${props.name}</strong><br>Role: ${props.role}<br>Sectors: ${props.sector}`)
+        .addTo(map)
+    })
+
+    map.on("click", "staff-clusters", (e) => {
+      const features = map.queryRenderedFeatures(e.point, { layers: ["staff-clusters"] });
+      const clusterId = features[0].properties.cluster_id;
+      map.getSource("sessionalStaff").getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err) return;
+        map.easeTo({ center: features[0].geometry.coordinates, zoom });
+      })
+    });
+
+    
     
     // Line visibility toggle
     const toggleBox = document.createElement("div")
@@ -684,7 +912,76 @@ async function runMatching() {
     notyf.error("An error occurred during the matching process. Please check the console for details.")
     document.getElementById("loadingIndicator").style.display = "none"
   }
+
+  setupHighlighting();
 }
+
+// Highlight Lines By Entity
+// Highlight Lines By Entity
+function highlightLinesByEntity(name) {
+  map.setLayoutProperty("assignment-lines-layer", "visibility", "visible");
+  map.setLayoutProperty("staff-lines-layer", "visibility", "visible");
+
+  map.setPaintProperty("assignment-lines-layer", "line-color", [
+    "case",
+    ["any", ["==", ["get", "student"], name], ["==", ["get", "agency"], name]],
+    "#FFD700",
+    "#ffffff"
+  ]);
+
+  map.setPaintProperty("staff-lines-layer", "line-color", [
+    "case",
+    ["any", ["==", ["get", "student"], name], ["==", ["get", "staff"], name]],
+    "#FFD700",
+    ["match", ["get", "type"], "LO", "#3B82F6", "EFE", "#10B981", "#ccc"]
+  ]);
+
+  map.setPaintProperty("assignment-lines-layer", "line-width", [
+    "case",
+    ["any", ["==", ["get", "student"], name], ["==", ["get", "agency"], name]],
+    4,
+    1.5
+  ]);
+
+  map.setPaintProperty("staff-lines-layer", "line-width", [
+    "case",
+    ["any", ["==", ["get", "student"], name], ["==", ["get", "staff"], name]],
+    4,
+    1.5
+  ]);
+
+  map.setPaintProperty("assignment-lines-layer", "line-dasharray", [1, 2]);
+  map.setPaintProperty("staff-lines-layer", "line-dasharray", [1, 2]);
+}
+
+function clearLineHighlights() {
+  map.setPaintProperty("assignment-lines-layer", "line-color", "#ffffff");
+  map.setPaintProperty("assignment-lines-layer", "line-width", 1.5);
+  map.setPaintProperty("assignment-lines-layer", "line-dasharray", [2, 2]);
+
+  map.setPaintProperty("staff-lines-layer", "line-color", [
+    "match", ["get", "type"], "LO", "#3B82F6", "EFE", "#10B981", "#ccc"
+  ]);
+  map.setPaintProperty("staff-lines-layer", "line-width", 1.5);
+  map.setPaintProperty("staff-lines-layer", "line-dasharray", [1, 3]);
+}
+
+function setupHighlighting() {
+  map.on("click", (e) => {
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: ["unclustered-fe1", "unclustered-fe2", "unclustered-agencies", "unclustered-staff"]
+    });
+
+    if (features.length) {
+      const name = features[0].properties.name;
+      highlightLinesByEntity(name);
+    } else {
+      clearLineHighlights();
+    }
+  });
+}
+
+
 
 // Fetch data from Firebase Firestore
 async function fetchFirebaseData() {
@@ -1114,92 +1411,82 @@ function matchStudents(fe2Students, fe1Students, agencies, geoCache) {
 }
 
 function assignSessionalStaff(students, sessionalStaff, geoCache, agencies) {
-  const assignedEFE = new Set()
-  const assignedLO = new Set()
+  const staffAssignmentCounts = {};
+
+  // Initialize counters
+  sessionalStaff.forEach(s => {
+    staffAssignmentCounts[s.Name] = {
+      LO: s.LO || 0,
+      EFE: s.EFE || 0,
+    };
+  });
 
   const parseSectors = (str) => {
-    if (!str) return []
-    return str.split(";").map(s => s.trim().toLowerCase()).filter(Boolean) // <- ensure lowercase
-  }
-  
-
-  
+    if (!str) return [];
+    return str.split(";").map(s => s.trim().toLowerCase()).filter(Boolean);
+  };
 
   const getDistance = (loc1, loc2) => {
-    const R = 6371
-    const toRad = (d) => (d * Math.PI) / 180
-    const dLat = toRad(loc2.lat - loc1.lat)
-    const dLon = toRad(loc2.lon - loc1.lon)
+    const R = 6371;
+    const toRad = (d) => (d * Math.PI) / 180;
+    const dLat = toRad(loc2.lat - loc1.lat);
+    const dLon = toRad(loc2.lon - loc1.lon);
     const a =
       Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(loc1.lat)) * Math.cos(toRad(loc2.lat)) * Math.sin(dLon / 2) ** 2
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  }
+      Math.cos(toRad(loc1.lat)) * Math.cos(toRad(loc2.lat)) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
 
   students.forEach((student) => {
-    const studentLoc = geoCache[student.Location]
-    const agency = agencies.find(a => a.Name === student.assignment)
-    const agencySectors = parseSectors(agency?.Sector || "")
+    const studentLoc = geoCache[student.Location];
+    const agency = agencies.find(a => a.Name === student.assignment);
+    const agencySectors = parseSectors(agency?.Sector || "");
 
-    if (!studentLoc || !agency) return
+    if (!studentLoc || !agency) return;
 
-    const agencyHasSupervisor =
-      agency["Onsite SW Supervisor"] &&
-      agency["Onsite SW Supervisor"].toLowerCase() === "yes"
-  
+    const assignStaff = (role) => {
+      return sessionalStaff
+        .filter(s =>
+          s.Role === role &&
+          staffAssignmentCounts[s.Name][role] > 0 &&
+          (!student.assignedLO || s.Name !== student.assignedLO) &&
+          (!student.assignedEFE || s.Name !== student.assignedEFE) &&
+          geoCache[s.Location]
+        )
+        .map(s => {
+          const staffLoc = geoCache[s.Location];
+          const distance = getDistance(staffLoc, studentLoc);
+          const sectorMatch = parseSectors(s.Sector).some(sec => agencySectors.includes(sec));
+          const sectorScore = sectorMatch ? 50 : 0;
+          const locationScore = Math.max(0, 50 - distance);
+          const totalScore = sectorScore + locationScore;
+          return { staff: s, totalScore };
+        })
+        .sort((a, b) => b.totalScore - a.totalScore)[0]?.staff;
+    };
 
-    const efeCandidates = sessionalStaff.filter(s => {
-      console.log(`Staff location for ${s.Name}:`, geoCache[s.Location]);
-      console.log(`Checking ${s.Name} for sectors:`, parseSectors(s.Sector));
-      console.log(`Agency sectors:`, agencySectors);
-      return (
-        s.Role === "EFE" &&
-        !assignedEFE.has(s.Name) &&
-        s.Name !== student.assignedLO &&
-        geoCache[s.Location] &&
-        parseSectors(s.Sector).some(sec => agencySectors.includes(sec))
-      )
-    })
-
-    const loCandidates = sessionalStaff.filter(s => {
-      return (
-        s.Role === "LO" &&
-        !assignedLO.has(s.Name) &&
-        s.Name !== student.assignedEFE &&
-        geoCache[s.Location] &&
-        parseSectors(s.Sector).some(sec => agencySectors.includes(sec))
-      )
-    })
-
-    // Sort candidates by proximity to student
-    efeCandidates.sort((a, b) =>
-      getDistance(geoCache[a.Location], studentLoc) -
-      getDistance(geoCache[b.Location], studentLoc)
-    )
-    loCandidates.sort((a, b) =>
-      getDistance(geoCache[a.Location], studentLoc) -
-      getDistance(geoCache[b.Location], studentLoc)
-    )
-
-    // Assign LO to all students
-    const lo = loCandidates[0]
+    // Assign LO
+    const lo = assignStaff("LO");
     if (lo) {
       student.assignedLO = lo.Name;
-      assignedLO.add(lo.Name);
+      staffAssignmentCounts[lo.Name].LO--;
       console.log(`Assigned LO ${lo.Name} to ${student.Name}`);
     }
-    
+
+    // Assign EFE if no onsite supervisor
+    const agencyHasSupervisor = agency["Onsite SW Supervisor"]?.toLowerCase() === "yes";
     if (!agencyHasSupervisor) {
-      const efe = efeCandidates[0];
-      if (efe && (!lo || efe.Name !== lo.Name)) {
+      const efe = assignStaff("EFE");
+      if (efe && efe.Name !== student.assignedLO) {
         student.assignedEFE = efe.Name;
-        assignedEFE.add(efe.Name);
+        staffAssignmentCounts[efe.Name].EFE--;
         console.log(`Assigned EFE ${efe.Name} to ${student.Name}`);
       }
     }
-    
-  })
+  });
 }
+
+
 
 
 // Update the displayResults function to remove priority bonus display
@@ -1527,6 +1814,8 @@ function exportToExcel(matchedStudents, unassignedStudents, locationWeight, sect
       "Student Name": s.Name,
       "Student Location": s.Location,
       "Assigned Agency": s.assignment,
+      "Assigned LO": s.assignedLO || "",
+      "Assigned EFE": s.assignedEFE || "",
       "Agency Sector": s.assignedSector || "",
       "Distance (km)": s.distance ? s.distance.toFixed(1) : "",
       "Match Score": s.matchScore || 0,
@@ -1549,6 +1838,8 @@ function exportToExcel(matchedStudents, unassignedStudents, locationWeight, sect
       "Student Name": s.Name,
       "Student Location": s.Location,
       "Assigned Agency": s.assignment,
+      "Assigned LO": s.assignedLO || "",
+      "Assigned EFE": s.assignedEFE || "",
       "Agency Sector": s.assignedSector || "",
       "Distance (km)": s.distance ? s.distance.toFixed(1) : "",
       "Match Score": s.matchScore || 0,
@@ -1598,6 +1889,42 @@ function exportToExcel(matchedStudents, unassignedStudents, locationWeight, sect
     },
   ]
 
+  // Generate sessional staff summary
+const staffSummaryMap = new Map();
+
+[...matchedStudents, ...unassignedStudents].forEach((student) => {
+  if (student.assignedLO) {
+    if (!staffSummaryMap.has(student.assignedLO)) {
+      staffSummaryMap.set(student.assignedLO, { name: student.assignedLO, role: "LO", assigned: 0 });
+    }
+    staffSummaryMap.get(student.assignedLO).assigned += 1;
+  }
+  if (student.assignedEFE) {
+    if (!staffSummaryMap.has(student.assignedEFE)) {
+      staffSummaryMap.set(student.assignedEFE, { name: student.assignedEFE, role: "EFE", assigned: 0 });
+    } else if (staffSummaryMap.get(student.assignedEFE).role === "LO") {
+      staffSummaryMap.get(student.assignedEFE).role = "LO & EFE";
+    }
+    staffSummaryMap.get(student.assignedEFE).assigned += 1;
+  }
+});
+
+const staffSummaryData = Array.from(staffSummaryMap.values()).map((s) => {
+  const original = sessionalStaffList.find((staff) => staff.Name === s.name) || {};
+  return {
+    "Staff Name": s.name,
+    "Role": s.role,
+    "Assigned Students": s.assigned,
+    "LO Capacity": original.LO || 0,
+    "EFE Capacity": original.EFE || 0,
+    "Remaining LO": (original.LO || 0) - (s.role.includes("LO") ? s.assigned : 0),
+    "Remaining EFE": (original.EFE || 0) - (s.role.includes("EFE") ? s.assigned : 0),
+    "Sectors": original.Sector || "",
+    "Location": original.Location || ""
+  };
+});
+
+
   // Add worksheets to workbook
   const ws0 = XLSX.utils.json_to_sheet(summaryData)
   XLSX.utils.book_append_sheet(wb, ws0, "Summary")
@@ -1610,6 +1937,10 @@ function exportToExcel(matchedStudents, unassignedStudents, locationWeight, sect
 
   const ws3 = XLSX.utils.json_to_sheet(unassignedData)
   XLSX.utils.book_append_sheet(wb, ws3, "Unassigned Students")
+
+  const ws4 = XLSX.utils.json_to_sheet(staffSummaryData);
+  XLSX.utils.book_append_sheet(wb, ws4, "Sessional Staff Summary");
+
 
   // Generate Excel file
   const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" })

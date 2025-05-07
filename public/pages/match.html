@@ -134,6 +134,7 @@
       float: left;
       margin-right: 8px;
       opacity: 0.7;
+      margin-top: 6px;
     }
     .nav-tabs .nav-link {
       color: #495057;
@@ -226,6 +227,7 @@
       background-color: #27358C;
       border-color: #27358C;
     }
+   
   </style>
 </head>
 <body>
@@ -377,18 +379,62 @@
           <div class="tab-pane fade show active" id="map-tab-pane" role="tabpanel" aria-labelledby="map-tab" tabindex="0">
             <div id="map-container" style="position: relative; width: 100%; height: 600px;">
               <div id="map" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%;"></div>
+              <div id="map-search" style="
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                z-index: 1;
+                background: white;
+                padding: 8px;
+                border-radius: 4px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+              ">
+                <input
+                  type="text"
+                  id="mapSearchInput"
+                  placeholder="Search name..."
+                  style="width: 200px; padding: 5px;"
+                />
+                <button id="mapSearchBtn" style="margin-left: 5px;">🔍</button>
+              </div>
+
               <div class="map-legend">
                 <h6>Map Legend</h6>
-                <label>
-                  <input type="checkbox" id="toggleLines" checked />
-                  Show Assignment Lines
-                </label>
-                <div><i style="background: #27358C"></i> Agency</div>
-                <div><i style="background: #4CAF50; border-radius: 50%;"></i> Assigned FE2 Student</div>
-                <div><i style="background: #2196F3; border-radius: 50%;"></i> Assigned FE1 Student</div>
-                <div><i style="background: #F44336; border-radius: 50%;"></i> Unassigned Student</div>
-                <div><i style="background: white; height: 2px; margin-top: 8px;"></i> Assignment Connection</div>
+              
+                <div>
+                  <label>
+                    <input type="checkbox" id="toggleLines" checked />
+                    Show Agency Assignment Lines
+                  </label>
+                </div>
+                <div>
+                  <label>
+                    <input type="checkbox" id="toggleStaffLines" checked />
+                    Show Staff Assignment Lines
+                  </label>
+                </div>
+              
+                <div><i style="background: #FF9800; border-radius: 50%; width: 12px; height: 12px; display: inline-block;"></i> Agency</div>
+                <div><i style="background: #4CAF50; border-radius: 50%; width: 12px; height: 12px; display: inline-block;"></i> Assigned FE2 Student</div>
+                <div><i style="background: #2196F3; border-radius: 50%; width: 12px; height: 12px; display: inline-block;"></i> Assigned FE1 Student</div>
+                <div><i style="background: #F44336; border-radius: 50%; width: 12px; height: 12px; display: inline-block;"></i> Unassigned Student</div>
+                <div><i style="background: #9C27B0; border-radius: 50%; width: 12px; height: 12px; display: inline-block;"></i> Sessional Staff</div>
+              
+                <div style="margin-top: 6px;">
+                  <svg height="6" width="40"><line x1="0" y1="3" x2="40" y2="3" style="stroke:#ccc; stroke-width:2; stroke-dasharray:4,4;" /></svg>
+                  Agency Connection
+                </div>
+                <div>
+                  <svg height="6" width="40"><line x1="0" y1="3" x2="40" y2="3" style="stroke:#3B82F6; stroke-width:2; stroke-dasharray:4,4;" /></svg>
+                  Liaison Officer (LO)
+                </div>
+                <div>
+                  <svg height="6" width="40"><line x1="0" y1="3" x2="40" y2="3" style="stroke:#10B981; stroke-width:2.5; stroke-dasharray:1,3;" /></svg>
+                  External Field Educator (EFE)
+                </div>
               </div>
+              
+              
             </div>
           </div>
           
