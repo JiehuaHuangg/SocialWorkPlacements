@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Firebase Auth Tests</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mocha/mocha.css">
+</head>
+<body>
+  <div id="mocha"></div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+
+  <!-- Mocha + Chai -->
+  <script src="https://cdn.jsdelivr.net/npm/mocha/mocha.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.3.4/chai.min.js"></script>
+
+  <script>
+    mocha.setup("bdd");
+    const assert = chai.assert;
+
+    // ✅ Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAtaf5eAkVjCmy4JzBSzoerR-cLRkD4GRM",
+      authDomain: "social-work-placement.firebaseapp.com",
+      projectId: "social-work-placement",
+      storageBucket: "social-work-placement.appspot.com",
+      messagingSenderId: "465758786519",
+      appId: "1:465758786519:web:04ae2f164411dbcf4bb192"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    describe("Firebase Auth Tests", function () {
+      this.timeout(10000);
+      let testEmail;
+      const testPassword = "test1234";
+
+      it("initializes Firebase", function () {
+        assert.isOk(firebase.app(), "Firebase initialized");
+      });
+
+      it("signs up a new user", async function () {
+        testEmail = `testuser${Date.now()}@uwa.edu.au`;
+        const userCred = await auth.createUserWithEmailAndPassword(testEmail, testPassword);
+        assert.isOk(userCred.user.uid, "User created");
+        assert.equal(userCred.user.email, testEmail);
+      });
+
+      it("signs in the user", async function () {
+        await auth.signOut();
+        const userCred = await auth.signInWithEmailAndPassword(testEmail, testPassword);
+        assert.equal(userCred.user.email, testEmail);
+      });
+
+      it("deletes the user", async function () {
+        const user = auth.currentUser;
+        assert.isOk(user, "User should be signed in");
+        await user.delete();
+        console.log(`✅ Deleted user: ${user.email}`);
+      });
+
+    });
+
+    mocha.run();
+  </script>
+</body>
+</html>

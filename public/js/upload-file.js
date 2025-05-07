@@ -276,7 +276,7 @@ function validateExcelColumns(worksheet, type) {
       "First Nations (Aboriginal & Torres Strait Islanders)",
       "Onsite SW Supervisor",
     ],
-    sessional: ["Name", "Location", "LO", "EFE"],
+    sessional: ["Name", "Location", "LO", "EFE", "Sector"],
   }
 
   // Check if all required columns are present
@@ -323,8 +323,22 @@ function previewExcel(file, type) {
         const row = limitedData[i]
         const headerLength = limitedData[0].length
         for (let j = 0; j < headerLength; j++) {
-          htmlTable += `<td>${row[j] !== undefined ? row[j] : ""}</td>`
-        }
+          const header = limitedData[0][j]?.trim().toLowerCase() || ""
+          let cellContent = row[j] !== undefined ? row[j] : ""
+
+          // Apply badge-style formatting for sector-related fields
+          const sectorHeaders = ["sector", "interested sectors", "sector exception", "fe 1 sector"]
+          if (sectorHeaders.includes(header)) {
+            const items = cellContent.split(";").map(s => s.trim()).filter(Boolean)
+            const colors = ['bg-primary', 'bg-success', 'bg-info', 'bg-warning', 'bg-danger']
+            cellContent = items.map((item, idx) => 
+              `<span class="badge ${colors[idx % colors.length]} me-1" style="border-radius: 12px; padding: 0.35em 0.75em;">${item}</span>`
+            ).join("")
+          }
+
+  htmlTable += `<td>${cellContent}</td>`
+}
+
         htmlTable += "</tr>"
       }
       htmlTable += "</tbody>"
