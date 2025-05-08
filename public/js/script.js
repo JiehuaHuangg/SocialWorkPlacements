@@ -525,7 +525,7 @@ async function runMatching() {
         type: "Feature",
         properties: {
           student: student.Name,
-          agency: agency.originalName
+          agency: agency.Name
         },
         geometry: {
           type: "LineString",
@@ -952,6 +952,40 @@ function highlightLinesByEntity(name) {
 
   map.setPaintProperty("assignment-lines-layer", "line-dasharray", [1, 2]);
   map.setPaintProperty("staff-lines-layer", "line-dasharray", [1, 2]);
+
+  // Dim all unconnected points by reducing opacity
+  const connected = matchedStudents.filter(s =>
+    s.Name === name || s.assignment === name || s.assignedLO === name || s.assignedEFE === name
+  ).map(s => [s.Name, s.assignment, s.assignedLO, s.assignedEFE]).flat().filter(Boolean);
+
+  map.setPaintProperty("unclustered-fe1", "circle-opacity", [
+    "case",
+    ["in", ["get", "name"], ["literal", connected]],
+    1,
+    0.2
+  ]);
+
+  map.setPaintProperty("unclustered-fe2", "circle-opacity", [
+    "case",
+    ["in", ["get", "name"], ["literal", connected]],
+    1,
+    0.2
+  ]);
+
+  map.setPaintProperty("unclustered-agencies", "circle-opacity", [
+    "case",
+    ["in", ["get", "name"], ["literal", connected]],
+    1,
+    0.2
+  ]);
+
+  map.setPaintProperty("unclustered-staff", "circle-opacity", [
+    "case",
+    ["in", ["get", "name"], ["literal", connected]],
+    1,
+    0.2
+  ]);
+
 }
 
 function clearLineHighlights() {
@@ -964,6 +998,11 @@ function clearLineHighlights() {
   ]);
   map.setPaintProperty("staff-lines-layer", "line-width", 1.5);
   map.setPaintProperty("staff-lines-layer", "line-dasharray", [1, 3]);
+  map.setPaintProperty("unclustered-fe1", "circle-opacity", 1);
+  map.setPaintProperty("unclustered-fe2", "circle-opacity", 1);
+  map.setPaintProperty("unclustered-agencies", "circle-opacity", 1);
+  map.setPaintProperty("unclustered-staff", "circle-opacity", 1);
+
 }
 
 function setupHighlighting() {
@@ -978,6 +1017,65 @@ function setupHighlighting() {
     } else {
       clearLineHighlights();
     }
+  });
+}
+
+function updateMapLinesAfterEdit() {
+  const assignmentLineFeatures = matchedStudents.map(student => {
+    const studentGeo = geoCache[student.Location];
+    const agency = allAgencies.find(a => a.Name === student.assignment);
+    const agencyGeo = geoCache[agency?.Location];
+    if (!studentGeo || !agencyGeo) return null;
+    return {
+      type: "Feature",
+      properties: {
+        student: student.Name,
+        agency: agency.Name
+      },
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [studentGeo.lon, studentGeo.lat],
+          [agencyGeo.lon, agencyGeo.lat]
+        ]
+      }
+    };
+  }).filter(Boolean);
+
+  const staffLineFeatures = matchedStudents.flatMap(student => {
+    const features = [];
+    const studentGeo = geoCache[student.Location];
+    if (!studentGeo) return features;
+
+    const lo = sessionalStaffList.find(s => s.Name === student.assignedLO);
+    const efe = sessionalStaffList.find(s => s.Name === student.assignedEFE);
+
+    if (lo && geoCache[lo.Location]) {
+      features.push({
+        type: "Feature",
+        properties: { student: student.Name, staff: lo.Name, type: "LO" },
+        geometry: { type: "LineString", coordinates: [[studentGeo.lon, studentGeo.lat], [geoCache[lo.Location].lon, geoCache[lo.Location].lat]] }
+      });
+    }
+    if (efe && geoCache[efe.Location]) {
+      features.push({
+        type: "Feature",
+        properties: { student: student.Name, staff: efe.Name, type: "EFE" },
+        geometry: { type: "LineString", coordinates: [[studentGeo.lon, studentGeo.lat], [geoCache[efe.Location].lon, geoCache[efe.Location].lat]] }
+      });
+    }
+
+    return features;
+  });
+
+  map.getSource("assignment-lines").setData({
+    type: "FeatureCollection",
+    features: assignmentLineFeatures
+  });
+
+  map.getSource("staff-lines").setData({
+    type: "FeatureCollection",
+    features: staffLineFeatures
   });
 }
 
@@ -1553,6 +1651,36 @@ const renderStudentList = (students) => {
   ).join("") + "</ul>";
 };
 
+function renderUnassignedStaffList(staffList) {
+  if (!staffList.length) return "<em>All staff assigned</em>";
+  return "<ul class='mb-1'>" + staffList.map((s) =>
+    `<li>${s.Name} (${(s.LO > 0 ? "LO" : "")}${s.LO > 0 && s.EFE > 0 ? " & " : ""}${s.EFE > 0 ? "EFE" : ""})</li>`
+  ).join("") + "</ul>";
+}
+
+const assignedStaffNames = new Set();
+
+matchedStudents.forEach((s) => {
+  if (s.assignedLO) assignedStaffNames.add(s.assignedLO);
+  if (s.assignedEFE) assignedStaffNames.add(s.assignedEFE);
+});
+
+const uniqueStaffByName = new Map();
+sessionalStaffList.forEach((s) => {
+  if (!uniqueStaffByName.has(s.Name)) {
+    uniqueStaffByName.set(s.Name, { ...s, LO: 0, EFE: 0 });
+  }
+  const existing = uniqueStaffByName.get(s.Name);
+  existing.LO += s.Role === "LO" ? 1 : 0;
+  existing.EFE += s.Role === "EFE" ? 1 : 0;
+});
+
+const unassignedStaff = Array.from(uniqueStaffByName.values()).filter(
+  (s) => !assignedStaffNames.has(s.Name)
+);
+
+
+
 const summaryHTML = `
   <div class="alert alert-info mb-4">
     <strong>Summary:</strong><br>
@@ -1575,6 +1703,12 @@ const summaryHTML = `
       <summary>⚠️ <strong>Students with 0 Sector Score</strong></summary>
       ${renderStudentList(studentsWithZeroSector)}
     </details>
+
+    <details class="mt-2">
+    <summary>👥 <strong>Unassigned Sessional Staff</strong></summary>
+      ${renderUnassignedStaffList(unassignedStaff)}
+    </details>
+
 
     📍 <strong>Students >30km from placement:</strong> ${assignedFarAway.length}<br>
     🧯 <strong>Fully Used Agencies:</strong> ${fullyUsedAgencies.length > 0 ? fullyUsedAgencies.join(", ") : "None"}
@@ -1669,6 +1803,48 @@ document.getElementById("resultsSummary").innerHTML = summaryHTML;
   ${scoreHtml}
 `
 
+const agencyOptions = allAgencies.map(a => `<option value="${a.Name}">${a.Name}</option>`).join("");
+    const staffNames = [...new Set(sessionalStaffList.map(s => s.Name))];
+    const loOptions = staffNames.map(name => `<option value="${name}">${name}</option>`).join("");
+    const efeOptions = ['<option value="">None</option>', ...staffNames.map(name => `<option value="${name}">${name}</option>`)].join("");
+    
+    const dropdownsHtml = `
+      <div class="assignment-controls d-flex flex-wrap align-items-end gap-2 mt-2 mb-3">
+      <div class="form-group me-2">
+        <label>Agency:</label>
+        <select class="form-control agency-select" data-student="${student.Name}">
+          <option value="">-- Select Agency --</option>
+          ${agencyOptions}
+        </select>
+      </div>
+
+      <div class="form-group me-2">
+        <label>LO:</label>
+        <select class="form-control lo-select" data-student="${student.Name}">
+          <option value="">-- Select LO --</option>
+          ${loOptions}
+        </select>
+      </div>
+
+      <div class="form-group me-2">
+        <label>EFE:</label>
+        <select class="form-control efe-select" data-student="${student.Name}">
+          ${efeOptions}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button class="btn btn-outline-primary d-block save-assignment-btn" data-student="${student.Name}">Save</button>
+      </div>
+    </div>
+
+    `;
+    
+
+studentDiv.innerHTML += dropdownsHtml;
+
+
 
 
     fe2Results.appendChild(studentDiv)
@@ -1756,6 +1932,47 @@ document.getElementById("resultsSummary").innerHTML = summaryHTML;
       </div>
       ${scoreHtml}
     `
+
+    const agencyOptions = allAgencies.map(a => `<option value="${a.Name}">${a.Name}</option>`).join("");
+    const staffNames = [...new Set(sessionalStaffList.map(s => s.Name))];
+    const loOptions = staffNames.map(name => `<option value="${name}">${name}</option>`).join("");
+    const efeOptions = ['<option value="">None</option>', ...staffNames.map(name => `<option value="${name}">${name}</option>`)].join("");
+    
+    const dropdownsHtml = `
+      <div class="assignment-controls d-flex flex-wrap align-items-end gap-2 mt-2 mb-3">
+      <div class="form-group me-2">
+        <label>Agency:</label>
+        <select class="form-control agency-select" data-student="${student.Name}">
+          <option value="">-- Select Agency --</option>
+          ${agencyOptions}
+        </select>
+      </div>
+
+      <div class="form-group me-2">
+        <label>LO:</label>
+        <select class="form-control lo-select" data-student="${student.Name}">
+          <option value="">-- Select LO --</option>
+          ${loOptions}
+        </select>
+      </div>
+
+      <div class="form-group me-2">
+        <label>EFE:</label>
+        <select class="form-control efe-select" data-student="${student.Name}">
+          ${efeOptions}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button class="btn btn-outline-primary d-block save-assignment-btn" data-student="${student.Name}">Save</button>
+      </div>
+    </div>
+
+    `;
+    
+
+studentDiv.innerHTML += dropdownsHtml;
   
 
     fe1Results.appendChild(studentDiv)
@@ -1794,10 +2011,81 @@ document.getElementById("resultsSummary").innerHTML = summaryHTML;
           Reason: ${student.unassignedReason || "No suitable match found"}
         </div>
       `
+      const agencyOptions = allAgencies.map(a => `<option value="${a.Name}">${a.Name}</option>`).join("");
+    const staffNames = [...new Set(sessionalStaffList.map(s => s.Name))];
+    const loOptions = staffNames.map(name => `<option value="${name}">${name}</option>`).join("");
+    const efeOptions = ['<option value="">None</option>', ...staffNames.map(name => `<option value="${name}">${name}</option>`)].join("");
+    
+    const dropdownsHtml = `
+      <div class="assignment-controls mt-2 mb-3">
+        <div class="form-group mb-2">
+          <label>Agency:</label>
+          <select class="form-control agency-select" data-student="${student.Name}">
+            <option value="">-- Select Agency --</option>
+            ${agencyOptions}
+          </select>
+        </div>
+    
+        <div class="form-group mb-2">
+          <label>LO:</label>
+          <select class="form-control lo-select" data-student="${student.Name}">
+            <option value="">-- Select LO --</option>
+            ${loOptions}
+          </select>
+        </div>
+    
+        <div class="form-group mb-2">
+          <label>EFE:</label>
+          <select class="form-control efe-select" data-student="${student.Name}">
+            ${efeOptions}
+          </select>
+        </div>
+    
+        <button class="btn btn-outline-primary save-assignment-btn" data-student="${student.Name}">Save</button>
+      </div>
+    `;
+    
+
+      studentDiv.innerHTML += dropdownsHtml;
 
       unassignedResults.appendChild(studentDiv)
     }
   }
+
+  document.querySelectorAll(".save-assignment-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const studentName = e.target.getAttribute("data-student");
+      const student = matchedStudents.find(s => s.Name === studentName);
+      if (!student) return;
+  
+      const agency = document.querySelector(`.agency-select[data-student="${studentName}"]`).value;
+      const lo = document.querySelector(`.lo-select[data-student="${studentName}"]`).value;
+      const efe = document.querySelector(`.efe-select[data-student="${studentName}"]`).value;
+  
+      student.assignment = agency;
+      student.assignedLO = lo;
+      student.assignedEFE = efe;
+  
+      const agencyObj = allAgencies.find(a => a.Name === agency);
+      if (agencyObj) {
+        student.scoreDetails = calculateMatchScore(student, agencyObj, geoCache);
+        student.matchScore = student.scoreDetails.total;
+        student.assignedSector = agencyObj.Sector;
+      }
+  
+      updateMapLinesAfterEdit();
+      const updatedScore = (
+        matchedStudents.reduce((sum, s) => sum + (s.matchScore || 0), 0) /
+        (matchedStudents.length * 100)
+      ) * 100;
+      
+      displayResults({ matchScore: updatedScore.toFixed(2) }, fe2Students, fe1Students);
+      
+      notyf.success(`Updated ${studentName}'s assignments`);
+    });
+  });
+  
+  
  
 
 }
