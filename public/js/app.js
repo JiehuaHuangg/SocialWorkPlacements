@@ -70,7 +70,13 @@ function determineRegion(lat, lng) {
   const perthLat = -31.9523
   const perthLng = 115.8613
 
-  // define region boundaries buffer value 30 km morethan or lessthan means any cardinal symbol
+    // We define a buffer of 0.3 degrees (~30 km), since 1 degree ≈ 111 km on Earth
+  // This buffer helps classify locations into broader regions:
+  // - North/South if latitude differs significantly
+  // - East/West if longitude differs significantly
+  // - Central if both latitude and longitude are within 0.3 degrees of Perth
+  // - Rural if it doesn't fall into any of the above
+
   if (lat < perthLat - 0.3) {
     return "South"
   } else if (lat > perthLat + 0.3) {
@@ -339,6 +345,59 @@ function processStakeholders() {
   console.log(`Processed ${stakeholders.length} total stakeholders`)
 }
 
+// Convert stakeholders to GeoJSON format for clustering
+function stakeholdersToGeoJSON(filteredStakeholders) {
+  return {
+    type: "FeatureCollection",
+    features: filteredStakeholders.map((stakeholder) => ({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: stakeholder.location,
+      },
+      properties: {
+        id: stakeholder.id,
+        name: stakeholder.name,
+        stakeholderType: stakeholder.stakeholderType,
+        address: stakeholder.address || "",
+        suburb: stakeholder.suburb || "",
+        region: stakeholder.region || "",
+        // Add other properties based on stakeholder type
+        ...(stakeholder.stakeholderType === "fe1_students" || stakeholder.stakeholderType === "fe2_students"
+          ? {
+              driversLicence: stakeholder.driversLicence || "",
+              studentType: stakeholder.studentType || "",
+              gender: stakeholder.gender || "",
+              firstNation: stakeholder.firstNation || "",
+              coordinator: stakeholder.coordinator || "",
+              sectors: stakeholder.sectors ? stakeholder.sectors.join(", ") : "",
+              exceptions: stakeholder.exceptions ? stakeholder.exceptions.join(", ") : "",
+            }
+          : {}),
+        ...(stakeholder.stakeholderType === "fe2_students"
+          ? {
+              fe1Sector: stakeholder.fe1Sector || "",
+              fe1Supervisor: stakeholder.fe1Supervisor || "",
+            }
+          : {}),
+        ...(stakeholder.stakeholderType === "agencies"
+          ? {
+              sector: stakeholder.sector || "",
+              availableSpots: stakeholder.availableSpots || 0,
+              supervisor: stakeholder.supervisor || "",
+            }
+          : {}),
+        ...(stakeholder.stakeholderType === "sessional_staff"
+          ? {
+              efe: stakeholder.efe || 0,
+              lo: stakeholder.lo || 0,
+            }
+          : {}),
+      },
+    })),
+  }
+}
+
 // Initialize Mapbox map
 function initializeMap() {
   mapboxgl.accessToken = MAPBOX_TOKEN
@@ -482,6 +541,30 @@ function setupFilterListeners() {
   if (resetBtn) {
     resetBtn.addEventListener("click", resetAllFilters)
   }
+
+  
+  // Add zoom level change listener to update marker display
+  map.on("zoomend", () => {
+    const currentZoom = map.getZoom()
+    // Toggle cluster visibility based on zoom level
+    if (map.getSource("stakeholders")) {
+      if (currentZoom < 10) {
+        // Show clusters when zoomed out
+        map.setLayoutProperty("clusters", "visibility", "visible")
+        map.setLayoutProperty("cluster-count", "visibility", "visible")
+        map.setLayoutProperty("unclustered-point", "visibility", "visible")
+        // Hide individual markers
+        markers.forEach((marker) => (marker.getElement().style.display = "none"))
+      } else {
+        // Hide clusters when zoomed in
+        map.setLayoutProperty("clusters", "visibility", "none")
+        map.setLayoutProperty("cluster-count", "visibility", "none")
+        map.setLayoutProperty("unclustered-point", "visibility", "none")
+        // Show individual markers
+        markers.forEach((marker) => (marker.getElement().style.display = "block"))
+      }
+    }
+  })
 }
 
 // Update the filters object based on UI selections
@@ -578,7 +661,10 @@ function createMarkerElement(stakeholder) {
     el.classList.add("marker-agency")
     // insert capacity number if available
     if (stakeholder.availableSpots && stakeholder.availableSpots > 0) {
-      el.textContent = stakeholder.availableSpots
+      const textSpan = document.createElement("span")
+      textSpan.className = "marker-agency-text"
+      textSpan.textContent = stakeholder.availableSpots
+      el.appendChild(textSpan)
     }
   } else if (stakeholder.stakeholderType === "sessional_staff") {
     el.classList.add("marker-staff")
@@ -681,6 +767,14 @@ function addMarkers() {
   markers.forEach((marker) => marker.remove())
   markers = []
 
+  // Remove existing sources and layers if they exist
+  if (map.getSource("stakeholders")) {
+    map.removeLayer("clusters")
+    map.removeLayer("cluster-count")
+    map.removeLayer("unclustered-point")
+    map.removeSource("stakeholders")
+  }
+
   // Filter stakeholders based on current filters
   const filteredStakeholders = stakeholders.filter((stakeholder) => {
     // Skip stakeholders without location
@@ -754,23 +848,213 @@ function addMarkers() {
       (stakeholder.name && stakeholder.name.toLowerCase().includes(searchLower)) ||
       (stakeholder.suburb && stakeholder.suburb.toLowerCase().includes(searchLower))
 
-    return (
-      typeMatch &&
-      regionMatch &&
-      interestMatch &&
-      licenceMatch &&
-      studentTypeMatch &&
-      genderMatch &&
-      searchMatch
+    return (typeMatch && regionMatch && interestMatch && licenceMatch && studentTypeMatch && genderMatch && searchMatch
     )
   })
 
   console.log(`Showing ${filteredStakeholders.length} of ${stakeholders.length} stakeholders after filtering`)
 
+  // Convert filtered stakeholders to GeoJSON for clustering
+  const geojsonData = stakeholdersToGeoJSON(filteredStakeholders)
+
+  // Add a GeoJSON source with clustering enabled
+  map.addSource("stakeholders", {
+    type: "geojson",
+    data: geojsonData,
+    cluster: true,
+    clusterMaxZoom: 14, // Max zoom to cluster points
+    clusterRadius: 50, // Radius of each cluster when clustering points
+  })
+
+  // Add a layer for the clusters
+  map.addLayer({
+    id: "clusters",
+    type: "circle",
+    source: "stakeholders",
+    filter: ["has", "point_count"],
+    paint: {
+      // Use different colors for different cluster sizes
+      "circle-color": [
+        "step",
+        ["get", "point_count"],
+        "#51bbd6", // Small clusters
+        10,
+        "#f1f075", // Medium clusters
+        30,
+        "#f28cb1", // Large clusters
+      ],
+      "circle-radius": [
+        "step",
+        ["get", "point_count"],
+        20, // Size for small clusters
+        10,
+        30, // Size for medium clusters
+        30,
+        40, // Size for large clusters
+      ],
+      "circle-stroke-width": 2,
+      "circle-stroke-color": "#fff",
+    },
+  })
+
+  // Add a layer for the cluster count labels
+  map.addLayer({
+    id: "cluster-count",
+    type: "symbol",
+    source: "stakeholders",
+    filter: ["has", "point_count"],
+    layout: {
+      "text-field": "{point_count_abbreviated}",
+      "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+      "text-size": 12,
+    },
+    paint: {
+      "text-color": "#ffffff",
+    },
+  })
+
+  // Add a layer for individual points
+  map.addLayer({
+    id: "unclustered-point",
+    type: "circle",
+    source: "stakeholders",
+    filter: ["!", ["has", "point_count"]],
+    paint: {
+      // Different colors based on stakeholder type
+      "circle-color": [
+        "match",
+        ["get", "stakeholderType"],
+        "fe1_students",
+        "#3498db",
+        "fe2_students",
+        "#9b59b6",
+        "agencies",
+        "#B4B897",
+        "sessional_staff",
+        "#2ecc71",
+        "#ccc", // default color
+      ],
+      "circle-radius": 10,
+      "circle-stroke-width": 2,
+      "circle-stroke-color": "#fff",
+    },
+  })
+
+  // Add click event for clusters
+  map.on("click", "clusters", (e) => {
+    const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] })
+    const clusterId = features[0].properties.cluster_id
+    const source = map.getSource("stakeholders")
+
+    source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+      if (err) return
+
+      map.easeTo({
+        center: features[0].geometry.coordinates,
+        zoom: zoom,
+      })
+    })
+  })
+
+  // Add click event for individual points
+  map.on("click", "unclustered-point", (e) => {
+    const coordinates = e.features[0].geometry.coordinates.slice()
+    const properties = e.features[0].properties
+
+    // Create popup content
+    let popupContent = `
+      <div class="popup-title">${properties.name}</div>
+      <div class="popup-type">${getStakeholderTypeName(properties.stakeholderType)}</div>
+      <div class="popup-info"><strong>Address:</strong> ${properties.address || "N/A"}</div>
+      <div class="popup-info"><strong>Suburb:</strong> ${properties.suburb || "Unknown"}</div>
+      <div class="popup-info"><strong>Region:</strong> ${properties.region || "Unknown"}</div>
+    `
+
+    // Add type-specific information
+    if (properties.stakeholderType === "fe1_students" || properties.stakeholderType === "fe2_students") {
+      popupContent += `
+        <div class="popup-section">
+          <div class="popup-info"><strong>Student Type:</strong> ${properties.studentType || "N/A"}</div>
+          <div class="popup-info"><strong>Driver's License:</strong> ${properties.driversLicence || "N/A"}</div>
+          <div class="popup-info"><strong>Gender:</strong> ${properties.gender || "N/A"}</div>
+          <div class="popup-info"><strong>First Nation:</strong> ${properties.firstNation || "No"}</div>
+          <div class="popup-info"><strong>UWA Coordinator:</strong> ${properties.coordinator || "N/A"}</div>
+      `
+
+      // Add FE2 specific info
+      if (properties.stakeholderType === "fe2_students") {
+        popupContent += `
+          <div class="popup-info"><strong>FE1 Sector:</strong> ${properties.fe1Sector || "N/A"}</div>
+          <div class="popup-info"><strong>FE1 Supervisor:</strong> ${properties.fe1Supervisor || "No"}</div>
+        `
+      }
+
+      // Add sectors
+      if (properties.sectors) {
+        popupContent += `<div class="popup-info"><strong>Interested Sectors:</strong> ${properties.sectors}</div>`
+      }
+
+      // Add exceptions
+      if (properties.exceptions) {
+        popupContent += `<div class="popup-info"><strong>Sector Exceptions:</strong> ${properties.exceptions}</div>`
+      }
+
+      popupContent += `</div>`
+    } else if (properties.stakeholderType === "agencies") {
+      popupContent += `
+        <div class="popup-section">
+          <div class="popup-info"><strong>Sector:</strong> ${properties.sector || "N/A"}</div>
+          <div class="popup-info"><strong>Available Spots:</strong> ${properties.availableSpots || "0"}</div>
+          <div class="popup-info"><strong>Onsite SW Supervisor:</strong> ${properties.supervisor || "No"}</div>
+          <div class="popup-info"><strong>Exception:</strong> ${properties.exception || "None"}</div>
+        </div>
+      `
+    } else if (properties.stakeholderType === "sessional_staff") {
+      popupContent += `
+        <div class="popup-section">
+          <div class="popup-info"><strong>EFE:</strong> ${properties.efe || "0"}</div>
+          <div class="popup-info"><strong>LO:</strong> ${properties.lo || "0"}</div>
+        </div>
+      `
+    }
+
+    // Ensure that if the map is zoomed out such that multiple copies of the feature are visible,
+    // the popup appears over the copy being pointed to
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360
+    }
+
+    new mapboxgl.Popup().setLngLat(coordinates).setHTML(popupContent).addTo(map)
+  })
+
+  // Change cursor on hover
+  map.on("mouseenter", "clusters", () => {
+    map.getCanvas().style.cursor = "pointer"
+  })
+
+  map.on("mouseleave", "clusters", () => {
+    map.getCanvas().style.cursor = ""
+  })
+
+  map.on("mouseenter", "unclustered-point", () => {
+    map.getCanvas().style.cursor = "pointer"
+  })
+
+  map.on("mouseleave", "unclustered-point", () => {
+    map.getCanvas().style.cursor = ""
+  })
+
+
+
   // Add markers for filtered stakeholders
   filteredStakeholders.forEach((stakeholder) => {
     // Create marker element
     const el = createMarkerElement(stakeholder)
+
+    // Initially hide the marker if we're zoomed out
+    if (map.getZoom() < 10) {
+      el.style.display = "none"
+    }
 
     // Create popup content
     const popupContent = createPopupContent(stakeholder)
@@ -786,6 +1070,22 @@ function addMarkers() {
   // If no markers are visible after filtering, show a notification
   if (filteredStakeholders.length === 0) {
     showNotification("No stakeholders match the current filters")
+  }
+}
+
+// Helper function to get stakeholder type display name
+function getStakeholderTypeName(type) {
+  switch (type) {
+    case "fe1_students":
+      return "FE1 Student"
+    case "fe2_students":
+      return "FE2 Student"
+    case "agencies":
+      return "Agency"
+    case "sessional_staff":
+      return "Sessional Staff"
+    default:
+      return "Unknown"
   }
 }
 
@@ -913,21 +1213,6 @@ async function init() {
     showNotification("Error initializing application. Please check console for details.")
   }
 }
-// Get buttons and sidebars
-const toggleLeftBtn = document.getElementById("toggle-left-sidebar");
-const toggleRightBtn = document.getElementById("toggle-right-sidebar");
-
-const leftSidebar = document.getElementById("left-sidebar");
-const rightSidebar = document.getElementById("right-sidebar");
-
-// Add toggle logic
-toggleLeftBtn.addEventListener("click", () => {
-  leftSidebar.classList.toggle("hidden");
-});
-
-toggleRightBtn.addEventListener("click", () => {
-  rightSidebar.classList.toggle("hidden");
-});
 
 // Start the application
 document.addEventListener("DOMContentLoaded", () => {
