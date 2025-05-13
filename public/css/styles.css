@@ -1,472 +1,426 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-  }
-  
-  body.map-view {
-    overflow: hidden;
-  }
-  
-  /*Map styles:full screen background */
-  #map {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-  }
-  
-  /* Search container styles */
-  .search-container-wrapper {
-    position: absolute;
-    top: 80px;
-    left: 49%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 500px;
-    z-index: 10;
-  }
-  
-  .search-container {
-    background-color: white;
-    border-radius: 50px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    width: 100%;
-    transition: all 0.3s ease;
-  }
-  
-  .search-container:hover {
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  }
-  
-  .form-control.search-input {
-    border: none;
-    background: transparent;
-    padding-left: 20px;
-    font-size: 1rem;
-    height: 50px;
-  }
-  
-  .form-control.search-input:focus {
-    box-shadow: none;
-    outline: none;
-  }
-  
-  .btn-search {
-    background-color: #27358c;
-    color: white;
-    border-radius: 50px;
-    padding: 10px 20px;
-    border: none;
-    transition: all 0.3s ease;
-  }
-  
-  .btn-search:hover {
-    background-color: #1e2a6e;
-    transform: scale(1.05);
-  }
-  
-  .btn-primary {
-    background-color: #0056b3;
-    color: white;
-    border-radius: 50px;
-    padding: 10px 20px;
-    border: none;
-    transition: all 0.3s ease;
-  }
-  
-  .search-icon {
-    color: #6c757d;
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  .navbar{
-    z-index: 100;
-  }
-  
-  /* left sidebar styles */
-  .sidebar {
-    position: absolute;
-    top: 80px;
-    left: 20px;
-    width: 200px;
-    height: calc(100vh - 200px);
-    /* adjust to fit above the legend bar */
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-    overflow-y: auto;
-  }
-  
-  /* hide scrollbar for chrome, safari and opera */
-  .sidebar::-webkit-scrollbar,
-  .sidebar-right::-webkit-scrollbar {
-    display: none;
-  }
-  
-  /* hide scrollbar for , edge */
-  .sidebar,
-  .sidebar-right {
-    -ms-overflow-style: none;
-  }
-  
-  /* hide scrollbar for firefox */
-  .sidebar,
-  .sidebar-right {
-    scrollbar-width: none;
-  }
-  
-  /*sidebar left header class*/
-  .sidebar-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background-color: #0056b3;
-    color: white;
-    padding: 15px 20px;
-    border-radius: 8px 8px 0 0;
-  }
-  
-  .sidebar-header h2 {
-    font-size: 18px;
-    font-weight: bold;
-    margin: 0;
-  }
-  
-  .sidebar-content {
-    padding: 15px;
-  }
-  
-  /* right sidebar styles */
-  .sidebar-right {
-    position: absolute;
-    top: 80px;
-    right: 50px;
-    width: 200px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-    height: calc(100vh - 200px);
-    overflow-y: auto;
-    /* allow dropdowns to overflow */
-    /*overflow: scroll;*/
-  }
-  
-  .sidebar-header-right {
-    padding: 15px;
-    background-color: #0056b3;
-    color: white;
-    border-radius: 8px 8px 0 0;
-    overflow-y: auto;
-  }
-  
-  .sidebar-header-right h3 {
-    font-size: 18px;
-    font-weight: 500;
-    margin: 0;
-  }
-  
-  /* Filter styles for radio and checkbox used*/
-  .filter-group,
-  .filter-section1 {
-    margin-bottom: 20px;
-  }
-  
-  .filter-section1 {
-    padding-left: 15px;
-    padding-right: 15px;
-    margin-top: 20px;
-  }
-  
-  .filter-group h3,
-  .filter-section1 h3,
-  .filter-section h2 {
-    font-size: 1rem;
-    margin-bottom: 10px;
-  }
-  
-  .filter-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-    font-size: 14px;
-  }
-  
-  .filter-item input[type="checkbox"],
-  .filter-item input[type="radio"] {
-    margin-right: 10px;
-    cursor: pointer;
-  }
-  
-  .filter-item ~ .form-check-input {
-    accent-color: black;
-  }
-  
-  .filter-item label {
-    font-size: 14px;
-  }
-  
-  .form-check input.form-check-input {
-    accent-color: #0056b3;
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
-  }
-  
-  .form-check input.form-check-input:checked {
-    accent-color: #0056b3;
-  }
-  
-  .filter-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  
-  .filter-option {
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 0.3rem 0.8rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .filter-option:hover {
-    background-color: #e0e0e0;
-  }
-  
-  .filter-option.active {
-    background-color: #4285f4;
-    color: white;
-    border-color: #4285f4;
-  }
-  
-  .filter-group input[radio] {
-    color: #0056b3;
-  }
-  
-  .filter-group {
-    accent-color: #4285f4;
-  }
-  
-  /*legend styles*/
-  .map-container {
-    position: relative;
-    width: 200px;
-    margin-bottom: 56%;
-    
-  }
-  
-  /*legend styles*/
-  .legend {
-    position: absolute;
-    top: 30em;
-    left: 20px;
-    background-color: white;
-    padding: 12px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 1;
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-    
-  }
-  
-  .legend-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-    font-size: 14px;
-  }
-  
-  .legend-marker {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-    border: 1px solid #333;
-  }
-  
-  /* Marker styles for legend */
-  .fe1-marker {
-    background-color: #3498db;
-    border-radius: 50%;
-  }
-  
-  .fe2-marker {
-    background-color: #9b59b6;
-    border-radius: 0;
-  }
-  
-  .agency-marker {
-    background-color: #B4B897;
-    border-radius: 50%;
-    transform: rotate(45deg);
-  }
-  
-  
-  .staff-marker {
-    background-color: #2ecc71;
-    border-radius: 3px;
-  }
-  
-  /*marker styles*/
-  .marker {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 12px;
-    box-shadow: 0 0 0 2px white;
-    border-style: solid;
-    border-color: black;
-  }
-  
-  /* Specific marker styles */
-  .marker-fe1 {
-    background-color: #3498db;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    border-color: black;
-  
-  }
-  
-  .marker-fe2 {
-    background-color: #9b59b6;
-    border-radius: 0;
-    width: 20px;
-    height: 20px;
-  }
-  
-  .marker-agency {
-    background-color: #B4B897;
-    border-radius: 50%;
-    transform: rotate(45deg);
-    width: 20px;
-    height: 20px;
-    
-  }
-  
-  .marker-staff {
-    background-color: #2ecc71;
-    border-radius: 3px;
-    width: 20px;
-    height: 20px;
-  }
-   
-  /*reset button styles*/
-  #reset-btn {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 10px;
-    transition: background-color 0.3s;
-  }
-  
-  #reset-btn:hover {
-    background-color: #5a6268;
-  }
-  
-  /* Popup styles */
-  .mapboxgl-popup-content {
-    padding: 15px;
-    max-width: 300px;
-  }
-  
-  .popup-title {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
-  }
-  
-  .popup-type {
-    font-size: 12px;
-    background-color: #f0f0f0;
-    padding: 2px 6px;
-    border-radius: 10px;
-    display: inline-block;
-    margin-bottom: 8px;
-  }
-  
-  .popup-info {
-    font-size: 13px;
-    margin-bottom: 5px;
-  }
-  
-  .popup-info strong {
-    font-weight: 600;
-  }
-  
-  .popup-section {
-    margin-top: 8px;
-    padding-top: 5px;
-    border-top: 1px dashed #eee;
-  }
-  /* Tablet responsive */
-@media (max-width: 1024px) {
-  .search-container-wrapper {
-display: none;  }
-  
-  
-  .map-container{
-    bottom: 60px;
-  }
-  .sidebar-right{
-    right: 20px;
-  }
-  /* Sidebar toggle buttons */
-  .sidebar-toggles {
-    display: flex;
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-  }
-  
-  .toggle-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: #0056b3;
-    color: white;
-    border: none;
-    margin: 0 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    font-size: 1.2rem;
-  }
-  
-  .toggle-btn:focus {
-    outline: none;
-  }
-  .sidebar {
-    transition: all 0.3s ease;
-  }
-  
-  .hidden {
-    display: none;
-  }  
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  overflow: hidden;
+}
+
+/*Map styles:full screen background */
+#map {
+  position: absolute;
+  top: 56px; /* Height of your navbar (adjust if needed) */
+  bottom: 0;
+  width: 100%;
+  height: calc(100% - 56px); /* Make space for the navbar */
 }
 
 
+/* Search container styles */
+.search-container-wrapper {
+  position: absolute;
+  top: 80px;
+  left: 49%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 500px;
+  z-index: 10;
+}
+
+.search-container {
+  background-color: white;
+  border-radius: 50px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.search-container:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.form-control.search-input {
+  border: none;
+  background: transparent;
+  padding-left: 20px;
+  font-size: 1rem;
+  height: 50px;
+}
+
+.form-control.search-input:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.btn-search {
+  background-color: #007bff;
+  color: white;
+  border-radius: 50px;
+  padding: 10px 20px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-search:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.search-icon {
+  color: #6c757d;
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
+/* left sidebar styles */
+.sidebar {
+  position: absolute;
+  top: 80px;
+  left: 20px;
+  width: 200px;
+  height: calc(100vh - 200px);
+  /* adjust to fit above the legend bar */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  overflow-y: auto;
+}
+
+/* hide scrollbar for chrome, safari and opera */
+.sidebar::-webkit-scrollbar,
+.sidebar-right::-webkit-scrollbar {
+  display: none;
+}
+
+/* hide scrollbar for , edge */
+.sidebar,
+.sidebar-right {
+  -ms-overflow-style: none;
+}
+
+/* hide scrollbar for firefox */
+.sidebar,
+.sidebar-right {
+  scrollbar-width: none;
+}
+
+/*sidebar left header class*/
+.sidebar-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #0056b3;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px 8px 0 0;
+}
+
+.sidebar-header h2 {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.sidebar-content {
+  padding: 15px;
+}
+
+/* right sidebar styles */
+.sidebar-right {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  width: 200px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  height: calc(100vh - 200px);
+  overflow-y: auto;
+  /* allow dropdowns to overflow */
+  /*overflow: scroll;*/
+}
+
+.sidebar-header-right {
+  padding: 15px;
+  background-color: #0056b3;
+  color: white;
+  border-radius: 8px 8px 0 0;
+  overflow-y: auto;
+}
+
+.sidebar-header-right h3 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Filter styles for radio and checkbox used*/
+.filter-group,
+.filter-section1 {
+  margin-bottom: 20px;
+}
+
+.filter-section1 {
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-top: 20px;
+}
+
+.filter-group h3,
+.filter-section1 h3,
+.filter-section h2 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.filter-item input[type="checkbox"],
+.filter-item input[type="radio"] {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.filter-item ~ .form-check-input {
+  accent-color: black;
+}
+
+.filter-item label {
+  font-size: 14px;
+}
+
+.form-check input.form-check-input {
+  accent-color: #0056b3;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.form-check input.form-check-input:checked {
+  accent-color: #0056b3;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-option {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-option:hover {
+  background-color: #e0e0e0;
+}
+
+.filter-option.active {
+  background-color: #4285f4;
+  color: white;
+  border-color: #4285f4;
+}
+
+.filter-group input[radio] {
+  color: #0056b3;
+}
+
+.filter-group {
+  accent-color: #4285f4;
+}
+
+/*legend styles*/
+.map-container {
+  width: 200px;
+}
+
+/*legend styles*/
+.legend {
+  position: fixed;
+  bottom: 40px;
+  left: 20px;
+  background-color: white;
+  padding: 12px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.legend-marker {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border: 1px solid #333;
+}
+
+/* Marker styles for legend */
+.fe1-marker {
+  background-color: #3498db;
+  border-radius: 50%;
+}
+
+.fe2-marker {
+  background-color: #9b59b6;
+  border-radius: 0;
+}
+
+.agency-marker {
+  background-color: #b4b897;
+  border-radius: 50%;
+  transform: rotate(45deg);
+}
+
+.staff-marker {
+  background-color: #2ecc71;
+  border-radius: 3px;
+}
+
+/*marker styles*/
+.marker {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 12px;
+  box-shadow: 0 0 0 2px white;
+  border-style: solid;
+  border-color: black;
+}
+
+/* Specific marker styles */
+.marker-fe1 {
+  background-color: #3498db;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  border-color: black;
+  
+}
+
+.marker-fe2 {
+  background-color: #9b59b6;
+  border-radius: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.marker-agency {
+  background-color: #b4b897;
+  border-radius: 50%;
+  transform: rotate(45deg);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Add a new class for the text inside agency markers */
+.marker-agency-text {
+  display: inline-block;
+  text-align: center;
+  justify-content: center;
+  width: 100%;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.marker-staff {
+  background-color: #2ecc71;
+  border-radius: 3px;
+  width: 20px;
+  height: 20px;
+}
+
+/*reset button styles*/
+#reset-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+#reset-btn:hover {
+  background-color: #5a6268;
+}
+
+/* Popup styles */
+.mapboxgl-popup-content {
+  padding: 15px;
+  max-width: 300px;
+}
+
+.popup-title {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+.popup-type {
+  font-size: 12px;
+  background-color: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 10px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.popup-info {
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.popup-info strong {
+  font-weight: 600;
+}
+
+.popup-section {
+  margin-top: 8px;
+  padding-top: 5px;
+  border-top: 1px dashed #eee;
+}
+
+/* Cluster styles */
+.mapboxgl-popup-content {
+  padding: 15px;
+  max-width: 300px;
+}
