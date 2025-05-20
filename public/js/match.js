@@ -2205,8 +2205,8 @@ const staffSummaryData = Array.from(staffSummaryMap.values()).map((s) => {
     "Assigned Students": s.assigned,
     "LO Capacity": original.LO || 0,
     "EFE Capacity": original.EFE || 0,
-    "Remaining LO": (original.LO || 0) - (s.role.includes("LO") ? s.assigned : 0),
-    "Remaining EFE": (original.EFE || 0) - (s.role.includes("EFE") ? s.assigned : 0),
+    "Remaining LO": (original.LO || 0) - matchedStudents.filter(stu => stu.assignedLO === s.name).length,
+    "Remaining EFE": (original.EFE || 0) - matchedStudents.filter(stu => stu.assignedEFE === s.name).length,
     "Sectors": original.Sector || "",
     "Location": original.Location || ""
   };

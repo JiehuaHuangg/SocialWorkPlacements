@@ -25,51 +25,57 @@ This project aims to simplify and improve the placement matching process for UWA
 
 ## 🛠️ Tech Stack  
 
-- **Frontend:** HTML, CSS(Bootstrap), Javascript  
+- **Frontend:** HTML, CSS (custom + Bootstrap), JavaScript (ES6 modules) 
 - **Backend:** Firebase Services  
 - **Database:** Firebase Firestore
 - **Mapping Services:** Mapbox GL JS  
-- **Deployment:** Firebase Hosting  
+- **Testing:** Mocha, Chai (for logic/utilities)
+- **Deployment:** Github Pages  
 
 ## ✅ Project Structure  
 
 ```bash
-├── public/                          
-│   ├── index.html                   
-│   ├── pages/                       
+project-root/
+├── .firebaserc                  # Firebase project config
+├── .gitignore
+├── firebase.json                # Firebase Hosting, Firestore, Storage config
+├── README.md
+├── config.json                  # (Optional) App config/settings
+│
+├── public/                      # All static assets (served by Firebase Hosting)
+│   ├── index.html               # Main entry point
+│   ├── pages/                   # Modular HTML pages (routed in-app)
 │   │   ├── login.html
-│   │   ├── upload-file.html
+│   │   ├── manual.html
 │   │   ├── map-filter.html
-│   │   └── matching.html
-│   ├── css/                    
-│   │   └── styles.css
-│   ├── js/                         
-│   │   ├── main.js
-│   │   ├── uploade-file.js 
-│   │   ├── map.js                  
-│   │   ├── firebase.js              
-│   │   └── matching.js         
-│   └── assets/                      
+│   │   ├── match.html
+│   │   ├── test.html
+│   │   └── upload-file.html
+│   ├── css/                     # Custom CSS by feature/page
+│   │   ├── manual.css
+│   │   ├── matching-settings.css
+│   │   ├── nav.css
+│   │   ├── styles.css
+│   │   └── upload-file.css
+│   ├── images/                  # Screenshots and UI assets
+│   │   ├── login-screenshot.png
+│   │   ├── manual-hero.png
+│   │   ├── map-overview.png
+│   │   ├── matching-overview.png
+│   │   └── upload-steps.png
+│   ├── js/                      # All main JS logic (ES6 modules)
+│   │   ├── app.js               # Main entry/app logic
+│   │   ├── auth.js              # Auth/signup/login logic
+│   │   ├── auth-check.js        # Auth guard for protected pages
+│   │   ├── firebase-config.js   # Firebase config/init
+│   │   ├── logout.js            # Logout logic
+│   │   ├── manual.js            # Help/manual page logic
+│   │   ├── match.js             # Matching algorithm/logic
+│   │   └── upload-file.js       # Excel upload & validation logic
 │
-├── firebase/                   
-│   ├── functions/           
-│   │   ├── index.js             
-│   │   ├── matchingAlgorithm.js    
-│   │   └── utils.js             
-│   ├── firestore.rules             
-│   ├── firebase.json              
-│   ├── .firebaserc               
-│   └── storage.rules       
-│
-├── data/                           
-│   ├── sample_students.csv
-│   ├── sample_agencies.csv
-│   └── placement_results_sample.xlsx
-│
-├── docs/                    
-│   └── requirements.md
-│
-└── README.md             
+├── firestore.rules              # Firestore security rules
+├── storage.rules                # Firebase Storage security rules
+          
 ```
 
 ## 🗂️ Project Management and Documentation  
@@ -83,9 +89,9 @@ This project aims to simplify and improve the placement matching process for UWA
 | Phase                 | Duration       | Status        |
 |-----------------------|----------------|---------------|
 | Planning & Research   | Weeks 1-3      | ✅ Completed  |
-| Design & Prototyping  | Weeks 4-6      | ⏳ In progress |
-| Development           | Weeks 7-9      | 🚧 Upcoming   |
-| Testing & Deployment  | Weeks 10-12    | 🚧 Upcoming   |
+| Design & Prototyping  | Weeks 4-6      | ✅ Completed  |
+| Development           | Weeks 7-9      | ✅ Completed  |
+| Testing & Deployment  | Weeks 10-12    | ✅ Completed  |
 
 ## 👥 Team Members  
 
@@ -98,30 +104,28 @@ This project aims to simplify and improve the placement matching process for UWA
 | Zongqi Wu       | 23957505     | @jacky-zq-woo  |
 
 ## 📌 How to Run Locally  
-Follow these instructions to run the application locally.
+Follow these instructions to run the application locally as a static site:
 
 **1. Clone the Repository**
 ```bash
 git clone <[https://github.com/JiehuaHuangg/SocialWorkPlacements.git](https://github.com/JiehuaHuangg/SocialWorkPlacements.git)>
-cd project-folder
+cd SocialWorkPlacements
 ```
-**2. Install Firebase CLI**
+**2. Open the Application in Your Browser**
+You can open the app directly from your file system:
+Open public/index.html in your browser (or double-click it in your file explorer).
+Recommended:
+For the best experience with ES6 modules and local file security, use a simple HTTP server. For example:
 ```bash
-npm install -g firebase-tools
+cd public
+python -m http.server 8080
 ```
-**3. Log in to Firebase**
-```bash
-firebase login
-```
-**4. Run the App Locally**
-Start the Firebase emulator to serve your app locally:
-```bash
-firebase serve
-```
-The application will now be accessible at:
-```
-http://localhost:5000
-```
+Then open http://localhost:8080/ in your browser.
+Or use Live Server in VSCode:
+Right-click public/index.html and select "Open with Live Server".
+
+Production deployment is on GitHub Pages
+All Firebase features (authentication, Firestore, storage) work in the browser via the client SDK.
 
 
 ## 🎓 Academic Context

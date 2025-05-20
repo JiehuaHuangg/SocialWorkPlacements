@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UWA Social Work Placement Mapper - User Manual</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../css/nav.css">
+    <link rel="stylesheet" href="../css/manual.css">
+    
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary custom-navbar sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">UWA Social Work Placement Mapper</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../pages/upload-file.html">Data Upload</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../pages/map-filter.html">Visualisation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../pages/match.html">Matching</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">User Manual</a>
+                    </li>
+                    <li class="nav-item">
+                            <button id="logoutBtn" class="btn btn-outline-danger">Logout</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1>User Manual</h1>
+                    <p class="lead">A comprehensive guide to using the UWA Social Work Placement Mapper</p>
+                </div>
+                <div class="col-md-6 text-center">
+                    <img src="../images/manual-hero.png" alt="UWA Social Work Placement Mapper" class="img-fluid rounded shadow">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container manual-content">
+        <div class="row">
+            <div class="col-lg-3 d-none d-lg-block">
+                <div class="sticky-top pt-4" style="top: 40px;">
+                    <div class="toc-container">
+                        <h5>Table of Contents</h5>
+                        <ul class="toc-list">
+                            <li><a href="#introduction">Introduction</a></li>
+                            <li><a href="#login">Login & Authentication</a></li>
+                            <li>
+                                <a href="#data-upload">Data Upload</a>
+                                <ul>
+                                    <li><a href="#upload-fe1">FE1 Students</a></li>
+                                    <li><a href="#upload-fe2">FE2 Students</a></li>
+                                    <li><a href="#upload-agencies">Agencies</a></li>
+                                    <li><a href="#upload-staff">Sessional Staff</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#visualization">Map Visualization</a>
+                                <ul>
+                                    <li><a href="#map-filters">Using Filters</a></li>
+                                    <li><a href="#map-search">Search Function</a></li>
+                                    <li><a href="#map-legend">Map Legend</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#matching">Matching System</a>
+                                <ul>
+                                    <li><a href="#matching-weights">Setting Weights</a></li>
+                                    <li><a href="#matching-results">Viewing Results</a></li>
+                                    <li><a href="#matching-export">Exporting Data</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#troubleshooting">Troubleshooting</a></li>
+                            <li><a href="#faq">FAQ</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-9">
+                <section id="introduction" class="manual-section">
+                    <h2>Introduction</h2>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p>The UWA Social Work Placement Mapper is a comprehensive tool designed to help the UWA Social Work Field Education team efficiently manage student placements. This system provides:</p>
+                            <ul>
+                                <li><strong>Geographic Visualization</strong> - View students, agencies, and staff on an interactive map</li>
+                                <li><strong>Advanced Filtering</strong> - Filter stakeholders based on multiple criteria</li>
+                                <li><strong>Automated Matching</strong> - Generate optimal placement recommendations</li>
+                                <li><strong>Data Management</strong> - Upload and manage student, agency, and staff data</li>
+                            </ul>
+                            <p>This user manual will guide you through all aspects of the system, from logging in to exporting final placement matches.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">System Overview</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>The system consists of four main components:</p>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-6 mb-4">
+                                    <div class="feature-card">
+                                        <div class="feature-icon">
+                                            <i class="bi bi-person-check"></i>
+                                        </div>
+                                        <h5>Login & Authentication</h5>
+                                        <p>Secure access to the system with UWA credentials</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="feature-card">
+                                        <div class="feature-icon">
+                                            <i class="bi bi-file-earmark-arrow-up"></i>
+                                        </div>
+                                        <h5>Data Upload</h5>
+                                        <p>Upload Excel files with student, agency, and staff information</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="feature-card">
+                                        <div class="feature-icon">
+                                            <i class="bi bi-map"></i>
+                                        </div>
+                                        <h5>Map Visualization</h5>
+                                        <p>Interactive map with filtering capabilities</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="feature-card">
+                                        <div class="feature-icon">
+                                            <i class="bi bi-diagram-3"></i>
+                                        </div>
+                                        <h5>Matching System</h5>
+                                        <p>Automated placement matching with customizable priorities</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="login" class="manual-section">
+                    <h2>Login & Authentication</h2>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h5>Accessing the System</h5>
+                                    <ol>
+                                        <li>Navigate to the UWA Social Work Placement Mapper login page</li>
+                                        <li>Enter your UWA email address (must end with @uwa.edu.au)</li>
+                                        <li>Enter your password</li>
+                                        <li>Click the "Login" button</li>
+                                    </ol>
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle-fill me-2"></i>
+                                        Only @uwa.edu.au email addresses are permitted to access the system.
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <img src="../images/login-screenshot.png" alt="Login Screen" class="img-fluid rounded shadow">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Creating an Account</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>If you don't have an account yet:</p>
+                            <ol>
+                                <li>Click the "Sign Up" button on the login page</li>
+                                <li>Enter your full name</li>
+                                <li>Enter your UWA email address</li>
+                                <li>Create a password (minimum 6 characters)</li>
+                                <li>Confirm your password</li>
+                                <li>Click the "Sign Up" button</li>
+                            </ol>
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                New accounts will require verification from email before access is granted.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="data-upload" class="manual-section">
+                    <h2>Data Upload</h2>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p>The Data Upload section allows you to upload Excel files containing information about students, agencies, and sessional staff. This data is essential for the visualization and matching features.</p>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                All four data categories (FE1 Students, FE2 Students, Agencies, and Sessional Staff) must be uploaded before you can use the visualization and matching features.
+                            </div>
+                            
+                            <h5 class="mt-4">Upload Process Overview</h5>
+                            <p>The upload process consists of four steps:</p>
+                            <ol>
+                                <li>Upload FE1 Students Excel file</li>
+                                <li>Upload FE2 Students Excel file</li>
+                                <li>Upload Agencies Excel file</li>
+                                <li>Upload Sessional Staff Excel file</li>
+                            </ol>
+                            
+                            <div class="text-center my-4">
+                                <img src="../images/upload-steps.png" alt="Upload Steps" class="img-fluid rounded shadow">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="upload-fe1" class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Step 1: FE1 Students Upload</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Required Columns</h6>
+                                    <p>Your Excel file must include these columns:</p>
+                                    <ul>
+                                        <li>Name</li>
+                                        <li>Location</li>
+                                        <li>Sector Exception</li>
+                                        <li>Interested sectors</li>
+                                        <li>Domestic / International</li>
+                                        <li>Driver's Licence</li>
+                                        <li>First Nations (Aboriginal & Torres Strait Islanders)</li>
+                                        <li>UWA FE Coordinators</li>
+                                    </ul>
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        Column names must match exactly as shown above.
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Upload Instructions</h6>
+                                    <ol>
+                                        <li>Click "Browse Files" or drag and drop your Excel file</li>
+                                        <li>Review the file preview to ensure data is correct</li>
+                                        <li>Click "Upload File"</li>
+                                        <li>Wait for the upload to complete</li>
+                                        <li>Click "Next Step" to proceed</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="upload-fe2" class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Step 2: FE2 Students Upload</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Required Columns</h6>
+                                    <p>Your Excel file must include these columns:</p>
+                                    <ul>
+                                        <li>Name</li>
+                                        <li>Location</li>
+                                        <li>Sector Exception</li>
+                                        <li>Interested sectors</li>
+                                        <li>FE1 Onsite Supervisor</li>
+                                        <li>FE 1 Sector</li>
+                                        <li>Domestic / International</li>
+                                        <li>Driver's Licence</li>
+                                        <li>First Nations (Aboriginal & Torres Strait Islanders)</li>
+                                        <li>UWA FE Coordinators</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Upload Instructions</h6>
+                                    <ol>
+                                        <li>Click "Browse Files" or drag and drop your Excel file</li>
+                                        <li>Review the file preview to ensure data is correct</li>
+                                        <li>Click "Upload File"</li>
+                                        <li>Wait for the upload to complete</li>
+                                        <li>Click "Next Step" to proceed</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="upload-agencies" class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Step 3: Agencies Upload</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Required Columns</h6>
+                                    <p>Your Excel file must include these columns:</p>
+                                    <ul>
+                                        <li>Name</li>
+                                        <li>Location</li>
+                                        <li>Sector</li>
+                                        <li>Exception</li>
+                                        <li>Available spots</li>
+                                        <li>First Nations (Aboriginal & Torres Strait Islanders)</li>
+                                        <li>Onsite SW Supervisor</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Upload Instructions</h6>
+                                    <ol>
+                                        <li>Click "Browse Files" or drag and drop your Excel file</li>
+                                        <li>Review the file preview to ensure data is correct</li>
+                                        <li>Click "Upload File"</li>
+                                        <li>Wait for the upload to complete</li>
+                                        <li>Click "Next Step" to proceed</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="upload-staff" class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Step 4: Sessional Staff Upload</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Required Columns</h6>
+                                    <p>Your Excel file must include these columns:</p>
+                                    <ul>
+                                        <li>Name</li>
+                                        <li>Location</li>
+                                        <li>LO</li>
+                                        <li>EFE</li>
+                                        <li>Sector</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Upload Instructions</h6>
+                                    <ol>
+                                        <li>Click "Browse Files" or drag and drop your Excel file</li>
+                                        <li>Review the file preview to ensure data is correct</li>
+                                        <li>Click "Upload File"</li>
+                                        <li>Wait for the upload to complete</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Final Submission</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>After uploading all four files:</p>
+                            <ol>
+                                <li>Click the "Submit All Files" button at the bottom of the page</li>
+                                <li>Wait for the system to process all files (this may take a few minutes)</li>
+                                <li>You will be redirected to the Map Visualization page when processing is complete</li>
+                            </ol>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                During processing, the system geocodes all addresses to display them on the map. This process requires an internet connection.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="visualization" class="manual-section">
+                    <h2>Map Visualization</h2>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p>The Map Visualization page displays all stakeholders (students, agencies, and sessional staff) on an interactive map. This allows you to visualize the geographic distribution and apply various filters to analyze the data.</p>
+                            
+                            <div class="text-center my-4">
+                                <img src="../images/map-overview.png" alt="Map Visualization Overview" class="img-fluid rounded shadow">
+                            </div>
+                            
+                            <h5 class="mt-4">Map Interface Components</h5>
+                            <ul>
+                                <li><strong>Main Map</strong> - Interactive Mapbox map showing all stakeholders</li>
+                                <li><strong>Left Sidebar</strong> - Contains filters for stakeholder type, driver's license, student type, region, and gender</li>
+                                <li><strong>Right Sidebar</strong> - Contains filters for sectors/areas of interest</li>
+                                <li><strong>Search Bar</strong> - Allows searching by name or suburb</li>
+                                <li><strong>Map Legend</strong> - Shows the meaning of different marker colors and shapes</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div id="map-filters" class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Using Filters</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Left Sidebar Filters</h6>
+                                    <ul>
+                                        <li><strong>Stakeholder Type</strong> - Filter by FE1 Students, FE2 Students, Agencies, or Sessional Staff</li>
+                                        <li><strong>Driver's Licence</strong> - Filter by license type (International, Australian, or No license)</li>
+                                        <li><strong>Student Type</strong> - Filter by International, Domestic, or First Nation students</li>
+                                        <li><strong>Region</strong> - Filter by geographic region (North, Central, South, East, West, Rural)</li>
+                                        <li><strong>Gender</strong> - Filter by gender</li>
+                                    </ul>
+                                    <p>Click the "Reset All" button at the bottom of the sidebar to clear all filters.</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Right Sidebar Filters</h6>
+                                    <p>The right sidebar contains filters for sectors or areas of interest. These are dynamically populated based on the data in your uploaded files.</p>
+                                    <p>Click on a sector to filter the map to show only stakeholders associated with that sector.</p>
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle-fill me-2"></i>
+                                        You can combine filters from both sidebars to narrow down your search.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="map-search" class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Search Function</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>The search bar at the top of the map allows you to quickly find specific stakeholders:</p>
+                            <ol>
+                                <li>Enter a name or suburb in the search box</li>
+                                <li>Click the search button or press Enter</li>
+                                <li>The map will zoom to the matching stakeholder(s)</li>
+                            </ol>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                The search function works with partial matches, so you don't need to type the full name.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="map-legend" class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Map Legend</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>The map legend helps you identify different types of stakeholders on the map:</p>
+                            <ul>
+                                <li><span class="legend-item"><span class="legend-marker fe1-marker"></span>FE1 Students</span></li>
+                                <li><span class="legend-item"><span class="legend-marker fe2-marker"></span>FE2 Students</span></li>
+                                <li><span class="legend-item"><span class="legend-marker agency-marker"></span>Agencies</span></li>
+                                <li><span class="legend-item"><span class="legend-marker staff-marker"></span>Sessional Staff</span></li>
+                            </ul>
+                            <p>Click on any marker on the map to view detailed information about that stakeholder.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="matching" class="manual-section">
+                    <h2>Matching System</h2>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p>The Matching System automatically pairs students with agencies based on various factors including location proximity, sector interests, and specific constraints. This powerful tool helps optimize student placements while considering multiple variables.</p>
+                            
+                            <div class="text-center my-4">
+                                <img src="../images/matching-overview.png" alt="Matching System Overview" class="img-fluid rounded shadow">
+                            </div>
+                            
+                            <h5 class="mt-4">Matching Interface Components</h5>
+                            <ul>
+                                <li><strong>Data Source Selection</strong> - Choose between using uploaded data or manual file upload</li>
+                                <li><strong>Matching Weights</strong> - Adjust the importance of location vs. sector interests</li>
+                                <li><strong>Results Tabs</strong> - View results in Map View, Results List, or Unassigned Students</li>
+                                <li><strong>Export Function</strong> - Export matching results to Excel</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div id="matching-weights" class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Setting Matching Weights</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <p>The matching algorithm balances two main factors:</p>
+                                    <ul>
+                                        <li><strong>Location Proximity</strong> - How close students are to agencies</li>
+                                        <li><strong>Sector Interests</strong> - How well agency sectors match student interests</li>
+                                    </ul>
+                                    <p>Use the slider to adjust the relative importance of these factors:</p>
+                                    <ul>
+                                        <li>Move left for <strong>Location Priority</strong> - Prioritize placing students closer to their location</li>
+                                        <li>Move right for <strong>Sector Priority</strong> - Prioritize matching students with their interested sectors</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="weight-slider-container p-3 border rounded">
+                                        <div class="slider-labels d-flex justify-content-between mb-2">
+                                            <span>Location Proximity: <span class="slider-value">50%</span></span>
+                                            <span>Sector Interests: <span class="slider-value">50%</span></span>
+                                        </div>
+                                        <input type="range" class="form-range" min="0" max="100" value="50">
+                                        <div class="row mt-3">
+                                            <div class="col-6">
+                                                <small class="text-muted">Location Priority</small>
+                                            </div>
+                                            <div class="col-6 text-end">
+                                                <small class="text-muted">Sector Priority</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="matching-results" class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Viewing Matching Results</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>After clicking "Run Matching Algorithm," the system will process the data and display results in three different views:</p>
+                            
+                            <h6 class="mt-3">1. Map View</h6>
+                            <p>Shows all stakeholders on the map with lines connecting matched students and agencies. The map includes:</p>
+                            <ul>
+                                <li>Color-coded markers for different stakeholder types</li>
+                                <li>Connection lines between students and assigned agencies</li>
+                                <li>Connection lines between students and assigned staff (LO and EFE)</li>
+                                <li>Search function to find specific stakeholders</li>
+                                <li>Toggle options to show/hide different types of connection lines</li>
+                            </ul>
+                            
+                            <h6 class="mt-3">2. Results List</h6>
+                            <p>Shows detailed information about each match, including:</p>
+                            <ul>
+                                <li>Overall match score</li>
+                                <li>Individual student-agency match scores</li>
+                                <li>Breakdown of location and sector scores</li>
+                                <li>Distance between student and agency</li>
+                                <li>Assigned Liaison Officers (LO) and External Field Educators (EFE)</li>
+                                <li>Manual assignment controls for adjusting matches</li>
+                            </ul>
+                            
+                            <h6 class="mt-3">3. Unassigned Students</h6>
+                            <p>Lists students who couldn't be matched with agencies, including:</p>
+                            <ul>
+                                <li>Student details</li>
+                                <li>Reason for being unassigned</li>
+                                <li>Manual assignment controls to assign these students</li>
+                            </ul>
+                            
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                You can manually adjust assignments using the dropdown menus in the Results List and Unassigned Students tabs.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="matching-export" class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Exporting Matching Results</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>To export the matching results to Excel:</p>
+                            <ol>
+                                <li>Go to the Results List tab</li>
+                                <li>Click the "Export Results to Excel" button</li>
+                                <li>Save the Excel file to your computer</li>
+                            </ol>
+                            <p>The exported Excel file contains multiple sheets:</p>
+                            <ul>
+                                <li><strong>Summary</strong> - Overall statistics about the matching process</li>
+                                <li><strong>FE2 Students</strong> - Detailed information about FE2 student matches</li>
+                                <li><strong>FE1 Students</strong> - Detailed information about FE1 student matches</li>
+                                <li><strong>Unassigned Students</strong> - Information about students who couldn't be matched</li>
+                                <li><strong>Sessional Staff Summary</strong> - Details about staff assignments and capacity</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="troubleshooting" class="manual-section">
+                    <h2>Troubleshooting</h2>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="accordion" id="troubleshootingAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                            Excel Upload Issues
+                                        </button>
+                                    </h2>
+                                    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#troubleshootingAccordion">
+                                        <div class="accordion-body">
+                                            <p><strong>Problem:</strong> Excel file upload fails or shows errors.</p>
+                                            <p><strong>Solutions:</strong></p>
+                                            <ul>
+                                                <li>Ensure your Excel file has the exact column names as specified in the requirements</li>
+                                                <li>Check that your Excel file is in .xlsx or .xls format</li>
+                                                <li>Verify that your Excel file doesn't contain any password protection or macros</li>
+                                                <li>Try saving your Excel file as a new file and uploading again</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                            Map Visualization Issues
+                                        </button>
+                                    </h2>
+                                    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                                        <div class="accordion-body">
+                                            <p><strong>Problem:</strong> Map doesn't load or markers don't appear.</p>
+                                            <p><strong>Solutions:</strong></p>
+                                            <ul>
+                                                <li>Check your internet connection, as the map requires an active connection</li>
+                                                <li>Try refreshing the page</li>
+                                                <li>Ensure your browser is up to date</li>
+                                                <li>Try clearing your browser cache and cookies</li>
+                                                <li>Verify that all required data has been uploaded successfully</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                            Matching Algorithm Issues
+                                        </button>
+                                    </h2>
+                                    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                                        <div class="accordion-body">
+                                            <p><strong>Problem:</strong> Matching algorithm produces unexpected results or too many unassigned students.</p>
+                                            <p><strong>Solutions:</strong></p>
+                                            <ul>
+                                                <li>Adjust the matching weights to prioritize different factors</li>
+                                                <li>Check agency "Available spots" to ensure there are enough placements</li>
+                                                <li>Verify that student locations are correctly entered and can be geocoded</li>
+                                                <li>Check for specific constraints that might be preventing matches (e.g., sector exceptions)</li>
+                                                <li>Use the manual assignment controls to adjust problematic matches</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                            Login and Authentication Issues
+                                        </button>
+                                    </h2>
+                                    <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                                        <div class="accordion-body">
+                                            <p><strong>Problem:</strong> Unable to log in or access the system.</p>
+                                            <p><strong>Solutions:</strong></p>
+                                            <ul>
+                                                <li>Ensure you're using a valid @uwa.edu.au email address</li>
+                                                <li>Check that your password is correct</li>
+                                                <li>Try resetting your password</li>
+                                                <li>Clear browser cookies and try again</li>
+                                                <li>Contact the support if problems persist : <a href="mailto:mihirtayshete@gmail.com, alanchacko42@gmail.com " class="text-dark">Send mail</a> </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="faq" class="manual-section">
+                    <h2>Frequently Asked Questions</h2>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="faq-item">
+                                <h5>Q: How often should I update the data?</h5>
+                                <p>A: It's recommended to update the data at the beginning of each placement cycle or whenever there are significant changes to student, agency, or staff information.</p>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <h5>Q: Can I edit data after uploading?</h5>
+                                <p>A: The current system doesn't support direct editing of uploaded data. To make changes, you'll need to update your Excel files and re-upload them.</p>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <h5>Q: How does the matching algorithm handle constraints?</h5>
+                                <p>A: The algorithm considers several constraints, including:</p>
+                                <ul>
+                                    <li>Student sector exceptions</li>
+                                    <li>Agency exceptions (e.g., international students, driver's license requirements)</li>
+                                    <li>FE2 students not being placed in the same sector as their FE1 placement</li>
+                                    <li>Students without FE1 onsite supervisors needing agencies with onsite supervisors</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <h5>Q: What do the LO and EFE roles mean?</h5>
+                                <p>A: LO (Liaison Officer) and EFE (External Field Educator) are roles assigned to sessional staff:</p>
+                                <ul>
+                                    <li><strong>LO (Liaison Officer)</strong> - Provides support and liaison between the university and the placement</li>
+                                    <li><strong>EFE (External Field Educator)</strong> - Provides supervision when an agency doesn't have an onsite social work supervisor</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <h5>Q: How are sessional staff assigned to students?</h5>
+                                <p>A: Sessional staff are assigned based on:</p>
+                                <ul>
+                                    <li>Geographic proximity to the student</li>
+                                    <li>Sector expertise matching the agency's sector</li>
+                                    <li>Available capacity (number of students they can support)</li>
+                                    <li>Role requirements (LO vs. EFE)</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <h5>Q: Can I manually adjust the matches?</h5>
+                                <p>A: Yes, after running the matching algorithm, you can manually adjust assignments using the dropdown menus in the Results List and Unassigned Students tabs.</p>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <h5>Q: What does the match score represent?</h5>
+                                <p>A: The match score (0-100) represents how well a student-agency pairing meets the criteria, considering:</p>
+                                <ul>
+                                    <li>Location proximity (weighted according to your slider setting)</li>
+                                    <li>Sector interest alignment (weighted according to your slider setting)</li>
+                                    <li>Higher scores indicate better matches</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer bg-primary text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>UWA Social Work Placement Mapper</h5>
+                    <p>A geographic visualization and matching tool for UWA's Social Work Field Education team.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#introduction" class="text-white">Introduction</a></li>
+                        <li><a href="#data-upload" class="text-white">Data Upload</a></li>
+                        <li><a href="#visualization" class="text-white">Visualization</a></li>
+                        <li><a href="#matching" class="text-white">Matching</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Support</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#troubleshooting" class="text-white">Troubleshooting</a></li>
+                        <li><a href="#faq" class="text-white">FAQ</a></li>
+                        <li><a href="mailto:mihirtayshete@gmail.com, alanchacko42@gmail.com" class="text-white">Contact Support</a></li>
+                        <li><a href="../pages/developerdoc.html"></a>Developer Docs</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12 text-center">
+                    <p class="mb-0">© 2025 UWA Social Work Field Education. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script type="module" src="../js/auth-check.js"></script>
+    <script type="module" src="../js/logout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="manual.js"></script>
+</body>
+</html>
