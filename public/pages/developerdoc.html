@@ -1,0 +1,2344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UWA Social Work Placement Mapper - Developer Documentation</title>
+    <style>
+        body {
+            font-family: 'Calibri', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #27358C;
+            border-bottom: 2px solid #27358C;
+            padding-bottom: 10px;
+            font-size: 24pt;
+        }
+        h2 {
+            color: #27358C;
+            margin-top: 30px;
+            font-size: 18pt;
+        }
+        h3 {
+            color: #27358C;
+            margin-top: 25px;
+            font-size: 14pt;
+        }
+        h4 {
+            color: #27358C;
+            margin-top: 20px;
+            font-size: 12pt;
+        }
+        code {
+            font-family: 'Consolas', monospace;
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 10pt;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 10pt;
+            border: 1px solid #ddd;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .note {
+            background-color: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        .warning {
+            background-color: #fff7e6;
+            border-left: 4px solid #fa8c16;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        .diagram {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .diagram img {
+            max-width: 100%;
+            height: auto;
+        }
+        .toc {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        .toc li {
+            margin: 5px 0;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 9pt;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>UWA Social Work Placement Mapper</h1>
+        <h2>Developer Documentation</h2>
+        <p>Version 1.0</p>
+        <p>Last Updated: May 20, 2025</p>
+    </div>
+
+    <div class="toc">
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#introduction">1. Introduction</a></li>
+            <li><a href="#system-architecture">2. System Architecture</a>
+                <ul>
+                    <li><a href="#high-level-overview">2.1 High-Level Overview</a></li>
+                    <li><a href="#technical-stack">2.2 Technical Stack</a></li>
+                    <li><a href="#component-diagram">2.3 Component Diagram</a></li>
+                </ul>
+            </li>
+            <li><a href="#codebase-organization">3. Codebase Organization</a>
+                <ul>
+                    <li><a href="#directory-structure">3.1 Directory Structure</a></li>
+                    <li><a href="#key-files">3.2 Key Files</a></li>
+                </ul>
+            </li>
+            <li><a href="#core-components">4. Core Components</a>
+                <ul>
+                    <li><a href="#authentication">4.1 Authentication System</a></li>
+                    <li><a href="#data-upload">4.2 Data Upload Module</a></li>
+                    <li><a href="#map-visualization">4.3 Map Visualization</a></li>
+                    <li><a href="#matching-algorithm">4.4 Matching Algorithm</a></li>
+                    <li><a href="#export-functionality">4.5 Export Functionality</a></li>
+                </ul>
+            </li>
+            <li><a href="#database">5. Firebase Integration</a>
+                <ul>
+                    <li><a href="#firestore-schema">5.1 Firestore Schema</a></li>
+                    <li><a href="#firebase-storage">5.2 Firebase Storage</a></li>
+                    <li><a href="#firebase-auth">5.3 Firebase Authentication</a></li>
+                </ul>
+            </li>
+            <li><a href="#firebase-sdk">6. Firebase SDK Usage</a>
+                <ul>
+                    <li><a href="#authentication-sdk">6.1 Authentication</a></li>
+                    <li><a href="#firestore-sdk">6.2 Firestore Operations</a></li>
+                    <li><a href="#storage-sdk">6.3 Storage Operations</a></li>
+                </ul>
+            </li>
+            <li><a href="#development-environment">7. Development Environment</a>
+                <ul>
+                    <li><a href="#prerequisites">7.1 Prerequisites</a></li>
+                    <li><a href="#setup">7.2 Setup Instructions</a></li>
+                    <li><a href="#configuration">7.3 Firebase Configuration</a></li>
+                </ul>
+            </li>
+            <li><a href="#deployment">8. Deployment</a>
+                <ul>
+                    <li><a href="#firebase-hosting">8.1 Firebase Hosting</a></li>
+                    <li><a href="#deployment-process">8.2 Deployment Process</a></li>
+                    <li><a href="#environment-config">8.3 Environment Configuration</a></li>
+                </ul>
+            </li>
+            <li><a href="#testing">9. Testing</a>
+                <ul>
+                    <li><a href="#testing-strategy">9.1 Testing Strategy</a></li>
+                    <li><a href="#unit-tests">9.2 Unit Tests</a></li>
+                    <li><a href="#integration-tests">9.3 Integration Tests</a></li>
+                </ul>
+            </li>
+            <li><a href="#contribution">10. Contribution Guidelines</a>
+                <ul>
+                    <li><a href="#code-style">10.1 Code Style</a></li>
+                    <li><a href="#pull-requests">10.2 Pull Request Process</a></li>
+                    <li><a href="#issue-tracking">10.3 Issue Tracking</a></li>
+                </ul>
+            </li>
+            <li><a href="#troubleshooting">11. Troubleshooting</a>
+                <ul>
+                    <li><a href="#common-issues">11.1 Common Issues</a></li>
+                    <li><a href="#debugging">11.2 Debugging Tips</a></li>
+                </ul>
+            </li>
+            <li><a href="#appendix">12. Appendix</a>
+                <ul>
+                    <li><a href="#glossary">12.1 Glossary</a></li>
+                    <li><a href="#references">12.2 References</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+
+    <section id="introduction">
+        <h2>1. Introduction</h2>
+        <p>The UWA Social Work Placement Mapper is a web application designed to facilitate the matching of social work students with appropriate placement agencies. This document provides comprehensive technical documentation for developers working on the application.</p>
+        
+        <h3>1.1 Purpose</h3>
+        <p>This application serves to:</p>
+        <ul>
+            <li>Streamline the process of matching social work students with placement agencies</li>
+            <li>Visualize geographical distribution of agencies and students</li>
+            <li>Provide an algorithmic approach to optimize student-agency matching based on multiple criteria</li>
+            <li>Facilitate data management for the UWA Social Work department</li>
+        </ul>
+        
+        <h3>1.2 Scope</h3>
+        <p>This documentation covers the technical aspects of the application including architecture, code organization, Firebase integration, development setup, and deployment procedures. It is intended for developers who need to maintain, extend, or deploy the application.</p>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="system-architecture">
+        <h2>2. System Architecture</h2>
+        
+        <section id="high-level-overview">
+            <h3>2.1 High-Level Overview</h3>
+            <p>The UWA Social Work Placement Mapper follows a client-side architecture with Firebase as the backend service. All application logic runs in the browser, with Firebase providing authentication, data storage, and hosting services.</p>
+            
+            <div class="diagram">
+                <pre>
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│  Client Browser │────▶│  Firebase       │────▶│  Firebase       │
+│  (HTML/JS/CSS)  │     │  Authentication │     │  Firestore      │
+│                 │◀────│                 │◀────│                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                                               │
+        │                                               │
+        │                                               │
+        ▼                                               ▼
+┌─────────────────┐                           ┌─────────────────┐
+│                 │                           │                 │
+│  Mapbox GL JS   │                           │  Firebase       │
+│  (Map Rendering)│                           │  Storage        │
+│                 │                           │                 │
+└─────────────────┘                           └─────────────────┘
+                </pre>
+            </div>
+        </section>
+        
+        <section id="technical-stack">
+            <h3>2.2 Technical Stack</h3>
+            <table>
+                <tr>
+                    <th>Component</th>
+                    <th>Technology</th>
+                    <th>Version</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td>Frontend</td>
+                    <td>HTML5, JavaScript (ES6 modules), CSS3</td>
+                    <td>-</td>
+                    <td>User interface and client-side logic</td>
+                </tr>
+                <tr>
+                    <td>UI Framework</td>
+                    <td>Bootstrap</td>
+                    <td>5.x</td>
+                    <td>Responsive design and UI components</td>
+                </tr>
+                <tr>
+                    <td>Maps</td>
+                    <td>Mapbox GL JS</td>
+                    <td>2.x</td>
+                    <td>Interactive map visualization</td>
+                </tr>
+                <tr>
+                    <td>Authentication</td>
+                    <td>Firebase Authentication</td>
+                    <td>9.x</td>
+                    <td>User authentication and authorization</td>
+                </tr>
+                <tr>
+                    <td>Database</td>
+                    <td>Firebase Firestore</td>
+                    <td>9.x</td>
+                    <td>NoSQL cloud database</td>
+                </tr>
+                <tr>
+                    <td>File Storage</td>
+                    <td>Firebase Storage</td>
+                    <td>9.x</td>
+                    <td>File storage for uploaded data</td>
+                </tr>
+                <tr>
+                    <td>Hosting</td>
+                    <td>Firebase Hosting</td>
+                    <td>-</td>
+                    <td>Application hosting and deployment</td>
+                </tr>
+                <tr>
+                    <td>File Processing</td>
+                    <td>XLSX.js</td>
+                    <td>0.18.x</td>
+                    <td>In-browser Excel file processing</td>
+                </tr>
+                <tr>
+                    <td>Icons</td>
+                    <td>Bootstrap Icons</td>
+                    <td>1.10.x</td>
+                    <td>UI icons</td>
+                </tr>
+                <tr>
+                    <td>Testing</td>
+                    <td>Mocha & Chai</td>
+                    <td>-</td>
+                    <td>Unit and integration testing</td>
+                </tr>
+            </table>
+        </section>
+        
+        <section id="component-diagram">
+            <h3>2.3 Component Diagram</h3>
+            <div class="diagram">
+                <pre>
+┌─────────────────────────────────────────────────────────────────┐
+│                        Client Browser                           │
+│                                                                 │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐       │
+│  │               │  │               │  │               │       │
+│  │ Authentication│  │ Data Upload   │  │ Map View      │       │
+│  │ Module        │  │ Module        │  │ Module        │       │
+│  │               │  │               │  │               │       │
+│  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘       │
+│          │                  │                  │               │
+│  ┌───────▼───────┐  ┌───────▼───────┐  ┌───────▼───────┐       │
+│  │               │  │               │  │               │       │
+│  │ Firebase Auth │  │ XLSX.js       │  │ Mapbox GL JS  │       │
+│  │ Client        │  │ Parser        │  │               │       │
+│  │               │  │               │  │               │       │
+│  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘       │
+│          │                  │                  │               │
+│  ┌───────▼───────────────────────────────────────────┐         │
+│  │                                                   │         │
+│  │              Firebase SDK                         │         │
+│  │                                                   │         │
+│  └───────┬───────────────────┬───────────────┬───────┘         │
+│          │                   │               │                 │
+└──────────┼───────────────────┼───────────────┼─────────────────┘
+           │                   │               │
+           ▼                   ▼               ▼
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│                 │  │                 │  │                 │
+│ Firebase Auth   │  │ Firebase        │  │ Firebase        │
+│ Service         │  │ Firestore       │  │ Storage         │
+│                 │  │                 │  │                 │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+                </pre>
+            </div>
+        </section>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="codebase-organization">
+        <h2>3. Codebase Organization</h2>
+        
+        <section id="directory-structure">
+            <h3>3.1 Directory Structure</h3>
+            <pre>
+project-root/
+├── .firebaserc                  # Firebase project configuration
+├── .gitignore                   # Git ignore file
+├── firebase.json                # Firebase configuration
+├── README.md                    # Project README
+├── index.html                   # Main entry point
+├── config.json                  # Application configuration
+├── pages/                       # HTML pages (routed/linked in the app)
+│   ├── login.html               # Login page
+│   ├── manual.html              # User manual page
+│   ├── map-filter.html          # Map visualization and filtering
+│   ├── match.html               # Matching algorithm page
+│   ├── test.html                # Testing page
+│   └── upload-file.html         # Data upload page
+└── public/                      # Public assets (deployed to Firebase)
+    ├── css/                     # Custom CSS (modular, per feature/page)
+    │   ├── manual.css           # Manual page styles
+    │   ├── matching-settings.css # Matching settings styles
+    │   ├── nav.css              # Navigation styles
+    │   ├── styles.css           # Global styles
+    │   └── upload-file.css      # Upload page styles
+    ├── images/                  # UI/documentation images/screenshots
+    │   ├── login-screenshot.png # Login page screenshot
+    │   ├── manual-hero.png      # Manual page hero image
+    │   ├── map-overview.png     # Map overview image
+    │   ├── matching-overview.png # Matching overview image
+    │   └── upload-steps.png     # Upload steps image
+    ├── js/                      # JavaScript logic modules
+    │   ├── app.js               # Main application logic
+    │   ├── auth-check.js        # Auth guard for pages
+    │   ├── auth.js              # Login/signup/logout/verify logic
+    │   ├── firebase-config.js   # Firebase config/init
+    │   ├── logout.js            # Logout functionality
+    │   ├── manual.js            # Manual/help page scripts
+    │   ├── match.js             # Matching logic/algorithm
+    │   └── upload-file.js       # File upload, validation, and storage
+    └── pages/                   # (Deployed static HTML copies)
+        ├── login.html           # Login page copy
+        ├── manual.html          # Manual page copy
+        ├── map-filter.html      # Map page copy
+        ├── match.html           # Matching page copy
+        ├── test.html            # Test page copy
+        └── upload-file.html     # Upload page copy
+            </pre>
+        </section>
+        
+        <section id="key-files">
+            <h3>3.2 Key Files</h3>
+            <table>
+                <tr>
+                    <th>File Path</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>index.html</td>
+                    <td>Main entry point that redirects to login or dashboard</td>
+                </tr>
+                <tr>
+                    <td>public/js/firebase-config.js</td>
+                    <td>Firebase configuration and initialization</td>
+                </tr>
+                <tr>
+                    <td>public/js/auth.js</td>
+                    <td>Authentication logic using Firebase Auth</td>
+                </tr>
+                <tr>
+                    <td>public/js/auth-check.js</td>
+                    <td>Authentication guard for protected pages</td>
+                </tr>
+                <tr>
+                    <td>public/js/upload-file.js</td>
+                    <td>Excel file upload and processing using XLSX.js</td>
+                </tr>
+                <tr>
+                    <td>public/js/match.js</td>
+                    <td>Matching algorithm implementation</td>
+                </tr>
+                <tr>
+                    <td>pages/map-filter.html</td>
+                    <td>Map visualization and filtering interface</td>
+                </tr>
+                <tr>
+                    <td>firebase.json</td>
+                    <td>Firebase project configuration for hosting and services</td>
+                </tr>
+                <tr>
+                    <td>config.json</td>
+                    <td>Application configuration settings</td>
+                </tr>
+            </table>
+        </section>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="core-components">
+        <h2>4. Core Components</h2>
+        
+        <section id="authentication">
+            <h3>4.1 Authentication System</h3>
+            <p>The authentication system uses Firebase Authentication with email/password and email verification.</p>
+            
+            <h4>4.1.1 Authentication Flow</h4>
+            <div class="diagram">
+                <pre>
+┌─────────┐          ┌─────────┐          ┌─────────┐
+│         │          │         │          │         │
+│ Browser │          │ Firebase│          │ Firebase│
+│         │          │ Auth    │          │ Firestore│
+└────┬────┘          └────┬────┘          └────┬────┘
+     │                    │                    │
+     │  Sign Up Request   │                    │
+     │ ─────────────────▶ │                    │
+     │                    │                    │
+     │                    │  Create User       │
+     │                    │ ─────────────────  │
+     │                    │                    │
+     │                    │  Send Verification │
+     │                    │  Email             │
+     │                    │ ─────────────────  │
+     │                    │                    │
+     │  Auth Response     │                    │
+     │ ◀───────────────── │                    │
+     │                    │                    │
+     │  Login Request     │                    │
+     │ ─────────────────▶ │                    │
+     │                    │                    │
+     │                    │  Verify Credentials│
+     │                    │ ─────────────────  │
+     │                    │                    │
+     │                    │  Check Email       │
+     │                    │  Verification      │
+     │                    │ ─────────────────  │
+     │                    │                    │
+     │  Auth Token        │                    │
+     │ ◀───────────────── │                    │
+     │                    │                    │
+     │  Get User Profile  │                    │
+     │ ─────────────────────────────────────▶ │
+     │                    │                    │
+     │  User Data         │                    │
+     │ ◀───────────────────────────────────── │
+     │                    │                    │
+                </pre>
+            </div>
+            
+            <h4>4.1.2 Key Authentication Files</h4>
+            <ul>
+                <li><code>public/js/auth.js</code> - Firebase Authentication implementation</li>
+                <li><code>public/js/auth-check.js</code> - Authentication guard for protected pages</li>
+                <li><code>pages/login.html</code> - Login and registration UI</li>
+            </ul>
+            
+            <h4>4.1.3 User Roles</h4>
+            <p>The system supports the following user roles:</p>
+            <ul>
+                <li><strong>Admin</strong> - Full access to all features</li>
+                <li><strong>Coordinator</strong> - Access to upload data, view maps, and run matching</li>
+                <li><strong>Viewer</strong> - Read-only access to view maps and matching results</li>
+            </ul>
+            
+            <h4>4.1.4 Authentication Implementation</h4>
+            <pre>
+// Example from public/js/auth.js
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  onAuthStateChanged,
+  signOut 
+} from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+import { firebaseConfig } from './firebase-config.js';
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Register a new user
+export async function registerUser(email, password, name, role = 'viewer') {
+  try {
+    // Create user in Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    // Send email verification
+    await sendEmailVerification(user);
+    
+    // Create user profile in Firestore
+    await setDoc(doc(db, 'users', user.uid), {
+      name: name,
+      email: email,
+      role: role,
+      createdAt: new Date().toISOString()
+    });
+    
+    return { success: true, message: 'Registration successful. Please verify your email.' };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+}
+
+// Login user
+export async function loginUser(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    // Check if email is verified
+    if (!user.emailVerified) {
+      await signOut(auth);
+      return { success: false, message: 'Please verify your email before logging in.' };
+    }
+    
+    // Get user profile from Firestore
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const userData = userDoc.data();
+    
+    return { 
+      success: true, 
+      user: {
+        uid: user.uid,
+        email: user.email,
+        name: userData.name,
+        role: userData.role
+      }
+    };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+}
+
+// Check authentication state
+export function initAuthStateListener(callback) {
+  return onAuthStateChanged(auth, async (user) => {
+    if (user && user.emailVerified) {
+      // Get user profile from Firestore
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const userData = userDoc.data();
+      
+      callback({
+        isAuthenticated: true,
+        user: {
+          uid: user.uid,
+          email: user.email,
+          name: userData.name,
+          role: userData.role
+        }
+      });
+    } else {
+      callback({
+        isAuthenticated: false,
+        user: null
+      });
+    }
+  });
+}
+
+// Logout user
+export async function logoutUser() {
+  try {
+    await signOut(auth);
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+}
+            </pre>
+        </section>
+        
+        <section id="data-upload">
+            <h3>4.2 Data Upload Module</h3>
+            <p>The data upload module handles the import of Excel files containing student, agency, and staff data using XLSX.js for in-browser parsing.</p>
+            
+            <h4>4.2.1 Data Upload Flow</h4>
+            <div class="diagram">
+                <pre>
+┌─────────┐          ┌─────────┐          ┌─────────┐          ┌─────────┐
+│         │          │         │          │         │          │         │
+│ Browser │          │ XLSX.js │          │ Firebase│          │ Firebase│
+│         │          │ Parser  │          │ Storage │          │ Firestore│
+└────┬────┘          └────┬────┘          └────┬────┘          └────┬────┘
+     │                    │                    │                    │
+     │  Select Excel File │                    │                    │
+     │ ─────────────────▶ │                    │                    │
+     │                    │                    │                    │
+     │                    │  Parse Excel       │                    │
+     │                    │ ─────────────────  │                    │
+     │                    │                    │                    │
+     │  Preview Data      │                    │                    │
+     │ ◀───────────────── │                    │                    │
+     │                    │                    │                    │
+     │  Confirm Import    │                    │                    │
+     │ ─────────────────▶ │                    │                    │
+     │                    │                    │                    │
+     │                    │  Process Data      │                    │
+     │                    │ ─────────────────  │                    │
+     │                    │                    │                    │
+     │                    │  Upload Original   │                    │
+     │                    │  File              │                    │
+     │                    │ ─────────────────▶ │                    │
+     │                    │                    │                    │
+     │                    │  File URL          │                    │
+     │                    │ ◀───────────────── │                    │
+     │                    │                    │                    │
+     │                    │  Store Processed   │                    │
+     │                    │  Data              │                    │
+     │                    │ ─────────────────────────────────────▶ │
+     │                    │                    │                    │
+     │                    │  Confirmation      │                    │
+     │                    │ ◀───────────────────────────────────── │
+     │                    │                    │                    │
+     │  Import Complete   │                    │                    │
+     │ ◀───────────────── │                    │                    │
+     │                    │                    │                    │
+                </pre>
+            </div>
+            
+            <h4>4.2.2 Key Data Upload Files</h4>
+            <ul>
+                <li><code>public/js/upload-file.js</code> - Main upload logic</li>
+                <li><code>pages/upload-file.html</code> - Upload interface</li>
+            </ul>
+            
+            <h4>4.2.3 Excel Processing Implementation</h4>
+            <pre>
+// Example from public/js/upload-file.js
+import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm';
+import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js';
+
+const db = getFirestore();
+const storage = getStorage();
+
+// Parse Excel file
+function parseExcelFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        // Get first sheet
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convert to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+          header: 1,
+          defval: '',
+          blankrows: false
+        });
+        
+        // Extract headers and rows
+        const headers = jsonData[0];
+        const rows = jsonData.slice(1);
+        
+        // Map rows to objects
+        const records = rows.map(row => {
+          const obj = {};
+          headers.forEach((header, i) => {
+            obj[header] = row[i];
+          });
+          return obj;
+        });
+        
+        resolve({
+          headers,
+          records,
+          sheetName: firstSheetName
+        });
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    reader.onerror = function(error) {
+      reject(error);
+    };
+    
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// Upload and process student data
+async function uploadStudentData(file) {
+  try {
+    // Parse Excel file
+    const { records } = await parseExcelFile(file);
+    
+    // Upload original file to Storage
+    const timestamp = new Date().getTime();
+    const fileName = `${timestamp}_${file.name}`;
+    const storageRef = ref(storage, `uploads/students/${fileName}`);
+    await uploadBytes(storageRef, file);
+    const fileUrl = await getDownloadURL(storageRef);
+    
+    // Process and store each record
+    const uploadPromises = records.map(async (row) => {
+      // Geocode address to get coordinates
+      const address = row.Address || '';
+      let lat = 0, lon = 0;
+      
+      if (address) {
+        try {
+          const geocodeResult = await geocodeAddress(address);
+          lat = geocodeResult.lat;
+          lon = geocodeResult.lng;
+        } catch (error) {
+          console.error('Geocoding error:', error);
+        }
+      }
+      
+      // Create record with coordinates
+      const record = {
+        ...row,
+        latitude: lat,
+        longitude: lon,
+        uploadedAt: new Date().toISOString(),
+        fileUrl: fileUrl
+      };
+      
+      // Add to Firestore
+      return addDoc(collection(db, 'students'), record);
+    });
+    
+    // Wait for all uploads to complete
+    await Promise.all(uploadPromises);
+    
+    return {
+      success: true,
+      message: `Successfully uploaded ${records.length} student records.`
+    };
+  } catch (error) {
+    console.error('Upload error:', error);
+    return {
+      success: false,
+      message: `Upload failed: ${error.message}`
+    };
+  }
+}
+
+// Geocode address using Mapbox
+async function geocodeAddress(address) {
+  const mapboxToken = 'YOUR_MAPBOX_TOKEN';
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${mapboxToken}&limit=1`;
+  
+  const response = await fetch(url);
+  const data = await response.json();
+  
+  if (data.features && data.features.length > 0) {
+    const [lng, lat] = data.features[0].center;
+    return { lat, lng };
+  } else {
+    throw new Error('Address not found');
+  }
+}
+            </pre>
+        </section>
+        
+        <section id="map-visualization">
+            <h3>4.3 Map Visualization</h3>
+            <p>The map visualization module displays agencies, students, and staff on an interactive map using Mapbox GL JS.</p>
+            
+            <h4>4.3.1 Map Components</h4>
+            <ul>
+                <li><code>pages/map-filter.html</code> - Map interface</li>
+                <li><code>public/css/styles.css</code> - Map styling</li>
+            </ul>
+            
+            <h4>4.3.2 Map Features</h4>
+            <ul>
+                <li>Multiple map layers (agencies, students, staff)</li>
+                <li>Filtering by various criteria (sector, location, etc.)</li>
+                <li>Marker clustering for improved performance</li>
+                <li>Popup information on marker click</li>
+                <li>Distance calculation between points</li>
+            </ul>
+            
+            <h4>4.3.3 Map Implementation</h4>
+            <pre>
+// Example map implementation
+import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+const db = getFirestore();
+let map;
+let studentMarkers = [];
+let agencyMarkers = [];
+
+// Initialize map
+function initMap() {
+  mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN';
+  
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [115.8613, -31.9523], // Perth, WA
+    zoom: 10
+  });
+  
+  // Add navigation controls
+  map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+  
+  // Wait for map to load
+  map.on('load', () => {
+    // Load data
+    loadMapData();
+    
+    // Add event listeners for filters
+    setupFilterListeners();
+  });
+}
+
+// Load data from Firestore
+async function loadMapData() {
+  try {
+    // Load students
+    const studentSnapshot = await getDocs(collection(db, 'students'));
+    const students = studentSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    // Load agencies
+    const agencySnapshot = await getDocs(collection(db, 'agencies'));
+    const agencies = agencySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    // Add markers to map
+    addStudentMarkers(students);
+    addAgencyMarkers(agencies);
+    
+  } catch (error) {
+    console.error('Error loading map data:', error);
+    showErrorMessage('Failed to load map data. Please try again later.');
+  }
+}
+
+// Add student markers to map
+function addStudentMarkers(students) {
+  // Clear existing markers
+  studentMarkers.forEach(marker => marker.remove());
+  studentMarkers = [];
+  
+  students.forEach(student => {
+    if (student.latitude && student.longitude) {
+      // Create marker element
+      const el = document.createElement('div');
+      el.className = 'marker student-marker';
+      el.innerHTML = '<i class="bi bi-person-fill"></i>';
+      
+      // Create marker
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([student.longitude, student.latitude])
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25 })
+            .setHTML(`
+              <div class="marker-popup">
+                <h5>${student.Name || 'Unknown Student'}</h5>
+                <p><strong>ID:</strong> ${student.StudentID || 'N/A'}</p>
+                <p><strong>Address:</strong> ${student.Address || 'N/A'}</p>
+              </div>
+            `)
+        );
+      
+      // Add marker to map
+      marker.addTo(map);
+      
+      // Store marker reference
+      studentMarkers.push(marker);
+      
+      // Add data attributes for filtering
+      marker._element.dataset.studentId = student.StudentID || '';
+      marker._element.dataset.transport = student.TransportMode || '';
+    }
+  });
+}
+
+// Add agency markers to map
+function addAgencyMarkers(agencies) {
+  // Clear existing markers
+  agencyMarkers.forEach(marker => marker.remove());
+  agencyMarkers = [];
+  
+  agencies.forEach(agency => {
+    if (agency.latitude && agency.longitude) {
+      // Create marker element
+      const el = document.createElement('div');
+      el.className = 'marker agency-marker';
+      el.innerHTML = '<i class="bi bi-building-fill"></i>';
+      
+      // Add sector class for styling
+      if (agency.Sector) {
+        el.classList.add(`sector-${agency.Sector.toLowerCase().replace(/\s+/g, '-')}`);
+      }
+      
+      // Create marker
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([agency.longitude, agency.latitude])
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25 })
+            .setHTML(`
+              <div class="marker-popup">
+                <h5>${agency.Name || 'Unknown Agency'}</h5>
+                <p><strong>ID:</strong> ${agency.AgencyID || 'N/A'}</p>
+                <p><strong>Address:</strong> ${agency.Address || 'N/A'}</p>
+                <p><strong>Sector:</strong> ${agency.Sector || 'Unknown'}</p>
+                <p><strong>Placements Available:</strong> ${agency.Placements || 0}</p>
+              </div>
+            `)
+        );
+      
+      // Add marker to map
+      marker.addTo(map);
+      
+      // Store marker reference
+      agencyMarkers.push(marker);
+      
+      // Add data attributes for filtering
+      marker._element.dataset.agencyId = agency.AgencyID || '';
+      marker._element.dataset.sector = agency.Sector || '';
+    }
+  });
+}
+
+// Setup filter event listeners
+function setupFilterListeners() {
+  // Sector filter
+  document.getElementById('sector-filter').addEventListener('change', applyFilters);
+  
+  // Transport filter
+  document.getElementById('transport-filter').addEventListener('change', applyFilters);
+  
+  // Layer toggles
+  document.getElementById('toggle-students').addEventListener('change', toggleLayer);
+  document.getElementById('toggle-agencies').addEventListener('change', toggleLayer);
+}
+
+// Apply filters to markers
+function applyFilters() {
+  const sectorFilter = document.getElementById('sector-filter').value;
+  const transportFilter = document.getElementById('transport-filter').value;
+  
+  // Filter student markers
+  studentMarkers.forEach(marker => {
+    let visible = true;
+    
+    // Apply transport filter
+    if (transportFilter && marker._element.dataset.transport !== transportFilter) {
+      visible = false;
+    }
+    
+    // Show/hide marker
+    marker._element.style.display = visible ? 'block' : 'none';
+  });
+  
+  // Filter agency markers
+  agencyMarkers.forEach(marker => {
+    let visible = true;
+    
+    // Apply sector filter
+    if (sectorFilter && marker._element.dataset.sector !== sectorFilter) {
+      visible = false;
+    }
+    
+    // Show/hide marker
+    marker._element.style.display = visible ? 'block' : 'none';
+  });
+}
+
+// Toggle layer visibility
+function toggleLayer(event) {
+  const layerId = event.target.id;
+  const checked = event.target.checked;
+  
+  if (layerId === 'toggle-students') {
+    studentMarkers.forEach(marker => {
+      marker._element.style.display = checked ? 'block' : 'none';
+    });
+  } else if (layerId === 'toggle-agencies') {
+    agencyMarkers.forEach(marker => {
+      marker._element.style.display = checked ? 'block' : 'none';
+    });
+  }
+}
+
+// Initialize map when page loads
+document.addEventListener('DOMContentLoaded', initMap);
+            </pre>
+        </section>
+        
+        <section id="matching-algorithm">
+            <h3>4.4 Matching Algorithm</h3>
+            <p>The matching algorithm pairs students with agencies based on various criteria and weights using the Hungarian/Munkres algorithm for optimal assignment.</p>
+            
+            <h4>4.4.1 Matching Criteria</h4>
+            <ul>
+                <li><strong>Location proximity</strong> - Distance between student and agency</li>
+                <li><strong>Sector preference</strong> - Student's preferred sectors vs. agency sectors</li>
+                <li><strong>Capacity</strong> - Agency's capacity to accept students</li>
+                <li><strong>Previous placements</strong> - History of previous placements</li>
+            </ul>
+            
+            <h4>4.4.2 Algorithm Implementation</h4>
+            <pre>
+// Example from public/js/match.js
+import { getFirestore, collection, getDocs, addDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+const db = getFirestore();
+
+// Maximum distance to consider (in km)
+const MAX_DISTANCE = 50;
+
+// Run matching algorithm
+async function runMatching(params) {
+  try {
+    // Get parameters
+    const { locationWeight = 50, sectorWeight = 50 } = params;
+    
+    // Normalize weights to sum to 1
+    const normalizedLocationWeight = locationWeight / 100;
+    const normalizedSectorWeight = sectorWeight / 100;
+    
+    // Load students and agencies from Firestore
+    const students = await loadStudents();
+    const agencies = await loadAgencies();
+    
+    // Create cost matrix for Hungarian algorithm
+    const costMatrix = [];
+    const studentAgencyMap = []; // To track which student/agency each matrix position represents
+    
+    for (let i = 0; i < students.length; i++) {
+      const student = students[i];
+      const row = [];
+      const rowMap = [];
+      
+      for (let j = 0; j < agencies.length; j++) {
+        const agency = agencies[j];
+        
+        // Skip if student or agency doesn't have coordinates
+        if (!student.latitude || !student.longitude || !agency.latitude || !agency.longitude) {
+          // Use a very high cost to ensure this pair is not matched
+          row.push(1000);
+          rowMap.push({ studentIndex: i, agencyIndex: j });
+          continue;
+        }
+        
+        // Calculate distance between student and agency
+        const distanceKm = calculateDistance(
+          student.latitude, student.longitude,
+          agency.latitude, agency.longitude
+        );
+        
+        // Calculate distance score (closer = lower cost)
+        const distanceScore = Math.min(distanceKm / MAX_DISTANCE, 1);
+        
+        // Calculate sector match score
+        const sectorMatch = student.PreferredSectors?.includes(agency.Sector) || false;
+        const sectorScore = sectorMatch ? 0 : 1; // Lower cost for matching sectors
+        
+        // Calculate total cost (lower is better for Hungarian algorithm)
+        const totalCost = (
+          normalizedLocationWeight * distanceScore +
+          normalizedSectorWeight * sectorScore
+        );
+        
+        row.push(totalCost);
+        rowMap.push({ studentIndex: i, agencyIndex: j });
+      }
+      
+      costMatrix.push(row);
+      studentAgencyMap.push(rowMap);
+    }
+    
+    // Run Hungarian algorithm to find optimal assignment
+    const assignments = hungarianAlgorithm(costMatrix);
+    
+    // Convert assignments to matches
+    const matches = [];
+    
+    for (let i = 0; i < assignments.length; i++) {
+      const assignment = assignments[i];
+      if (assignment !== -1) { // -1 means no assignment
+        const { studentIndex, agencyIndex } = studentAgencyMap[i][assignment];
+        const student = students[studentIndex];
+        const agency = agencies[agencyIndex];
+        
+        // Calculate actual distance and score for reporting
+        const distanceKm = calculateDistance(
+          student.latitude, student.longitude,
+          agency.latitude, agency.longitude
+        );
+        
+        const sectorMatch = student.PreferredSectors?.includes(agency.Sector) || false;
+        
+        // Calculate match score (higher is better for reporting)
+        const distanceScore = 1 - Math.min(distanceKm / MAX_DISTANCE, 1);
+        const sectorScore = sectorMatch ? 1 : 0;
+        
+        const matchScore = (
+          normalizedLocationWeight * distanceScore +
+          normalizedSectorWeight * sectorScore
+        );
+        
+        matches.push({
+          student,
+          agency,
+          score: matchScore,
+          distanceKm,
+          sectorMatch
+        });
+      }
+    }
+    
+    // Find unmatched students
+    const matchedStudentIds = matches.map(match => match.student.id);
+    const unmatchedStudents = students.filter(student => 
+      !matchedStudentIds.includes(student.id)
+    );
+    
+    // Calculate summary statistics
+    const summary = {
+      totalStudents: students.length,
+      matchedStudents: matches.length,
+      unmatchedStudents: unmatchedStudents.length,
+      averageScore: matches.length > 0 
+        ? matches.reduce((sum, match) => sum + match.score, 0) / matches.length 
+        : 0,
+      averageDistance: matches.length > 0
+        ? matches.reduce((sum, match) => sum + match.distanceKm, 0) / matches.length
+        : 0
+    };
+    
+    return {
+      matches,
+      unmatchedStudents,
+      summary
+    };
+  } catch (error) {
+    console.error('Error running matching algorithm:', error);
+    throw error;
+  }
+}
+
+// Hungarian algorithm implementation
+function hungarianAlgorithm(costMatrix) {
+  // Implementation of the Hungarian/Munkres algorithm
+  // This is a simplified version - in production, you might use a library
+  
+  // Step 1: Find the minimum value in each row and subtract it from the row
+  for (let i = 0; i < costMatrix.length; i++) {
+    const row = costMatrix[i];
+    const minValue = Math.min(...row);
+    for (let j = 0; j < row.length; j++) {
+      costMatrix[i][j] -= minValue;
+    }
+  }
+  
+  // Step 2: Find the minimum value in each column and subtract it from the column
+  for (let j = 0; j < costMatrix[0].length; j++) {
+    let minValue = costMatrix[0][j];
+    for (let i = 1; i < costMatrix.length; i++) {
+      if (costMatrix[i][j] < minValue) {
+        minValue = costMatrix[i][j];
+      }
+    }
+    for (let i = 0; i < costMatrix.length; i++) {
+      costMatrix[i][j] -= minValue;
+    }
+  }
+  
+  // Step 3: Cover all zeros with minimum number of lines
+  // Step 4: Create additional zeros
+  // Step 5: Find optimal assignment
+  
+  // For simplicity, we'll use a greedy approach here
+  // In a real implementation, you would complete the Hungarian algorithm
+  
+  const assignments = [];
+  const assignedCols = new Set();
+  
+  for (let i = 0; i < costMatrix.length; i++) {
+    let minValue = Infinity;
+    let minIndex = -1;
+    
+    for (let j = 0; j < costMatrix[i].length; j++) {
+      if (!assignedCols.has(j) && costMatrix[i][j] < minValue) {
+        minValue = costMatrix[i][j];
+        minIndex = j;
+      }
+    }
+    
+    if (minIndex !== -1) {
+      assignments.push(minIndex);
+      assignedCols.add(minIndex);
+    } else {
+      assignments.push(-1); // No assignment
+    }
+  }
+  
+  return assignments;
+}
+
+// Calculate distance between two points using Haversine formula
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  
+  return distance;
+}
+
+function toRadians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
+// Load students from Firestore
+async function loadStudents() {
+  const studentSnapshot = await getDocs(collection(db, 'students'));
+  
+  return studentSnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+}
+
+// Load agencies from Firestore
+async function loadAgencies() {
+  const agencySnapshot = await getDocs(collection(db, 'agencies'));
+  
+  return agencySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+}
+
+// Save matching results to Firestore
+async function saveMatchingResults(matchingName, matches, userId) {
+  try {
+    // Create matching document
+    const matchingDoc = await addDoc(collection(db, 'matchings'), {
+      name: matchingName,
+      createdBy: userId,
+      createdAt: new Date().toISOString(),
+      summary: {
+        totalMatches: matches.length,
+        averageScore: matches.length > 0 
+          ? matches.reduce((sum, match) => sum + match.score, 0) / matches.length 
+          : 0,
+        averageDistance: matches.length > 0
+          ? matches.reduce((sum, match) => sum + match.distanceKm, 0) / matches.length
+          : 0
+      }
+    });
+    
+    // Create match documents
+    const matchPromises = matches.map(match => 
+      addDoc(collection(db, 'matchings', matchingDoc.id, 'matches'), {
+        studentId: match.student.id,
+        agencyId: match.agency.id,
+        studentName: match.student.Name,
+        agencyName: match.agency.Name,
+        score: match.score,
+        distanceKm: match.distanceKm,
+        sectorMatch: match.sectorMatch
+      })
+    );
+    
+    await Promise.all(matchPromises);
+    
+    return {
+      success: true,
+      matchingId: matchingDoc.id
+    };
+  } catch (error) {
+    console.error('Error saving matching results:', error);
+    throw error;
+  }
+}
+            </pre>
+            
+            <h4>4.4.3 Matching Workflow</h4>
+            <div class="diagram">
+                <pre>
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│  Set Weights    │────▶│  Run Algorithm  │────▶│  Review Results │
+│                 │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                                                        ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│  Export Results │◀────│  Manual Adjust  │◀────│  Save Results   │
+│                 │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                </pre>
+            </div>
+        </section>
+        
+        <section id="export-functionality">
+            <h3>4.5 Export Functionality</h3>
+            <p>The export functionality allows users to export matching results and other data in Excel format using XLSX.js.</p>
+            
+            <h4>4.5.1 Export Implementation</h4>
+            <pre>
+// Export matching results to Excel
+function exportMatchingToExcel(matches, matchingName) {
+  // Create workbook
+  const workbook = XLSX.utils.book_new();
+  
+  // Create main results sheet
+  const matchData = matches.map(match => ({
+    'Student ID': match.student.StudentID,
+    'Student Name': match.student.Name,
+    'Agency ID': match.agency.AgencyID,
+    'Agency Name': match.agency.Name,
+    'Match Score': (match.score * 100).toFixed(2) + '%',
+    'Distance (km)': match.distanceKm.toFixed(2),
+    'Sector Match': match.sectorMatch ? 'Yes' : 'No'
+  }));
+  
+  const matchSheet = XLSX.utils.json_to_sheet(matchData);
+  XLSX.utils.book_append_sheet(workbook, matchSheet, 'Matching Results');
+  
+  // Create student details sheet
+  const studentData = matches.map(match => ({
+    'Student ID': match.student.StudentID,
+    'Student Name': match.student.Name,
+    'Address': match.student.Address,
+    'Preferred Sectors': match.student.PreferredSectors?.join(', ') || 'None',
+    'Transport Mode': match.student.TransportMode || 'Unknown'
+  }));
+  
+  const studentSheet = XLSX.utils.json_to_sheet(studentData);
+  XLSX.utils.book_append_sheet(workbook, studentSheet, 'Student Details');
+  
+  // Create agency details sheet
+  const agencyData = matches.map(match => ({
+    'Agency ID': match.agency.AgencyID,
+    'Agency Name': match.agency.Name,
+    'Address': match.agency.Address,
+    'Sector': match.agency.Sector || 'Unknown',
+    'Placements Available': match.agency.Placements || 1
+  }));
+  
+  const agencySheet = XLSX.utils.json_to_sheet(agencyData);
+  XLSX.utils.book_append_sheet(workbook, agencySheet, 'Agency Details');
+  
+  // Generate Excel file
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  
+  // Create download link
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${matchingName.replace(/\s+/g, '_')}_results.xlsx`;
+  a.click();
+  
+  // Clean up
+  URL.revokeObjectURL(url);
+}
+            </pre>
+        </section>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="database">
+        <h2>5. Firebase Integration</h2>
+        
+        <section id="firestore-schema">
+            <h3>5.1 Firestore Schema</h3>
+            <p>The application uses Firebase Firestore as its database. Here's the schema design:</p>
+            
+            <h4>5.1.1 Collections and Documents</h4>
+            <pre>
+firestore/
+├── users/                  # User profiles
+│   ├── {userId}/           # User document
+│   │   ├── name: string    # User's name
+│   │   ├── email: string   # User's email
+│   │   ├── role: string    # User's role (admin, coordinator, viewer)
+│   │   └── createdAt: timestamp # Account creation date
+│   │
+├── students/               # Student records
+│   ├── {studentId}/        # Student document
+│   │   ├── StudentID: string # Student ID number
+│   │   ├── Name: string    # Student's name
+│   │   ├── Address: string # Student's address
+│   │   ├── latitude: number # Latitude coordinate
+│   │   ├── longitude: number # Longitude coordinate
+│   │   ├── PreferredSectors: array # List of preferred sectors
+│   │   ├── TransportMode: string # Transport mode (public, car, both, none)
+│   │   ├── uploadedAt: timestamp # Record creation date
+│   │   └── fileUrl: string # URL to original file in Storage
+│   │
+├── agencies/               # Agency records
+│   ├── {agencyId}/         # Agency document
+│   │   ├── AgencyID: string # Agency ID
+│   │   ├── Name: string    # Agency name
+│   │   ├── Address: string # Agency address
+│   │   ├── latitude: number # Latitude coordinate
+│   │   ├── longitude: number # Longitude coordinate
+│   │   ├── Sector: string  # Agency sector
+│   │   ├── Placements: number # Number of placements
+│   │   ├── Supervisor: string # Supervisor information
+│   │   ├── uploadedAt: timestamp # Record creation date
+│   │   └── fileUrl: string # URL to original file in Storage
+│   │
+├── matchings/              # Matching results
+│   ├── {matchingId}/       # Matching document
+│   │   ├── name: string    # Matching name
+│   │   ├── createdBy: string # User ID who created the matching
+│   │   ├── createdAt: timestamp # Creation date
+│   │   ├── summary: map    # Summary statistics
+│   │   │   ├── totalMatches: number # Total matches
+│   │   │   ├── averageScore: number # Average match score
+│   │   │   └── averageDistance: number # Average distance
+│   │   │
+│   │   └── matches/        # Subcollection of matches
+│   │       ├── {matchId}/  # Match document
+│   │       │   ├── studentId: string # Reference to student
+│   │       │   ├── agencyId: string # Reference to agency
+│   │       │   ├── studentName: string # Student name
+│   │       │   ├── agencyName: string # Agency name
+│   │       │   ├── score: number # Match score (0-1)
+│   │       │   ├── distanceKm: number # Distance in kilometers
+│   │       │   └── sectorMatch: boolean # Whether sectors match
+│   │
+└── sectors/                # Sector definitions
+    ├── {sectorId}/         # Sector document
+    │   ├── name: string    # Sector name
+    │   ├── description: string # Sector description
+    │   └── createdAt: timestamp # Creation date
+            </pre>
+            
+            <h4>5.1.2 Firestore Security Rules</h4>
+            <p>The following security rules are implemented to protect the Firestore database:</p>
+            <pre>
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isCoordinator() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coordinator';
+    }
+    
+    // User profiles
+    match /users/{userId} {
+      // Users can read their own profile
+      // Admins can read and write all profiles
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && request.auth.uid == userId && 
+                     !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']);
+    }
+    
+    // Students
+    match /students/{studentId} {
+      // All authenticated users can read
+      // Only admins and coordinators can write
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCoordinator());
+    }
+    
+    // Agencies
+    match /agencies/{agencyId} {
+      // All authenticated users can read
+      // Only admins and coordinators can write
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCoordinator());
+    }
+    
+    // Matching results
+    match /matchings/{matchingId} {
+      // All authenticated users can read
+      // Only admins and coordinators can write
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCoordinator());
+      
+      // Matches subcollection
+      match /matches/{matchId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && (isAdmin() || isCoordinator());
+      }
+    }
+    
+    // Sectors
+    match /sectors/{sectorId} {
+      // All authenticated users can read
+      // Only admins can write
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}
+            </pre>
+        </section>
+        
+        <section id="firebase-storage">
+            <h3>5.2 Firebase Storage</h3>
+            <p>Firebase Storage is used to store uploaded Excel files and other assets.</p>
+            
+            <h4>5.2.1 Storage Structure</h4>
+            <pre>
+storage/
+├── uploads/                # Uploaded files
+│   ├── students/           # Student Excel files
+│   │   ├── {timestamp}_{filename}.xlsx # Original student files
+│   ├── agencies/           # Agency Excel files
+│   │   ├── {timestamp}_{filename}.xlsx # Original agency files
+│   └── staff/              # Staff Excel files
+│       ├── {timestamp}_{filename}.xlsx # Original staff files
+│
+├── exports/                # Exported files
+│   ├── matchings/          # Matching results
+│   │   ├── {timestamp}_{matchingName}.xlsx # Exported matching files
+│
+└── templates/              # Template files
+    ├── student_template.xlsx # Student import template
+    ├── agency_template.xlsx # Agency import template
+    └── staff_template.xlsx # Staff import template
+            </pre>
+            
+            <h4>5.2.2 Storage Security Rules</h4>
+            <pre>
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isCoordinator() {
+      return isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'coordinator';
+    }
+    
+    // Upload files
+    match /uploads/{type}/{fileName} {
+      // All authenticated users can read
+      // Only admins and coordinators can write
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCoordinator());
+    }
+    
+    // Export files
+    match /exports/{type}/{fileName} {
+      // All authenticated users can read
+      // Only admins and coordinators can write
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCoordinator());
+    }
+    
+    // Template files
+    match /templates/{fileName} {
+      // All authenticated users can read
+      // Only admins can write
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}
+            </pre>
+        </section>
+        
+        <section id="firebase-auth">
+            <h3>5.3 Firebase Authentication</h3>
+            <p>Firebase Authentication is used for user authentication with email/password and email verification.</p>
+            
+            <h4>5.3.1 Authentication Configuration</h4>
+            <ul>
+                <li><strong>Sign-in method:</strong> Email/Password</li>
+                <li><strong>Email verification:</strong> Required</li>
+                <li><strong>Password requirements:</strong>
+                    <ul>
+                        <li>Minimum 8 characters</li>
+                        <li>At least one uppercase letter</li>
+                        <li>At least one number</li>
+                    </ul>
+                </li>
+                <li><strong>User account creation:</strong> Admin creates initial accounts</li>
+            </ul>
+            
+            <h4>5.3.2 User Roles</h4>
+            <p>User roles are stored in the Firestore database in the users collection. The application checks the user's role to determine access permissions.</p>
+            <ul>
+                <li><strong>Admin:</strong> Full access to all features</li>
+                <li><strong>Coordinator:</strong> Can upload data, view maps, and run matching</li>
+                <li><strong>Viewer:</strong> Read-only access to view maps and matching results</li>
+            </ul>
+        </section>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="firebase-sdk">
+        <h2>6. Firebase SDK Usage</h2>
+        
+        <section id="authentication-sdk">
+            <h3>6.1 Authentication</h3>
+            <p>The application uses the Firebase Authentication SDK for user authentication.</p>
+            
+            <h4>6.1.1 Authentication Methods</h4>
+            <ul>
+                <li><strong>Sign Up:</strong> <code>createUserWithEmailAndPassword()</code></li>
+                <li><strong>Email Verification:</strong> <code>sendEmailVerification()</code></li>
+                <li><strong>Login:</strong> <code>signInWithEmailAndPassword()</code></li>
+                <li><strong>Logout:</strong> <code>signOut()</code></li>
+                <li><strong>Password Reset:</strong> <code>sendPasswordResetEmail()</code></li>
+                <li><strong>Auth State:</strong> <code>onAuthStateChanged()</code></li>
+            </ul>
+            
+            <h4>6.1.2 Authentication Example</h4>
+            <pre>
+// Initialize Firebase Auth
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+
+const auth = getAuth();
+
+// Login function
+async function login(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    // Check if email is verified
+    if (!user.emailVerified) {
+      await signOut(auth);
+      showError('Please verify your email before logging in.');
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Login error:', error);
+    showError(error.message);
+    return false;
+  }
+}
+
+// Auth state listener
+function initAuthListener() {
+  onAuthStateChanged(auth, async (user) => {
+    if (user && user.emailVerified) {
+      // User is signed in and email is verified
+      // Redirect to dashboard or show authenticated UI
+      window.location.href = '/pages/map-filter.html';
+    } else {
+      // User is signed out or email is not verified
+      // Show login UI
+      if (window.location.pathname !== '/pages/login.html') {
+        window.location.href = '/pages/login.html';
+      }
+    }
+  });
+}
+            </pre>
+        </section>
+        
+        <section id="firestore-sdk">
+            <h3>6.2 Firestore Operations</h3>
+            <p>The application uses the Firebase Firestore SDK for database operations.</p>
+            
+            <h4>6.2.1 Firestore Methods</h4>
+            <ul>
+                <li><strong>Read Data:</strong> <code>getDoc()</code>, <code>getDocs()</code>, <code>query()</code>, <code>where()</code>, <code>orderBy()</code></li>
+                <li><strong>Write Data:</strong> <code>setDoc()</code>, <code>addDoc()</code>, <code>updateDoc()</code>, <code>deleteDoc()</code></li>
+                <li><strong>Real-time Updates:</strong> <code>onSnapshot()</code></li>
+                <li><strong>Batch Operations:</strong> <code>writeBatch()</code></li>
+                <li><strong>Transactions:</strong> <code>runTransaction()</code></li>
+            </ul>
+            
+            <h4>6.2.2 Firestore Example</h4>
+            <pre>
+// Initialize Firestore
+import { getFirestore, collection, addDoc, getDocs, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+const db = getFirestore();
+
+// Add a new student
+async function addStudent(studentData) {
+  try {
+    // Add a new document to the students collection
+    const docRef = await addDoc(collection(db, 'students'), {
+      StudentID: studentData.StudentID,
+      Name: studentData.Name,
+      Address: studentData.Address,
+      latitude: studentData.latitude,
+      longitude: studentData.longitude,
+      PreferredSectors: studentData.PreferredSectors || [],
+      TransportMode: studentData.TransportMode || 'none',
+      uploadedAt: new Date().toISOString(),
+      fileUrl: studentData.fileUrl
+    });
+    
+    console.log('Student added with ID:', docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding student:', error);
+    throw error;
+  }
+}
+
+// Get students by sector
+async function getStudentsBySector(sector) {
+  try {
+    const studentsQuery = query(
+      collection(db, 'students'),
+      where('PreferredSectors', 'array-contains', sector),
+      orderBy('Name')
+    );
+    
+    const querySnapshot = await getDocs(studentsQuery);
+    const students = [];
+    
+    querySnapshot.forEach((doc) => {
+      students.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    return students;
+  } catch (error) {
+    console.error('Error getting students by sector:', error);
+    throw error;
+  }
+}
+            </pre>
+        </section>
+        
+        <section id="storage-sdk">
+            <h3>6.3 Storage Operations</h3>
+            <p>The application uses the Firebase Storage SDK for file storage operations.</p>
+            
+            <h4>6.3.1 Storage Methods</h4>
+            <ul>
+                <li><strong>Upload Files:</strong> <code>uploadBytes()</code>, <code>uploadBytesResumable()</code></li>
+                <li><strong>Download Files:</strong> <code>getDownloadURL()</code></li>
+                <li><strong>Delete Files:</strong> <code>deleteObject()</code></li>
+                <li><strong>List Files:</strong> <code>listAll()</code></li>
+            </ul>
+            
+            <h4>6.3.2 Storage Example</h4>
+            <pre>
+// Initialize Storage
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js';
+
+const storage = getStorage();
+
+// Upload Excel file
+async function uploadExcelFile(file, type) {
+  try {
+    // Create a storage reference
+    const timestamp = new Date().getTime();
+    const fileName = `${timestamp}_${file.name}`;
+    const storageRef = ref(storage, `uploads/${type}/${fileName}`);
+    
+    // Upload file
+    const snapshot = await uploadBytes(storageRef, file);
+    console.log('File uploaded successfully');
+    
+    // Get download URL
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    
+    return {
+      fileName,
+      downloadURL
+    };
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    throw error;
+  }
+}
+
+// Download template file
+async function downloadTemplate(type) {
+  try {
+    const templateRef = ref(storage, `templates/${type}_template.xlsx`);
+    const downloadURL = await getDownloadURL(templateRef);
+    
+    // Create download link
+    const a = document.createElement('a');
+    a.href = downloadURL;
+    a.download = `${type}_template.xlsx`;
+    a.click();
+  } catch (error) {
+    console.error('Error downloading template:', error);
+    throw error;
+  }
+}
+            </pre>
+        </section>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="development-environment">
+        <h2>7. Development Environment</h2>
+        
+        <section id="prerequisites">
+            <h3>7.1 Prerequisites</h3>
+            <p>The following tools and accounts are required for development:</p>
+            <ul>
+                <li><strong>Firebase Account:</strong> Access to Firebase console</li>
+                <li><strong>Firebase CLI:</strong> For deployment and local development</li>
+                <li><strong>Node.js:</strong> v14 or higher</li>
+                <li><strong>npm:</strong> v6 or higher</li>
+                <li><strong>Mapbox Account:</strong> For map API access</li>
+                <li><strong>Web Browser:</strong> Chrome, Firefox, or Edge</li>
+                <li><strong>Code Editor:</strong> Visual Studio Code or similar</li>
+            </ul>
+        </section>
+        
+        <section id="setup">
+            <h3>7.2 Setup Instructions</h3>
+            <ol>
+                <li><strong>Clone the repository:</strong>
+                    <pre>git clone https://github.com/uwa/social-work-placement-mapper.git
+cd social-work-placement-mapper</pre>
+                </li>
+                <li><strong>Install Firebase CLI:</strong>
+                    <pre>npm install -g firebase-tools</pre>
+                </li>
+                <li><strong>Login to Firebase:</strong>
+                    <pre>firebase login</pre>
+                </li>
+                <li><strong>Install dependencies:</strong>
+                    <pre>npm install</pre>
+                </li>
+                <li><strong>Configure Firebase:</strong>
+                    <p>Create a new Firebase project in the Firebase console and update the <code>public/js/firebase-config.js</code> file with your project configuration.</p>
+                </li>
+                <li><strong>Configure Mapbox:</strong>
+                    <p>Create a Mapbox account and update the Mapbox access token in the map-related JavaScript files.</p>
+                </li>
+                <li><strong>Start local development server:</strong>
+                    <pre>firebase serve</pre>
+                </li>
+            </ol>
+        </section>
+        
+        <section id="configuration">
+            <h3>7.3 Firebase Configuration</h3>
+            <p>The Firebase configuration is stored in <code>public/js/firebase-config.js</code>:</p>
+            <pre>
+// Firebase configuration
+export const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "your-project-id.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project-id.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+            </pre>
+            
+            <p>Replace the placeholder values with your actual Firebase project configuration.</p>
+        </section>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="deployment">
+        <h2>8. Deployment</h2>
+        
+        <section id="firebase-hosting">
+            <h3>8.1 Firebase Hosting</h3>
+            <p>The application is deployed using Firebase Hosting, which provides fast and secure hosting for web applications.</p>
+            
+            <h4>8.1.1 Firebase Hosting Configuration</h4>
+            <p>The Firebase Hosting configuration is stored in <code>firebase.json</code>:</p>
+            <pre>
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|html|css|json)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(jpg|jpeg|png|gif|svg|ico)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=86400"
+          }
+        ]
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
+            </pre>
+        </section>
+        
+        <section id="deployment-process">
+            <h3>8.2 Deployment Process</h3>
+            <ol>
+                <li><strong>Build the application (if needed):</strong>
+                    <pre>npm run build</pre>
+                </li>
+                <li><strong>Deploy to Firebase:</strong>
+                    <pre>firebase deploy</pre>
+                </li>
+                <li><strong>Deploy only specific resources:</strong>
+                    <pre>firebase deploy --only hosting</pre>
+                    <pre>firebase deploy --only firestore:rules</pre>
+                    <pre>firebase deploy --only storage:rules</pre>
+                </li>
+            </ol>
+        </section>
+        
+        <section id="environment-config">
+            <h3>8.3 Environment Configuration</h3>
+            <p>Different environments (development, staging, production) can be configured using Firebase projects:</p>
+            <pre>
+// .firebaserc
+{
+  "projects": {
+    "default": "your-project-id",
+    "development": "your-dev-project-id",
+    "staging": "your-staging-project-id",
+    "production": "your-prod-project-id"
+  }
+}
+            </pre>
+            
+            <p>To deploy to a specific environment:</p>
+            <pre>firebase use development
+firebase deploy</pre>
+            <pre>firebase use production
+firebase deploy</pre>
+        </section>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="testing">
+        <h2>9. Testing</h2>
+        
+        <section id="testing-strategy">
+            <h3>9.1 Testing Strategy</h3>
+            <p>The application uses the following testing approaches:</p>
+            <ul>
+                <li><strong>Unit Testing:</strong> Testing individual functions and components</li>
+                <li><strong>Integration Testing:</strong> Testing interactions between components</li>
+                <li><strong>Manual Testing:</strong> Testing the application manually</li>
+            </ul>
+        </section>
+        
+        <section id="unit-tests">
+            <h3>9.2 Unit Tests</h3>
+            <p>Unit tests are implemented using Mocha and Chai and focus on testing individual functions and utilities.</p>
+            <pre>
+// Example unit test for geocoding utility
+const { expect } = require('chai');
+const { calculateDistance } = require('../public/js/utils/geocoding');
+
+describe('Geocoding Utilities', () => {
+  it('should correctly calculate distance between two points', () => {
+    // Perth to Fremantle (approximately 15km)
+    const perthLat = -31.9523;
+    const perthLng = 115.8613;
+    const fremantleLat = -32.0569;
+    const fremantleLng = 115.7439;
+    
+    const distance = calculateDistance(perthLat, perthLng, fremantleLat, fremantleLng);
+    
+    // Allow for some margin of error
+    expect(distance).to.be.greaterThan(14);
+    expect(distance).to.be.lessThan(16);
+  });
+  
+  it('should return 0 for same coordinates', () => {
+    const lat = -31.9523;
+    const lng = 115.8613;
+    
+    const distance = calculateDistance(lat, lng, lat, lng);
+    
+    expect(distance).to.equal(0);
+  });
+});
+            </pre>
+        </section>
+        
+        <section id="integration-tests">
+            <h3>9.3 Integration Tests</h3>
+            <p>Integration tests focus on testing interactions between components and with Firebase services.</p>
+            <pre>
+// Example integration test for authentication
+const { expect } = require('chai');
+const firebase = require('@firebase/testing');
+
+describe('Authentication Integration', () => {
+  let app;
+  
+  before(async () => {
+    // Create test app
+    app = firebase.initializeTestApp({
+      projectId: 'test-project',
+      auth: { uid: 'test-user', email: 'test@example.com' }
+    });
+  });
+  
+  after(async () => {
+    // Clean up
+    await firebase.clearFirestoreData({ projectId: 'test-project' });
+    await Promise.all(firebase.apps().map(app => app.delete()));
+  });
+  
+  it('should allow authenticated users to read student data', async () => {
+    const db = app.firestore();
+    const studentsRef = db.collection('students');
+    
+    // Should not throw an error
+    await firebase.assertSucceeds(studentsRef.get());
+  });
+  
+  it('should not allow unauthenticated users to read student data', async () => {
+    const noAuth = firebase.initializeTestApp({
+      projectId: 'test-project'
+    });
+    
+    const db = noAuth.firestore();
+    const studentsRef = db.collection('students');
+    
+    // Should throw an error
+    await firebase.assertFails(studentsRef.get());
+  });
+});
+            </pre>
+        </section>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="contribution">
+        <h2>10. Contribution Guidelines</h2>
+        
+        <section id="code-style">
+            <h3>10.1 Code Style</h3>
+            <p>The project follows these code style guidelines:</p>
+            <ul>
+                <li><strong>JavaScript:</strong> ES6+ syntax, 2-space indentation</li>
+                <li><strong>HTML:</strong> 2-space indentation, semantic elements</li>
+                <li><strong>CSS:</strong> 2-space indentation, BEM naming convention</li>
+                <li><strong>File Naming:</strong> Lowercase with hyphens (kebab-case)</li>
+                <li><strong>Comments:</strong> JSDoc style for functions, inline comments for complex logic</li>
+            </ul>
+        </section>
+        
+        <section id="pull-requests">
+            <h3>10.2 Pull Request Process</h3>
+            <ol>
+                <li>Fork the repository and create a new branch for your feature or bug fix</li>
+                <li>Make your changes and ensure all tests pass</li>
+                <li>Update documentation if necessary</li>
+                <li>Submit a pull request with a clear description of the changes</li>
+                <li>Wait for code review and address any feedback</li>
+            </ol>
+        </section>
+        
+        <section id="issue-tracking">
+            <h3>10.3 Issue Tracking</h3>
+            <p>Issues are tracked using GitHub Issues. When creating a new issue, please include:</p>
+            <ul>
+                <li>A clear and descriptive title</li>
+                <li>Steps to reproduce (for bugs)</li>
+                <li>Expected behavior</li>
+                <li>Actual behavior</li>
+                <li>Screenshots or error messages (if applicable)</li>
+                <li>Environment information (browser, OS, etc.)</li>
+            </ul>
+        </section>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="troubleshooting">
+        <h2>11. Troubleshooting</h2>
+        
+        <section id="common-issues">
+            <h3>11.1 Common Issues</h3>
+            <table>
+                <tr>
+                    <th>Issue</th>
+                    <th>Possible Cause</th>
+                    <th>Solution</th>
+                </tr>
+                <tr>
+                    <td>Authentication fails</td>
+                    <td>Firebase configuration incorrect</td>
+                    <td>Check firebase-config.js and ensure API keys are correct</td>
+                </tr>
+                <tr>
+                    <td>Excel file upload fails</td>
+                    <td>File format or size issue</td>
+                    <td>Ensure file is .xlsx format and under 5MB</td>
+                </tr>
+                <tr>
+                    <td>Map doesn't load</td>
+                    <td>Mapbox token invalid</td>
+                    <td>Check Mapbox token in map-related JavaScript files</td>
+                </tr>
+                <tr>
+                    <td>Geocoding fails</td>
+                    <td>Invalid address format</td>
+                    <td>Ensure addresses are complete and properly formatted</td>
+                </tr>
+                <tr>
+                    <td>Firebase permission denied</td>
+                    <td>Security rules issue</td>
+                    <td>Check Firestore and Storage security rules</td>
+                </tr>
+            </table>
+        </section>
+        
+        <section id="debugging">
+            <h3>11.2 Debugging Tips</h3>
+            <ul>
+                <li><strong>Browser Console:</strong> Check for JavaScript errors in the browser console (F12)</li>
+                <li><strong>Firebase Console:</strong> Check Authentication, Firestore, and Storage logs in the Firebase console</li>
+                <li><strong>Network Tab:</strong> Monitor network requests in the browser's developer tools</li>
+                <li><strong>Firebase Emulator:</strong> Use Firebase emulator for local testing</li>
+                <li><strong>Logging:</strong> Add console.log statements to debug specific functions</li>
+                <li><strong>Firebase Debug Mode:</strong> Enable Firebase debug mode:
+                    <pre>firebase.firestore.setLogLevel('debug');</pre>
+                </li>
+            </ul>
+        </section>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section id="appendix">
+        <h2>12. Appendix</h2>
+        
+        <section id="glossary">
+            <h3>12.1 Glossary</h3>
+            <table>
+                <tr>
+                    <th>Term</th>
+                    <th>Definition</th>
+                </tr>
+                <tr>
+                    <td>FE1</td>
+                    <td>First-year field education students</td>
+                </tr>
+                <tr>
+                    <td>FE2</td>
+                    <td>Second-year field education students</td>
+                </tr>
+                <tr>
+                    <td>Agency</td>
+                    <td>Social work placement organization</td>
+                </tr>
+                <tr>
+                    <td>Sector</td>
+                    <td>Field of practice (e.g., Health, Education, Mental Health)</td>
+                </tr>
+                <tr>
+                    <td>Matching</td>
+                    <td>Process of pairing students with agencies</td>
+                </tr>
+                <tr>
+                    <td>Firestore</td>
+                    <td>Firebase's NoSQL cloud database</td>
+                </tr>
+                <tr>
+                    <td>Firebase Auth</td>
+                    <td>Firebase's authentication service</td>
+                </tr>
+                <tr>
+                    <td>Firebase Storage</td>
+                    <td>Firebase's file storage service</td>
+                </tr>
+                <tr>
+                    <td>Mapbox GL JS</td>
+                    <td>JavaScript library for interactive maps</td>
+                </tr>
+                <tr>
+                    <td>XLSX.js</td>
+                    <td>JavaScript library for Excel file processing</td>
+                </tr>
+                <tr>
+                    <td>Hungarian Algorithm</td>
+                    <td>Optimization algorithm for assignment problems</td>
+                </tr>
+            </table>
+        </section>
+        
+        <section id="references">
+            <h3>12.2 References</h3>
+            <ul>
+                <li><a href="https://firebase.google.com/docs">Firebase Documentation</a></li>
+                <li><a href="https://docs.mapbox.com/mapbox-gl-js/api/">Mapbox GL JS Documentation</a></li>
+                <li><a href="https://docs.sheetjs.com/">SheetJS Documentation</a></li>
+                <li><a href="https://getbootstrap.com/docs/5.0/">Bootstrap 5 Documentation</a></li>
+                <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">MDN JavaScript Documentation</a></li>
+            </ul>
+        </section>
+    </section>
+
+    <div class="footer">
+        <p>UWA Social Work Placement Mapper - Developer Documentation</p>
+        <p>Last Updated: May 20, 2025</p>
+    </div>
+</body>
+</html>

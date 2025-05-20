@@ -142,23 +142,39 @@ function handleFileSelect(input, type) {
     // Save file for uploading later
     uploadedFiles[type] = file
 
-    // Check if file is Excel
     if (!file.name.match(/\.(xlsx|xls)$/)) {
       alert("Please select an Excel file (.xlsx or .xls)")
       input.value = ""
       return
     }
 
-    // Display file info
-    document.getElementById(`${type}FileName`).textContent = file.name
-    document.getElementById(`${type}FileSize`).textContent = formatFileSize(file.size)
-    document.getElementById(`${type}FileInfo`).style.display = "block"
-    document.getElementById(`${type}UploadArea`).style.display = "none"
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result)
+      const workbook = XLSX.read(data, { type: "array" })
+      const firstSheet = workbook.SheetNames[0]
+      const worksheet = workbook.Sheets[firstSheet]
 
-    // Preview Excel file
-    previewExcel(file, type)
+      // ✅ VALIDATE HERE
+      const isValid = validateExcelColumns(worksheet, type)
+      if (!isValid) {
+        input.value = ""
+        removeFile(type)
+        return
+      }
+
+      // Show file info and preview
+      document.getElementById(`${type}FileName`).textContent = file.name
+      document.getElementById(`${type}FileSize`).textContent = formatFileSize(file.size)
+      document.getElementById(`${type}FileInfo`).style.display = "block"
+      document.getElementById(`${type}UploadArea`).style.display = "none"
+      previewExcel(file, type)
+    }
+
+    reader.readAsArrayBuffer(file)
   }
 }
+
 
 /**
  * Removes the selected file and resets the upload area
