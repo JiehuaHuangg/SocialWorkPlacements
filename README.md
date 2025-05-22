@@ -1,6 +1,6 @@
 # Social Work Placements Mapper APP 
 
-A web-based application for mapping and optimizing Social Work student placements at the University of Western Australia (UWA).
+A web-based application for mapping and optimising Social Work student placements at the University of Western Australia (UWA).
 
 ## 📌 Overview  
 
@@ -30,20 +30,17 @@ This project aims to simplify and improve the placement matching process for UWA
 - **Database:** Firebase Firestore
 - **Mapping Services:** Mapbox GL JS  
 - **Testing:** Mocha, Chai (for logic/utilities)
-- **Deployment:** Github Pages  
+- **Deployment:** Firebase Hosting  
 
 ## ✅ Project Structure  
 
 ```bash
 project-root/
-├── .firebaserc                  # Firebase project config
 ├── .gitignore
-├── firebase.json                # Firebase Hosting, Firestore, Storage config
 ├── README.md
 ├── config.json                  # (Optional) App config/settings
 │
 ├── public/                      # All static assets (served by Firebase Hosting)
-│   ├── index.html               # Main entry point
 │   ├── pages/                   # Modular HTML pages (routed in-app)
 │   │   ├── login.html
 │   │   ├── manual.html
@@ -72,17 +69,8 @@ project-root/
 │   │   ├── manual.js            # Help/manual page logic
 │   │   ├── match.js             # Matching algorithm/logic
 │   │   └── upload-file.js       # Excel upload & validation logic
-│
-├── firestore.rules              # Firestore security rules
-├── storage.rules                # Firebase Storage security rules
           
 ```
-
-## 🗂️ Project Management and Documentation  
-
-- **MVP Development**  
-- **Project Meeting Notes**  
-- **Issue Tracking**
 
 ## 📅 Project Timeline (Brief)
 
@@ -116,11 +104,13 @@ You can open the app directly from your file system:
 Open public/pages/login.html in your browser (or double-click it in your file explorer).
 
 Recommended:
-For the best experience with ES6 modules and local file security, use a simple HTTP server. For example:
-use the Live Server in VSCode:
+For the best experience with ES6 modules and local file security, use a simple HTTP server. 
+For example:
+Use the Live Server in VSCode:
 Right-click public/pages/login.html and select "Open with Live Server".
 
 Production deployment is on Firebase Hosting @ https://social-work-placement.web.app/pages/login.html
+
 All Firebase features (authentication, Firestore) work in the browser via the client SDK.
 
 
