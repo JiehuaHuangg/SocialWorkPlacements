@@ -54,3 +54,6 @@
     color: #DDB106;
   }
   
+  .custom-navbar{
+    z-index: 11;
+  }
