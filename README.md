@@ -39,7 +39,7 @@ project-root/
 ├── .gitignore
 ├── README.md
 ├── config.json                  # (Optional) App config/settings
-│
+├── index.html                   # Main entry point
 ├── public/                      # All static assets (served by Firebase Hosting)
 │   ├── pages/                   # Modular HTML pages (routed in-app)
 │   │   ├── login.html
