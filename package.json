@@ -1,0 +1,32 @@
+{
+  "name": "socialworkplacements",
+  "version": "1.0.0",
+  "description": "A web-based application for mapping and optimizing Social Work student placements at the University of Western Australia (UWA).",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:selenium": "node tests/selenium_test.js"
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JiehuaHuangg/SocialWorkPlacements.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JiehuaHuangg/SocialWorkPlacements/issues"
+  },
+  "homepage": "https://github.com/JiehuaHuangg/SocialWorkPlacements#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "chromedriver": "^136.0.2",
+    "selenium-webdriver": "^4.32.0"
+  }
+}
