@@ -80,9 +80,9 @@ project-root/
 
 ## 🗂️ Project Management and Documentation  
 
-- **[MVP Development]([https://your-ms-teams-link](https://www.canva.com/design/DAGin7Rj58I/kZdoHJ8hQ24ZQW4_pUlEnw/edit))**  
-- **[Project Meeting Notes]([https://your-docs-link](https://uniwa-my.sharepoint.com/:w:/g/personal/24109735_student_uwa_edu_au/EUK0KunCaBFGps-29fPur6oBKcsP0eXKYvDj4VNw3zGHIA?e=HQrYZm))**  
-- **[Issue Tracking]([../../issues](https://github.com/JiehuaHuangg/SocialWorkPlacements/issues))**
+- **MVP Development**  
+- **Project Meeting Notes**  
+- **Issue Tracking**
 
 ## 📅 Project Timeline (Brief)
 
@@ -108,24 +108,20 @@ Follow these instructions to run the application locally as a static site:
 
 **1. Clone the Repository**
 ```bash
-git clone <[https://github.com/JiehuaHuangg/SocialWorkPlacements.git](https://github.com/JiehuaHuangg/SocialWorkPlacements.git)>
+git clone https://github.com/JiehuaHuangg/SocialWorkPlacements.git
 cd SocialWorkPlacements
 ```
 **2. Open the Application in Your Browser**
 You can open the app directly from your file system:
-Open public/index.html in your browser (or double-click it in your file explorer).
+Open public/pages/login.html in your browser (or double-click it in your file explorer).
+
 Recommended:
 For the best experience with ES6 modules and local file security, use a simple HTTP server. For example:
-```bash
-cd public
-python -m http.server 8080
-```
-Then open http://localhost:8080/ in your browser.
-Or use Live Server in VSCode:
-Right-click public/index.html and select "Open with Live Server".
+use the Live Server in VSCode:
+Right-click public/pages/login.html and select "Open with Live Server".
 
-Production deployment is on GitHub Pages
-All Firebase features (authentication, Firestore, storage) work in the browser via the client SDK.
+Production deployment is on Firebase Hosting @ https://social-work-placement.web.app/pages/login.html
+All Firebase features (authentication, Firestore) work in the browser via the client SDK.
 
 
 ## 🎓 Academic Context
